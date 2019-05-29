@@ -21,6 +21,9 @@ public class PositionChangebyButton : MonoBehaviour {
 	public Button rotZplusButton;
 	public Button rotZminusButton;
 
+	public Text cameraPositionText;
+	public Text bsenPositionText;
+
 	// Use this for initialization
 	void Start () {
 		posXplusButton.onClick.AddListener(onPosXplusClick);
@@ -40,7 +43,11 @@ public class PositionChangebyButton : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
+		cameraPositionText.text = "Camera Position : " + Camera.main.transform.position.ToString() + "\n";
+		cameraPositionText.text += "Camera Rotation : " + Camera.main.transform.eulerAngles.ToString();
+
+		bsenPositionText.text = "B-sen Position : " + whichObject.transform.position.ToString() + "\n";
+		bsenPositionText.text += "B-sen Rotation : " + whichObject.transform.eulerAngles.ToString();
 	}
 
 	void onPosXplusClick() {
