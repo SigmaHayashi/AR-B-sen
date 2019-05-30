@@ -8,6 +8,7 @@ public class PositionChangebyButton : MonoBehaviour {
 
 	private GameObject whichObject;
 	private GameObject childObject;
+	private GameObject ballObject;
 
 	public Button posXplusButton;
 	public Button posXminusButton;
@@ -53,6 +54,7 @@ public class PositionChangebyButton : MonoBehaviour {
 
 		whichObject = GameObject.Find("rostms");
 		childObject = GameObject.Find("rostms/world_link");
+		ballObject = GameObject.Find("rostms/world_link/MarkerPositionMemo");
 	}
 	
 	// Update is called once per frame
@@ -60,7 +62,7 @@ public class PositionChangebyButton : MonoBehaviour {
 		cameraPositionText.text = "Camera Position : " + Camera.main.transform.position.ToString() + "\n";
 		cameraPositionText.text += "Camera Rotation : " + Camera.main.transform.eulerAngles.ToString();
 
-		bsenPositionText.text = "B-sen Position : " + whichObject.transform.position.ToString() + "\n";
+		bsenPositionText.text = "B-sen Position : " + childObject.transform.localPosition.ToString() + "\n";
 		bsenPositionText.text += "B-sen Rotation : " + whichObject.transform.eulerAngles.ToString();
 
 
@@ -73,33 +75,35 @@ public class PositionChangebyButton : MonoBehaviour {
 		if(image.TrackingState == TrackingState.Tracking && tmp_object == null) {
 			m_dictionary.Add(image.DatabaseIndex, whichObject);
 
-			debugText.text = "Auto Positioning READY";
+			//debugText.text = "Auto Positioning READY";
 		}
+
+		//debugText.text = "Marker : " + image.CenterPose.position.ToString();
+		//debugText.text += "\nBall : " + ballObject.transform.position.ToString();
 	}
 
 	void autoPositioning() {
 		GameObject tmp_object = null;
 		var image = m_AugmentedImages[0];
 		m_dictionary.TryGetValue(image.DatabaseIndex, out tmp_object);
-		if(image.TrackingState == TrackingState.Tracking && tmp_object != null) {
-			//GameObject tmp_object2 = new GameObject();
-			//tmp_object2.transform.position = image.CenterPose.position;
-			//tmp_object2.transform.eulerAngles = image.CenterPose.rotation.eulerAngles;
 
+		if(image.TrackingState == TrackingState.Tracking && tmp_object != null) {
 			Vector3 tmp_euler = image.CenterPose.rotation.eulerAngles;
-			//Vector3 tmp_euler = tmp_object2.transform.eulerAngles;
 			tmp_euler.x = 0.0f;
 			tmp_euler.y += 90.0f;
 			tmp_euler.z = 0.0f;
-			//tmp_object2.transform.eulerAngles = tmp_euler;
-
-			Vector3 temp_position = image.CenterPose.position;
-			//Vector3 temp_position = tmp_object2.transform.position;
-			Vector3 temp_position_sub = new Vector3(-6.2f, 1.6f, 9.2f);
-			temp_position_sub -= temp_position;
 
 			whichObject.transform.eulerAngles = tmp_euler;
-			childObject.transform.localPosition = temp_position_sub;
+
+			Vector3 marker_position = image.CenterPose.position;
+			Vector3 ball_position = ballObject.transform.position;
+			Vector3 offset_vector = marker_position - ball_position;
+
+			Vector3 temp_room_position = childObject.transform.position;
+			temp_room_position += offset_vector;
+			childObject.transform.position = temp_room_position;
+
+			debugText.text = "Auto Positioning DONE";
 		}
 	}
 
@@ -108,73 +112,37 @@ public class PositionChangebyButton : MonoBehaviour {
 	}
 
 	void onPosXplusClick() {
-		/*
-		Vector3 tmp = whichObject.transform.position;
-		tmp.x += 0.05f;
-		whichObject.transform.position = tmp;
-		*/
-
 		Vector3 tmp = childObject.transform.localPosition;
-		tmp.x += 0.05f;
+		tmp.x += 0.1f;
 		childObject.transform.localPosition = tmp;
 	}
 
 	void onPosXminusClick() {
-		/*
-		Vector3 tmp = whichObject.transform.position;
-		tmp.x -= 0.05f;
-		whichObject.transform.position = tmp;
-		*/
-
 		Vector3 tmp = childObject.transform.localPosition;
-		tmp.x -= 0.05f;
+		tmp.x -= 0.1f;
 		childObject.transform.localPosition = tmp;
 	}
 
 	void onPosYplusClick() {
-		/*
-		Vector3 tmp = whichObject.transform.position;
-		tmp.y += 0.05f;
-		whichObject.transform.position = tmp;
-		*/
-
 		Vector3 tmp = childObject.transform.localPosition;
-		tmp.y += 0.05f;
+		tmp.y += 0.1f;
 		childObject.transform.localPosition = tmp;
 	}
 
 	void onPosYminusClick() {
-		/*
-		Vector3 tmp = whichObject.transform.position;
-		tmp.y -= 0.05f;
-		whichObject.transform.position = tmp;
-		*/
-
 		Vector3 tmp = childObject.transform.localPosition;
-		tmp.y -= 0.05f;
+		tmp.y -= 0.1f;
 		childObject.transform.localPosition = tmp;
 	}
 
 	void onPosZplusClick() {
-		/*
-		Vector3 tmp = whichObject.transform.position;
-		tmp.z += 0.05f;
-		whichObject.transform.position = tmp;
-		*/
-
 		Vector3 tmp = childObject.transform.localPosition;
-		tmp.z += 0.05f;
+		tmp.z += 0.1f;
 		childObject.transform.localPosition = tmp;
 	}
 	void onPosZminusClick() {
-		/*
-		Vector3 tmp = whichObject.transform.position;
-		tmp.z -= 0.05f;
-		whichObject.transform.position = tmp;
-		*/
-
 		Vector3 tmp = childObject.transform.localPosition;
-		tmp.z -= 0.05f;
+		tmp.z -= 0.1f;
 		childObject.transform.localPosition = tmp;
 	}
 
