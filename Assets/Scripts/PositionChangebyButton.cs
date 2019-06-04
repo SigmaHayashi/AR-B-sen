@@ -68,6 +68,7 @@ public class PositionChangebyButton : MonoBehaviour {
 
 		Session.GetTrackables<AugmentedImage>(m_AugmentedImages, TrackableQueryFilter.Updated);
 
+		/*
 		GameObject tmp_object = null;
 		var image = m_AugmentedImages[0];
 		m_dictionary.TryGetValue(image.DatabaseIndex, out tmp_object);
@@ -77,33 +78,46 @@ public class PositionChangebyButton : MonoBehaviour {
 
 			//debugText.text = "Auto Positioning READY";
 		}
+		*/
+		foreach(var image in m_AugmentedImages) {
+			GameObject tmp_object = null;
+			m_dictionary.TryGetValue(image.DatabaseIndex, out tmp_object);
+
+			if (image.TrackingState == TrackingState.Tracking && tmp_object == null) {
+				m_dictionary.Add(image.DatabaseIndex, whichObject);
+
+				//debugText.text = "Auto Positioning READY";
+			}
+		}
 
 		//debugText.text = "Marker : " + image.CenterPose.position.ToString();
 		//debugText.text += "\nBall : " + ballObject.transform.position.ToString();
 	}
 
 	void autoPositioning() {
-		GameObject tmp_object = null;
-		var image = m_AugmentedImages[0];
-		m_dictionary.TryGetValue(image.DatabaseIndex, out tmp_object);
+		foreach(var image in m_AugmentedImages) {
+			GameObject tmp_object = null;
+			//var image = m_AugmentedImages[0];
+			m_dictionary.TryGetValue(image.DatabaseIndex, out tmp_object);
 
-		if(image.TrackingState == TrackingState.Tracking && tmp_object != null) {
-			Vector3 tmp_euler = image.CenterPose.rotation.eulerAngles;
-			tmp_euler.x = 0.0f;
-			tmp_euler.y += 90.0f;
-			tmp_euler.z = 0.0f;
+			if(image.TrackingState == TrackingState.Tracking && tmp_object != null) {
+				Vector3 tmp_euler = image.CenterPose.rotation.eulerAngles;
+				tmp_euler.x = 0.0f;
+				tmp_euler.y += 90.0f;
+				tmp_euler.z = 0.0f;
 
-			whichObject.transform.eulerAngles = tmp_euler;
+				whichObject.transform.eulerAngles = tmp_euler;
 
-			Vector3 marker_position = image.CenterPose.position;
-			Vector3 ball_position = ballObject.transform.position;
-			Vector3 offset_vector = marker_position - ball_position;
+				Vector3 marker_position = image.CenterPose.position;
+				Vector3 ball_position = ballObject.transform.position;
+				Vector3 offset_vector = marker_position - ball_position;
 
-			Vector3 temp_room_position = childObject.transform.position;
-			temp_room_position += offset_vector;
-			childObject.transform.position = temp_room_position;
+				Vector3 temp_room_position = childObject.transform.position;
+				temp_room_position += offset_vector;
+				childObject.transform.position = temp_room_position;
 
-			debugText.text = "Auto Positioning DONE";
+				debugText.text = "Auto Positioning DONE";
+			}
 		}
 	}
 
