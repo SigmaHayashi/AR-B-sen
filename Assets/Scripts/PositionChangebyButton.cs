@@ -7,7 +7,8 @@ using GoogleARCore;
 public class PositionChangebyButton : MonoBehaviour {
 
 	private GameObject whichObject;
-	private GameObject childObject;
+	//private GameObject childObject;
+	private GameObject coordinatesAdapter;
 	private GameObject ballObject;
 
 	public Button posXplusButton;
@@ -53,7 +54,8 @@ public class PositionChangebyButton : MonoBehaviour {
 		autoPositioningButton.onClick.AddListener(onAutoPositioningClick);
 
 		whichObject = GameObject.Find("rostms");
-		childObject = GameObject.Find("rostms/world_link");
+		//childObject = GameObject.Find("rostms/world_link");
+		coordinatesAdapter = GameObject.Find("rostms/CoordinatesAdapter");
 		ballObject = GameObject.Find("rostms/world_link/MarkerPositionMemo");
 	}
 	
@@ -62,9 +64,10 @@ public class PositionChangebyButton : MonoBehaviour {
 		cameraPositionText.text = "Camera Position : " + Camera.main.transform.position.ToString() + "\n";
 		cameraPositionText.text += "Camera Rotation : " + Camera.main.transform.eulerAngles.ToString();
 
-		bsenPositionText.text = "B-sen Position : " + childObject.transform.localPosition.ToString() + "\n";
+		//bsenPositionText.text = "B-sen Position : " + childObject.transform.localPosition.ToString() + "\n";
+		//bsenPositionText.text += "B-sen Rotation : " + whichObject.transform.eulerAngles.ToString();
+		bsenPositionText.text = "B-sen Position : " + whichObject.transform.localPosition.ToString() + "\n";
 		bsenPositionText.text += "B-sen Rotation : " + whichObject.transform.eulerAngles.ToString();
-
 
 		Session.GetTrackables<AugmentedImage>(m_AugmentedImages, TrackableQueryFilter.Updated);
 
@@ -111,10 +114,11 @@ public class PositionChangebyButton : MonoBehaviour {
 				Vector3 marker_position = image.CenterPose.position;
 				Vector3 ball_position = ballObject.transform.position;
 				Vector3 offset_vector = marker_position - ball_position;
-
-				Vector3 temp_room_position = childObject.transform.position;
+				
+				Vector3 temp_room_position = whichObject.transform.position;
 				temp_room_position += offset_vector;
-				childObject.transform.position = temp_room_position;
+				whichObject.transform.position = temp_room_position;
+
 
 				debugText.text = "Auto Positioning DONE";
 			}
@@ -126,38 +130,80 @@ public class PositionChangebyButton : MonoBehaviour {
 	}
 
 	void onPosXplusClick() {
+		/*
 		Vector3 tmp = childObject.transform.localPosition;
 		tmp.x += 0.1f;
 		childObject.transform.localPosition = tmp;
+		*/
+		Vector3 tmp = new Vector3(0.1f, 0.0f, 0.0f);
+		coordinatesAdapter.transform.localPosition = tmp;
+
+		tmp = coordinatesAdapter.transform.position;
+		whichObject.transform.position = tmp;
 	}
 
 	void onPosXminusClick() {
+		/*
 		Vector3 tmp = childObject.transform.localPosition;
 		tmp.x -= 0.1f;
 		childObject.transform.localPosition = tmp;
+		*/
+		Vector3 tmp = new Vector3(-0.1f, 0.0f, 0.0f);
+		coordinatesAdapter.transform.localPosition = tmp;
+
+		tmp = coordinatesAdapter.transform.position;
+		whichObject.transform.position = tmp;
 	}
 
 	void onPosYplusClick() {
+		/*
 		Vector3 tmp = childObject.transform.localPosition;
 		tmp.y += 0.1f;
 		childObject.transform.localPosition = tmp;
+		*/
+		Vector3 tmp = new Vector3(0.0f, 0.1f, 0.0f);
+		coordinatesAdapter.transform.localPosition = tmp;
+
+		tmp = coordinatesAdapter.transform.position;
+		whichObject.transform.position = tmp;
 	}
 
 	void onPosYminusClick() {
+		/*
 		Vector3 tmp = childObject.transform.localPosition;
 		tmp.y -= 0.1f;
 		childObject.transform.localPosition = tmp;
+		*/
+		Vector3 tmp = new Vector3(0.0f, -0.1f, 0.0f);
+		coordinatesAdapter.transform.localPosition = tmp;
+
+		tmp = coordinatesAdapter.transform.position;
+		whichObject.transform.position = tmp;
 	}
 
 	void onPosZplusClick() {
+		/*
 		Vector3 tmp = childObject.transform.localPosition;
 		tmp.z += 0.1f;
 		childObject.transform.localPosition = tmp;
+		*/
+		Vector3 tmp = new Vector3(0.0f, 0.0f, 0.1f);
+		coordinatesAdapter.transform.localPosition = tmp;
+
+		tmp = coordinatesAdapter.transform.position;
+		whichObject.transform.position = tmp;
 	}
 	void onPosZminusClick() {
+		/*
 		Vector3 tmp = childObject.transform.localPosition;
 		tmp.z -= 0.1f;
 		childObject.transform.localPosition = tmp;
+		*/
+		Vector3 tmp = new Vector3(0.0f, 0.0f, -0.1f);
+		coordinatesAdapter.transform.localPosition = tmp;
+
+		tmp = coordinatesAdapter.transform.position;
+		whichObject.transform.position = tmp;
 	}
 
 
