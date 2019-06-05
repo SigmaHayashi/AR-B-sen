@@ -105,6 +105,7 @@ public class PositionChangebyButton : MonoBehaviour {
 
 			if(image.TrackingState == TrackingState.Tracking && tmp_object != null) {
 				Vector3 tmp_euler = image.CenterPose.rotation.eulerAngles;
+				//tmp_euler.x += 90.0f;
 				tmp_euler.x = 0.0f;
 				tmp_euler.y += 90.0f;
 				tmp_euler.z = 0.0f;
