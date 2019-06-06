@@ -104,13 +104,25 @@ public class PositionChangebyButton : MonoBehaviour {
 			m_dictionary.TryGetValue(image.DatabaseIndex, out tmp_object);
 
 			if(image.TrackingState == TrackingState.Tracking && tmp_object != null) {
-				Vector3 tmp_euler = image.CenterPose.rotation.eulerAngles;
+				//Vector3 tmp_euler = image.CenterPose.rotation.eulerAngles;
 				//tmp_euler.x += 90.0f;
+				/*
 				tmp_euler.x = 0.0f;
 				tmp_euler.y += 90.0f;
 				tmp_euler.z = 0.0f;
+				*/
 
-				whichObject.transform.eulerAngles = tmp_euler;
+				Quaternion new_rot = new Quaternion();
+				new_rot = image.CenterPose.rotation;
+				new_rot *= Quaternion.Euler(0, 0, 90);
+				new_rot *= Quaternion.Euler(90, 0, 0);
+
+				Vector3 new_euler = new_rot.eulerAngles;
+				new_euler.x = 0.0f;
+				new_euler.z = 0.0f;
+
+				//whichObject.transform.eulerAngles = tmp_euler;
+				whichObject.transform.eulerAngles = new_euler;
 
 				Vector3 marker_position = image.CenterPose.position;
 				Vector3 ball_position = ballObject.transform.position;
