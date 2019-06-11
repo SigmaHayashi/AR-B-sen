@@ -11,4 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/AR B-sen.unity
     guid: d665d4a2fe14cd944a487d854e520f25
+  - enabled: 1
+    path: Assets/Scenes/Shader Test Scene.unity
+    guid: f858907edd79daa4795c44b6753f0f30
   m_configObjects: {}
