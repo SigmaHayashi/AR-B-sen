@@ -33,7 +33,8 @@ public class PositionChangebyButton : MonoBehaviour {
 
 	private List<AugmentedImage> m_AugmentedImages = new List<AugmentedImage>();
 
-	private Dictionary<int, GameObject> m_dictionary = new Dictionary<int, GameObject>();
+	private bool detected_marker = false;
+	private AugmentedImage marker;
 
 	// Use this for initialization
 	void Start () {
@@ -63,57 +64,27 @@ public class PositionChangebyButton : MonoBehaviour {
 	void Update () {
 		cameraPositionText.text = "Camera Position : " + Camera.main.transform.position.ToString() + "\n";
 		cameraPositionText.text += "Camera Rotation : " + Camera.main.transform.eulerAngles.ToString();
-
-		//bsenPositionText.text = "B-sen Position : " + childObject.transform.localPosition.ToString() + "\n";
-		//bsenPositionText.text += "B-sen Rotation : " + whichObject.transform.eulerAngles.ToString();
+		
 		bsenPositionText.text = "B-sen Position : " + whichObject.transform.localPosition.ToString() + "\n";
 		bsenPositionText.text += "B-sen Rotation : " + whichObject.transform.eulerAngles.ToString();
 
 		Session.GetTrackables<AugmentedImage>(m_AugmentedImages, TrackableQueryFilter.Updated);
 
-		/*
-		GameObject tmp_object = null;
-		var image = m_AugmentedImages[0];
-		m_dictionary.TryGetValue(image.DatabaseIndex, out tmp_object);
-
-		if(image.TrackingState == TrackingState.Tracking && tmp_object == null) {
-			m_dictionary.Add(image.DatabaseIndex, whichObject);
-
-			//debugText.text = "Auto Positioning READY";
-		}
-		*/
-		foreach(var image in m_AugmentedImages) {
-			GameObject tmp_object = null;
-			m_dictionary.TryGetValue(image.DatabaseIndex, out tmp_object);
-
-			if (image.TrackingState == TrackingState.Tracking && tmp_object == null) {
-				m_dictionary.Add(image.DatabaseIndex, whichObject);
-
-				//debugText.text = "Auto Positioning READY";
+		if (!detected_marker) {
+			foreach(var image in m_AugmentedImages) {
+				if(image.TrackingState == TrackingState.Tracking) {
+					detected_marker = true;
+					marker = image;
+				}
 			}
 		}
-
-		//debugText.text = "Marker : " + image.CenterPose.position.ToString();
-		//debugText.text += "\nBall : " + ballObject.transform.position.ToString();
 	}
 
 	void autoPositioning() {
-		foreach(var image in m_AugmentedImages) {
-			GameObject tmp_object = null;
-			//var image = m_AugmentedImages[0];
-			m_dictionary.TryGetValue(image.DatabaseIndex, out tmp_object);
-
-			if(image.TrackingState == TrackingState.Tracking && tmp_object != null) {
-				//Vector3 tmp_euler = image.CenterPose.rotation.eulerAngles;
-				//tmp_euler.x += 90.0f;
-				/*
-				tmp_euler.x = 0.0f;
-				tmp_euler.y += 90.0f;
-				tmp_euler.z = 0.0f;
-				*/
-
+		if (detected_marker) {
+			if(marker.TrackingState == TrackingState.Tracking) {
 				Quaternion new_rot = new Quaternion();
-				new_rot = image.CenterPose.rotation;
+				new_rot = marker.CenterPose.rotation;
 				new_rot *= Quaternion.Euler(0, 0, 90);
 				new_rot *= Quaternion.Euler(90, 0, 0);
 
@@ -121,17 +92,15 @@ public class PositionChangebyButton : MonoBehaviour {
 				new_euler.x = 0.0f;
 				new_euler.z = 0.0f;
 
-				//whichObject.transform.eulerAngles = tmp_euler;
 				whichObject.transform.eulerAngles = new_euler;
 
-				Vector3 marker_position = image.CenterPose.position;
+				Vector3 marker_position = marker.CenterPose.position;
 				Vector3 ball_position = ballObject.transform.position;
 				Vector3 offset_vector = marker_position - ball_position;
-				
+
 				Vector3 temp_room_position = whichObject.transform.position;
 				temp_room_position += offset_vector;
 				whichObject.transform.position = temp_room_position;
-
 
 				debugText.text = "Auto Positioning DONE";
 			}
@@ -143,11 +112,6 @@ public class PositionChangebyButton : MonoBehaviour {
 	}
 
 	void onPosXplusClick() {
-		/*
-		Vector3 tmp = childObject.transform.localPosition;
-		tmp.x += 0.1f;
-		childObject.transform.localPosition = tmp;
-		*/
 		Vector3 tmp = new Vector3(0.1f, 0.0f, 0.0f);
 		coordinatesAdapter.transform.localPosition = tmp;
 
@@ -156,11 +120,6 @@ public class PositionChangebyButton : MonoBehaviour {
 	}
 
 	void onPosXminusClick() {
-		/*
-		Vector3 tmp = childObject.transform.localPosition;
-		tmp.x -= 0.1f;
-		childObject.transform.localPosition = tmp;
-		*/
 		Vector3 tmp = new Vector3(-0.1f, 0.0f, 0.0f);
 		coordinatesAdapter.transform.localPosition = tmp;
 
@@ -169,11 +128,6 @@ public class PositionChangebyButton : MonoBehaviour {
 	}
 
 	void onPosYplusClick() {
-		/*
-		Vector3 tmp = childObject.transform.localPosition;
-		tmp.y += 0.1f;
-		childObject.transform.localPosition = tmp;
-		*/
 		Vector3 tmp = new Vector3(0.0f, 0.1f, 0.0f);
 		coordinatesAdapter.transform.localPosition = tmp;
 
@@ -182,11 +136,6 @@ public class PositionChangebyButton : MonoBehaviour {
 	}
 
 	void onPosYminusClick() {
-		/*
-		Vector3 tmp = childObject.transform.localPosition;
-		tmp.y -= 0.1f;
-		childObject.transform.localPosition = tmp;
-		*/
 		Vector3 tmp = new Vector3(0.0f, -0.1f, 0.0f);
 		coordinatesAdapter.transform.localPosition = tmp;
 
@@ -195,11 +144,6 @@ public class PositionChangebyButton : MonoBehaviour {
 	}
 
 	void onPosZplusClick() {
-		/*
-		Vector3 tmp = childObject.transform.localPosition;
-		tmp.z += 0.1f;
-		childObject.transform.localPosition = tmp;
-		*/
 		Vector3 tmp = new Vector3(0.0f, 0.0f, 0.1f);
 		coordinatesAdapter.transform.localPosition = tmp;
 
@@ -207,11 +151,6 @@ public class PositionChangebyButton : MonoBehaviour {
 		whichObject.transform.position = tmp;
 	}
 	void onPosZminusClick() {
-		/*
-		Vector3 tmp = childObject.transform.localPosition;
-		tmp.z -= 0.1f;
-		childObject.transform.localPosition = tmp;
-		*/
 		Vector3 tmp = new Vector3(0.0f, 0.0f, -0.1f);
 		coordinatesAdapter.transform.localPosition = tmp;
 
