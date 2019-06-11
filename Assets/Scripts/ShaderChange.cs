@@ -16,36 +16,33 @@ public class ShaderChange : MonoBehaviour {
 
 	// Start is called before the first frame update
 	void Start() {
-		debug_text.text += "Start\n";
+		debug("Start");
 
-		//ChangeShader(cube, "Materials/SemiTransparent");
-		//ChangeColor(cube, 0.5f);
-		
 		renderers = GetComponentsInChildren<Renderer>();
-		debug_text.text += "renderers\n";
+		debug("renderers");
 
 		ChangeShader();
-		debug_text.text += "ChangeShader\n";
+		debug("ChangeShader");
 
 		SaveColors();
-		debug_text.text += "SaveColors\n";
+		debug("SaveColors");
 
 		ChangeColors();
-		debug_text.text += "ChangeColors\n";
+		debug("ChangeColors");
 	}
 
 	// Update is called once per frame
 	void Update() {
-		foreach(Renderer ren in renderers) {
-			mats = ren.materials;
-			for(int i = 0; i < ren.materials.Length; i++) {
-				mats[i].shader = Shader.Find("Custom/SemiTransparent");
-			}
-		}
+
 	}
 
 	void ChangeShader() {
-
+		foreach (Renderer ren in renderers) {
+			mats = ren.materials;
+			for (int i = 0; i < ren.materials.Length; i++) {
+				mats[i].shader = Shader.Find("Custom/SemiTransparent");
+			}
+		}
 	}
 
 	void SaveColors() {
@@ -70,42 +67,9 @@ public class ShaderChange : MonoBehaviour {
 		}
 	}
 
-	/*
-	void ChangeShader(GameObject targetObject, string shader_name_to, string shader_name_from = "") {
-		foreach (Transform transform in targetObject.GetComponentInChildren<Transform>(true)) {
-			if(transform.GetComponent<Renderer>() != null) {
-				var materials = transform.GetComponent<Renderer>().materials;
-				for(int i = 0; i< materials.Length; i++) {
-					Material material = materials[i];
-					if(shader_name_from == "") {
-						material.shader = Shader.Find(shader_name_to);
-						//material.shader = semitransparent;
-					}
-					else {
-						if(material.shader.name == shader_name_from) {
-							material.shader = Shader.Find(shader_name_to);
-							//material.shader = semitransparent;
-						}
-					}
-				}
-			}
+	void debug(string message) {
+		if(debug_text != null) {
+			debug_text.text += message + "\n";
 		}
 	}
-
-	void ChangeColor(GameObject targetObject, float alpha) {
-		//int renderers_id = 0;
-		foreach(Transform transform in targetObject.GetComponentInChildren<Transform>(true)) {
-			Renderer renderer = transform.GetComponent<Renderer>();
-			if(renderer != null) {
-				mats = renderer.materials;
-				for(int i = 0; i < renderer.materials.Length; i++) {
-					Color tmp_color = mats[0].color;
-					tmp_color.a = alpha;
-					mats[i].SetColor("_Color", tmp_color);
-				}
-				renderer.materials = mats;
-			}
-		}
-	}
-	*/
 }
