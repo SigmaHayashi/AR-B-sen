@@ -12,7 +12,7 @@ public class ShaderChange : MonoBehaviour {
 
 	private List<Color> origin_colors = new List<Color>();
 
-	float alpha = 0.5f;
+	public float alpha = 0.5f;
 
 	// Start is called before the first frame update
 	void Start() {
