@@ -80,6 +80,9 @@ public class PositionChangebyButton : MonoBehaviour {
 		}
 	}
 
+	/*****************************************************************
+	 * 自動キャリブレーション
+	 *****************************************************************/
 	void autoPositioning() {
 		if (detected_marker) {
 			if(marker.TrackingState == TrackingState.Tracking) {
@@ -107,6 +110,9 @@ public class PositionChangebyButton : MonoBehaviour {
 		}
 	}
 
+	/*****************************************************************
+	 * ボタン押したとき
+	 *****************************************************************/
 	void onAutoPositioningClick() {
 		autoPositioning();
 	}
