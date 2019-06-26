@@ -12,6 +12,79 @@ public class wscCONST {
 	public const int STATE_ERROR = -1;
 }
 
+[Serializable]
+public class ServiceCallDB {
+	public string op = "call_service";
+	public string service;
+	public TmsDBReq args;
+
+	public ServiceCallDB(string service, TmsDBReq args) {
+		this.service = service;
+		this.args = args;
+	}
+}
+
+[Serializable]
+public class TmsDBReq {
+	public tmsdb tmsdb;
+}
+
+[Serializable]
+public class tmsdb {
+	public string time;
+	public string type;
+	public int id;
+	public string name;
+	public double x;
+	public double y;
+	public double z;
+	public double rr;
+	public double rp;
+	public double ry;
+	public double offset_x;
+	public double offset_y;
+	public double offset_z;
+	public string joint;
+	public double weight;
+	public string rfid;
+	public string etcdata;
+	public int place;
+	public string extfile;
+	public int sensor;
+	public double probability;
+	public int state;
+	public string task;
+	public string note;
+	public string tag;
+	public string announce;
+
+	public tmsdb(string search_mode, int arg1 = 0, int arg2 = 0) {
+		switch (search_mode) {
+			case "ID_SENSOR":
+			this.id = arg1;
+			this.sensor = arg2;
+			break;
+
+			case "PLACE":
+			this.place = arg1;
+			break;
+		}
+	}
+}
+
+[Serializable]
+public class ServiceResponseDB {
+	public bool result;
+	public string service;
+	public string op;
+	public DBValue values;
+}
+
+[Serializable]
+public class DBValue {
+	public tmsdb[] tmsdb;
+}
+
 // class for rostopic publish
 #region
 [Serializable]

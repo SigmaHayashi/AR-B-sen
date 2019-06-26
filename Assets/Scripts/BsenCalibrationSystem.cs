@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -39,6 +40,14 @@ public class BsenCalibrationSystem : MonoBehaviour {
 
 	private int calibration_state = 0;
 
+	//Android Ros Socket Client関連
+	private AndroidRosSocketClient wsc;
+	private string srvName = "tms_db_reader";
+	private TmsDBReq srvReq = new TmsDBReq();
+	private string srvRes;
+
+	float time;
+
 	// Start is called before the first frame update
 	// 最初の1回呼び出されるよ～
 	void Start() {
@@ -53,6 +62,10 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		ButtonTextSetting();
 
 		//ROSTMSに接続
+		wsc = GameObject.Find("Android Ros Socket Client").GetComponent<AndroidRosSocketClient>();
+		srvReq.tmsdb = new tmsdb("ID_SENSOR", 7030, 3001);
+		ServiceCallerDB(srvName, srvReq);
+		time = 0.0f;
 
 		calibration_state = 1;
 	}
@@ -78,8 +91,35 @@ public class BsenCalibrationSystem : MonoBehaviour {
 			//ROSTMSにアクセスしてマーカーの座標取得
 			//irvs_marker = Instantiate(prefab); //マーカーの座標にオブジェクトを配置
 			case 1:
-			irvs_marker = GameObject.Find("rostms/world_link/MarkerPositionMemo");
-			calibration_state = 2;
+			time += Time.deltaTime;
+			if(time > 3.0f) {
+				time = 0.0f;
+				Debug.Log("Retry...");
+
+				wsc.Connect();
+
+				ServiceCallerDB(srvName, srvReq);
+			}
+			if(wsc.IsReceiveSrvRes() && wsc.GetSrvResValue("service") == srvName) {
+				srvRes = wsc.GetSrvResMsg();
+				Debug.Log("ROS: " + srvRes);
+
+				ServiceResponseDB responce = JsonUtility.FromJson<ServiceResponseDB>(srvRes);
+
+				Vector3 marker_position = new Vector3((float)responce.values.tmsdb[0].x, (float)responce.values.tmsdb[0].y, (float)responce.values.tmsdb[0].z);
+				marker_position = Ros2UnityPosition(marker_position);
+				marker_position.z += 0.2f;
+				Debug.Log("Marker: " + marker_position);
+				
+				irvs_marker = GameObject.Find("rostms/world_link/MarkerPositionMemo");
+				irvs_marker.transform.localPosition = marker_position;
+
+				GameObject world_link = GameObject.Find("rostms/world_link");
+				world_link.transform.localPosition = marker_position * -1;
+
+				time = 0.0f;
+				calibration_state = 2;
+			}
 			break;
 
 			//phase2
@@ -140,6 +180,12 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		debugText = GameObject.Find("Main System/Text Canvas/Debug Text").GetComponent<Text>();
 	}
 
+	//
+	void ServiceCallerDB(string serviceName, TmsDBReq args) {
+		ServiceCallDB temp = new ServiceCallDB(serviceName, args);
+		wsc.SendOpMsg(temp);
+	}
+
 	/*****************************************************************
 	 * 自動キャリブレーション
 	 *****************************************************************/
@@ -157,9 +203,9 @@ public class BsenCalibrationSystem : MonoBehaviour {
 
 				bsen_model.transform.eulerAngles = new_euler;
 
-				Vector3 marker_position = marker_image.CenterPose.position;
-				Vector3 ball_position = irvs_marker.transform.position;
-				Vector3 offset_vector = marker_position - ball_position;
+				Vector3 image_position = marker_image.CenterPose.position;
+				Vector3 real_position = irvs_marker.transform.position;
+				Vector3 offset_vector = image_position - real_position;
 
 				Vector3 temp_room_position = bsen_model.transform.position;
 				temp_room_position += offset_vector;
@@ -262,9 +308,14 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		bsen_model.transform.eulerAngles = tmp;
 	}
 
+
 	void debug(string message) {
 		if(debugText != null) {
 			debugText.text = message;
 		}
+	}
+
+	private Vector3 Ros2UnityPosition(Vector3 input) {
+		return new Vector3(-input.y, input.z, input.x);// (-pos_y, pos_z, pos_x)
 	}
 }
