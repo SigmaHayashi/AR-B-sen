@@ -456,6 +456,12 @@ public class AndroidRosSocketClient : MonoBehaviour {
 		SendOpMsg(temp);
 	}
 
+	//
+	public void ServiceCallerDB(string serviceName, TmsDBReq args) {
+		ServiceCallDB temp = new ServiceCallDB(serviceName, args);
+		SendOpMsg(temp);
+	}
+
 	public void ServiceAdvertiser(string serviceName, string serviceType) {
 		namesService.Add(new string[] { serviceName, serviceType });
 		AdvertiseService temp = new AdvertiseService(serviceName, serviceType);

@@ -61,13 +61,14 @@ public class BsenCalibrationSystem : MonoBehaviour {
 
 		ButtonTextSetting();
 
+		calibration_state = 1;
+
 		//ROSTMSに接続
 		wsc = GameObject.Find("Android Ros Socket Client").GetComponent<AndroidRosSocketClient>();
 		srvReq.tmsdb = new tmsdb("ID_SENSOR", 7030, 3001);
-		ServiceCallerDB(srvName, srvReq);
+		wsc.ServiceCallerDB(srvName, srvReq);
 		time = 0.0f;
 
-		calibration_state = 1;
 	}
 
 	// Update is called once per frame
@@ -98,7 +99,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 
 				wsc.Connect();
 
-				ServiceCallerDB(srvName, srvReq);
+				wsc.ServiceCallerDB(srvName, srvReq);
 			}
 			if(wsc.IsReceiveSrvRes() && wsc.GetSrvResValue("service") == srvName) {
 				srvRes = wsc.GetSrvResMsg();
@@ -106,14 +107,34 @@ public class BsenCalibrationSystem : MonoBehaviour {
 
 				ServiceResponseDB responce = JsonUtility.FromJson<ServiceResponseDB>(srvRes);
 
+				//位置を取得＆変換
 				Vector3 marker_position = new Vector3((float)responce.values.tmsdb[0].x, (float)responce.values.tmsdb[0].y, (float)responce.values.tmsdb[0].z);
 				marker_position = Ros2UnityPosition(marker_position);
 				marker_position.z += 0.2f;
-				Debug.Log("Marker: " + marker_position);
+				Debug.Log("Marker Pos: " + marker_position);
+
+				//回転を取得＆変換
+				Vector3 marker_euler = new Vector3(Rad2Euler((float)responce.values.tmsdb[0].rr), Rad2Euler((float)responce.values.tmsdb[0].rp), Rad2Euler((float)responce.values.tmsdb[0].ry));
+				marker_euler = Ros2UnityRotation(marker_euler);
+				//Debug.Log("Marker rot raw: " + marker_euler);
 				
-				irvs_marker = GameObject.Find("rostms/world_link/MarkerPositionMemo");
+				Quaternion marker_rot = Quaternion.Euler(marker_euler);
+				marker_rot *= Quaternion.Euler(0, 0, 180);
+				marker_euler = marker_rot.eulerAngles;
+				marker_euler.x = 0.0f;
+				marker_euler.z = 0.0f;
+				Debug.Log("Marker rot: " + marker_euler);
+
+				//回転をモデルに適用
+				bsen_model.transform.eulerAngles = marker_euler;
+				
+				//位置をモデル上のマーカーに適用
+				GameObject prefab = (GameObject)Resources.Load("Coordinates Adapter");
+				irvs_marker = Instantiate(prefab);
+				irvs_marker.transform.parent = GameObject.Find("rostms/world_link").transform;
 				irvs_marker.transform.localPosition = marker_position;
 
+				//回転軸をマーカーの位置に合わせる
 				GameObject world_link = GameObject.Find("rostms/world_link");
 				world_link.transform.localPosition = marker_position * -1;
 
@@ -180,12 +201,6 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		debugText = GameObject.Find("Main System/Text Canvas/Debug Text").GetComponent<Text>();
 	}
 
-	//
-	void ServiceCallerDB(string serviceName, TmsDBReq args) {
-		ServiceCallDB temp = new ServiceCallDB(serviceName, args);
-		wsc.SendOpMsg(temp);
-	}
-
 	/*****************************************************************
 	 * 自動キャリブレーション
 	 *****************************************************************/
@@ -201,8 +216,9 @@ public class BsenCalibrationSystem : MonoBehaviour {
 				new_euler.x = 0.0f;
 				new_euler.z = 0.0f;
 
-				bsen_model.transform.eulerAngles = new_euler;
-
+				//bsen_model.transform.eulerAngles = new_euler;
+				bsen_model.transform.eulerAngles += new_euler;
+				
 				Vector3 image_position = marker_image.CenterPose.position;
 				Vector3 real_position = irvs_marker.transform.position;
 				Vector3 offset_vector = image_position - real_position;
@@ -314,8 +330,19 @@ public class BsenCalibrationSystem : MonoBehaviour {
 			debugText.text = message;
 		}
 	}
-
+	
+	/*****************************************************************
+	 * ROSの座標系（右手系）からUnityの座標系（左手系）への変換
+	 *****************************************************************/
 	private Vector3 Ros2UnityPosition(Vector3 input) {
 		return new Vector3(-input.y, input.z, input.x);// (-pos_y, pos_z, pos_x)
+	}
+
+	private Vector3 Ros2UnityRotation(Vector3 input) {
+		return new Vector3(input.y, -input.z, -input.x);// (-pos_y, pos_z, pos_x)
+	}
+
+	private float Rad2Euler(float input) {
+		return input * (180.0f / Mathf.PI);
 	}
 }
