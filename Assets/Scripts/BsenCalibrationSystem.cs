@@ -38,7 +38,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	private bool detected_marker = false;
 	private AugmentedImage marker_image;
 
-	private int calibration_state = 0;
+	public int calibration_state = 0;
 
 	//Android Ros Socket Client関連
 	private AndroidRosSocketClient wsc;
