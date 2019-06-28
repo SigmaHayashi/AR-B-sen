@@ -15,7 +15,8 @@ public class RefrigeratorManager : MonoBehaviour {
 	private GameObject cancoffee;
 	private GameObject soysauce;
 	private List<GameObject> goods_list = new List<GameObject>();
-
+	private bool[] goods_state = new bool[3];
+	
 	//Android Ros Socket Client関連
 	private AndroidRosSocketClient wsc;
 	private string srvName = "tms_db_reader";
@@ -42,6 +43,9 @@ public class RefrigeratorManager : MonoBehaviour {
 		goods_list.Add(greentea);
 		goods_list.Add(cancoffee);
 		goods_list.Add(soysauce);
+		goods_state[0] = false;
+		goods_state[1] = false;
+		goods_state[2] = false;
 
 		greentea.SetActive(false);
 		cancoffee.SetActive(false);
@@ -66,7 +70,8 @@ public class RefrigeratorManager : MonoBehaviour {
 		distance = CalcDistance(coordinates_adapter, ar_camera);
 		//debug_text.text = distance.ToString("f2");
 		//Debug.Log(distance.ToString("f2"));
-
+		
+		/*
 		if(distance < 1.5f) {
 			greentea.SetActive(true);
 			cancoffee.SetActive(true);
@@ -76,6 +81,21 @@ public class RefrigeratorManager : MonoBehaviour {
 			greentea.SetActive(false);
 			cancoffee.SetActive(false);
 			soysauce.SetActive(false);
+		}
+		*/
+
+		foreach(GameObject goods in goods_list) {
+			if (goods_state[goods_list.IndexOf(goods)]) {
+				if(distance < 1.5f) {
+					goods.SetActive(true);
+				}
+				else {
+					goods.SetActive(false);
+				}
+			}
+			else {
+				goods.SetActive(false);
+			}
 		}
 		
 		if(calib_system.calibration_state > 1) {
@@ -95,17 +115,23 @@ public class RefrigeratorManager : MonoBehaviour {
 				ServiceResponseDB responce = JsonUtility.FromJson<ServiceResponseDB>(srvRes);
 			
 				foreach(tmsdb data in responce.values.tmsdb) {
-					if(data.x != -1 && data.y != -1 && data.z != -1) {
-						//Debug.Log(data.name);
-						//Debug.Log(data.x + ", " + data.y + ", " + data.z);
+					//Debug.Log(data.name);
+					//Debug.Log(data.x + ", " + data.y + ", " + data.z);
 
-						foreach(GameObject goods in goods_list) {
-							if(goods.name.IndexOf(data.name) != -1) {
+					foreach(GameObject goods in goods_list) {
+						if(goods.name.IndexOf(data.name) != -1) {
+							if(data.x != -1 && data.y != -1 && data.z != -1) {
+								//goods.SetActive(true);
+								goods_state[goods_list.IndexOf(goods)] = true;
 								Vector3 place = new Vector3((float)data.x, (float)data.y, (float)data.z);
 								place = Ros2UnityPosition(place);
 								Debug.Log(data.name + " pos: " + place.ToString("f2"));
 
 								goods.transform.localPosition = place;
+							}
+							else {
+								//goods.SetActive(false);
+								goods_state[goods_list.IndexOf(goods)] = false;
 							}
 						}
 					}
