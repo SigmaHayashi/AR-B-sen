@@ -54,7 +54,7 @@ public class ShaderChange : MonoBehaviour {
 		}
 	}
 
-	void ChangeColors() {
+	public void ChangeColors() {
 		int id = 0;
 		foreach(Renderer ren in renderers) {
 			mats = ren.materials;

@@ -48,11 +48,14 @@ public class BsenCalibrationSystem : MonoBehaviour {
 
 	float time;
 
+	private ShaderChange rostms_shader;
+
 	// Start is called before the first frame update
 	// 最初の1回呼び出されるよ～
 	void Start() {
 
 		bsen_model = GameObject.Find("rostms");
+		rostms_shader = bsen_model.GetComponent<ShaderChange>();
 
 		GameObject prefab = (GameObject)Resources.Load("Coordinates Adapter");
 
@@ -68,7 +71,6 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		srvReq.tmsdb = new tmsdb("ID_SENSOR", 7030, 3001);
 		wsc.ServiceCallerDB(srvName, srvReq);
 		time = 0.0f;
-
 	}
 
 	// Update is called once per frame
@@ -154,6 +156,9 @@ public class BsenCalibrationSystem : MonoBehaviour {
 						marker_image = image;
 
 						autoPositioning();
+
+						rostms_shader.alpha = 0.8f;
+						rostms_shader.ChangeColors();
 
 						calibration_state = 3;
 					}

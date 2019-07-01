@@ -2226,7 +2226,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debug_text: {fileID: 0}
-  alpha: 0.8
+  alpha: 0
 --- !u!1 &793311822
 GameObject:
   m_ObjectHideFlags: 0

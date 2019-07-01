@@ -85,6 +85,7 @@ public class RefrigeratorManager : MonoBehaviour {
 		*/
 
 		foreach(GameObject goods in goods_list) {
+			/*
 			if (goods_state[goods_list.IndexOf(goods)]) {
 				if(distance < 1.5f) {
 					goods.SetActive(true);
@@ -92,6 +93,13 @@ public class RefrigeratorManager : MonoBehaviour {
 				else {
 					goods.SetActive(false);
 				}
+			}
+			else {
+				goods.SetActive(false);
+			}
+			*/
+			if (goods_state[goods_list.IndexOf(goods)] && distance < 1.5f) {
+				goods.SetActive(true);
 			}
 			else {
 				goods.SetActive(false);
