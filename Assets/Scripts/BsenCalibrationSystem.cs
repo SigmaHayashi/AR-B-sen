@@ -38,6 +38,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	private bool detected_marker = false;
 	private AugmentedImage marker_image;
 
+	[NonSerialized]
 	public int calibration_state = 0;
 
 	//Android Ros Socket Client関連
@@ -119,10 +120,16 @@ public class BsenCalibrationSystem : MonoBehaviour {
 				Vector3 marker_euler = new Vector3(Rad2Euler((float)responce.values.tmsdb[0].rr), Rad2Euler((float)responce.values.tmsdb[0].rp), Rad2Euler((float)responce.values.tmsdb[0].ry));
 				marker_euler = Ros2UnityRotation(marker_euler);
 				//Debug.Log("Marker rot raw: " + marker_euler);
-				
-				Quaternion marker_rot = Quaternion.Euler(marker_euler);
-				marker_rot *= Quaternion.Euler(0, 0, 180);
+
+				/*
+				Quaternion marker_rot = Quaternion.Euler(marker_euler * -1);
+				//marker_rot *= Quaternion.Euler(0, 0, 180);
+				//marker_rot *= Quaternion.Euler(0, 180, 0);
 				marker_euler = marker_rot.eulerAngles;
+				marker_euler.x = 0.0f;
+				marker_euler.z = 0.0f;
+				*/
+				marker_euler *= -1.0f;
 				marker_euler.x = 0.0f;
 				marker_euler.z = 0.0f;
 				Debug.Log("Marker rot: " + marker_euler);

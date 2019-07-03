@@ -56,14 +56,15 @@ public class VICONCoordinatesTest : MonoBehaviour {
 
 			//Debug.Log("Marker rot raw: " + marker_euler);
 
-			/*
+			
 			Quaternion marker_rot = Quaternion.Euler(marker_euler);
-			marker_rot *= Quaternion.Euler(0, 0, 180);
+			//marker_rot *= Quaternion.Euler(0, 0, 180);
+			marker_rot *= Quaternion.Euler(0, 180, 0);
 			marker_euler = marker_rot.eulerAngles;
 			marker_euler.x = 0.0f;
 			marker_euler.z = 0.0f;
 			Debug.Log("Marker rot: " + marker_euler);
-			*/
+			
 
 			//回転をモデルに適用
 			transform.eulerAngles = marker_euler;
