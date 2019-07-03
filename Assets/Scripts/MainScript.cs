@@ -42,6 +42,7 @@ public class MainScript : MonoBehaviour {
 	}
 
 	void changeTestScene() {
-		SceneManager.LoadScene("Shader Test Scene");
+		//SceneManager.LoadScene("Shader Test Scene");
+		SceneManager.LoadScene("VICON coordinates Test Scene");
 	}
 }
