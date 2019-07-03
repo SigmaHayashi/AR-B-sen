@@ -128,7 +128,8 @@ public class RefrigeratorManager : MonoBehaviour {
 
 					foreach(GameObject goods in goods_list) {
 						if(goods.name.IndexOf(data.name) != -1) {
-							if(data.x != -1 && data.y != -1 && data.z != -1) {
+							//if(data.x != -1 && data.y != -1 && data.z != -1) {
+							if(data.state == 1) {
 								//goods.SetActive(true);
 								goods_state[goods_list.IndexOf(goods)] = true;
 								Vector3 place = new Vector3((float)data.x, (float)data.y, (float)data.z);
