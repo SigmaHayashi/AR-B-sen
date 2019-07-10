@@ -1,4 +1,4 @@
-﻿Shader "Custom/SemiTransparent" {
+﻿Shader "Custom/ARTransparent" {
 	Properties {
 		_Color ("Color", Color) = (1,1,1,1)
 		_MainTex ("Albedo (RGB)", 2D) = "white" {}
@@ -7,7 +7,7 @@
 	}
 	SubShader {
 		//Tags { "RenderType"="Transparent" "Queue" = "Transparent" }
-		Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+		Tags { "RenderType"="Transparent" "Queue"="Transparent-1000" }
 		LOD 200
 
 		Pass{

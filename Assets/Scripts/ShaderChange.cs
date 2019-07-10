@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,23 +13,16 @@ public class ShaderChange : MonoBehaviour {
 
 	private List<Color> origin_colors = new List<Color>();
 
-	public float alpha = 0.5f;
+	[NonSerialized]
+	public float alpha = 0.0f;
 
 	// Start is called before the first frame update
 	void Start() {
-		debug("Start");
-
 		renderers = GetComponentsInChildren<Renderer>();
-		debug("renderers");
-
-		ChangeShader();
-		debug("ChangeShader");
-
+		ChangeShader(Shader.Find("Custom/ARTransparent"));
+		//ChangeShader(Shader.Find("Custom/SemiTransparent"));
 		SaveColors();
-		debug("SaveColors");
-
 		ChangeColors();
-		debug("ChangeColors");
 	}
 
 	// Update is called once per frame
@@ -36,16 +30,16 @@ public class ShaderChange : MonoBehaviour {
 
 	}
 
-	void ChangeShader() {
+	public void ChangeShader(Shader shader) {
 		foreach (Renderer ren in renderers) {
 			mats = ren.materials;
 			for (int i = 0; i < ren.materials.Length; i++) {
-				mats[i].shader = Shader.Find("Custom/SemiTransparent");
+				mats[i].shader = shader;
 			}
 		}
 	}
 
-	void SaveColors() {
+	public void SaveColors() {
 		foreach(Renderer ren in renderers) {
 			mats = ren.materials;
 			for(int i = 0; i < ren.materials.Length; i++) {
