@@ -417,7 +417,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37f99612bdb95ca41a607338729a9b93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  calibration_state: 0
 --- !u!4 &94305706
 Transform:
   m_ObjectHideFlags: 0
@@ -3540,6 +3539,8 @@ MonoBehaviour:
   ScreenNOTSleep: 1
   changeMainSceneButton: {fileID: 0}
   changeTestSceneButton: {fileID: 206296621}
+  TextCanvas: {fileID: 1428471311}
+  ButtonCanvas: {fileID: 180851470}
 --- !u!1 &1059405929
 GameObject:
   m_ObjectHideFlags: 0

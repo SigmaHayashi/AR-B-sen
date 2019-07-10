@@ -11,6 +11,10 @@ public class MainScript : MonoBehaviour {
 	public Button changeMainSceneButton;
 	public Button changeTestSceneButton;
 
+	private bool capture_mode = false;
+	public Canvas TextCanvas;
+	public Canvas ButtonCanvas;
+
 	// Use this for initialization
 	void Start () {
 		// 画面が消えないようにする
@@ -34,6 +38,24 @@ public class MainScript : MonoBehaviour {
 		// 戻るボタンでアプリ終了
 		if (Input.GetKey(KeyCode.Escape)) {
 			Application.Quit();
+		}
+
+		//5本指タッチでキャプチャモードON/OFF切り替え
+		if (!Application.isEditor) {
+			if(Input.touchCount >= 5) {
+				Touch touch = Input.GetTouch(Input.touchCount - 1);
+				if(touch.phase == TouchPhase.Began) {
+					capture_mode = !capture_mode;
+					if (capture_mode) {
+						TextCanvas.gameObject.SetActive(false);
+						ButtonCanvas.gameObject.SetActive(false);
+					}
+					else {
+						TextCanvas.gameObject.SetActive(true);
+						ButtonCanvas.gameObject.SetActive(true);
+					}
+				}
+			}
 		}
 	}
 
