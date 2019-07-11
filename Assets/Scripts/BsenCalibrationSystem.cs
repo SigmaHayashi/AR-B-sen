@@ -164,7 +164,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 
 						autoPositioning();
 
-						rostms_shader.alpha = 0.8f;
+						rostms_shader.alpha = 0.6f;
 						rostms_shader.ChangeColors();
 
 						calibration_state = 3;

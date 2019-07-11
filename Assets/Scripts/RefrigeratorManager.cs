@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -36,10 +38,8 @@ public class RefrigeratorManager : MonoBehaviour {
 	//ShaderChange
 	private ShaderChange refrigerator_shaderchange;
 	private ShaderChange rostms_shaderchange;
-	//private List<ShaderChange> goods_shaderchange_list = new List<ShaderChange>();
 	private bool change_goods_shader = false;
-
-	//private bool changed = false;
+	private bool finish_coroutine = true;
 
 	//public Text debug_text;
 
@@ -61,7 +61,6 @@ public class RefrigeratorManager : MonoBehaviour {
 
 		foreach(GameObject goods in goods_list) {
 			goods.AddComponent<ShaderChange>();
-			//goods_shaderchange_list.Add(goods.GetComponent<ShaderChange>());
 		}
 		
 		/*
@@ -99,35 +98,14 @@ public class RefrigeratorManager : MonoBehaviour {
 
 		if (!change_goods_shader) {
 			foreach(GameObject goods in goods_list) {
-				//goods.SetActive(true);
-				/*
-				goods_shaderchange_list[goods_list.IndexOf(goods)].ChangeShader(Shader.Find("Custom/Transparent"));
-				goods_shaderchange_list[goods_list.IndexOf(goods)].alpha = 0.4f;
-				goods_shaderchange_list[goods_list.IndexOf(goods)].ChangeColors();
-				*/
 				ShaderChange shaderchange = goods.GetComponent<ShaderChange>();
 				shaderchange.ChangeShader(Shader.Find("Custom/Transparent"));
-				//shaderchange.alpha = 0.4f;
-				//shaderchange.ChangeColors();
-
-				//goods.SetActive(false);
 			}
 			change_goods_shader = true;
 		}
 
 		//距離が閾値以下でデータベースのstateが1だったら表示，違ったら非表示
-		foreach(GameObject goods in goods_list) {
-			/*
-			if(goods.GetComponent<ShaderChange>() == null) {
-				goods.AddComponent<ShaderChange>();
-				ShaderChange goods_shaderchange = goods.GetComponent<ShaderChange>();
-				goods_shaderchange.ChangeShader(Shader.Find("Custom/Transparent"));
-				goods_shaderchange.SaveColors();
-				goods_shaderchange.alpha = 0.6f;
-				goods_shaderchange.ChangeColors();
-			}
-			*/
-
+		//foreach(GameObject goods in goods_list) {
 			/*
 			if (goods_state[goods_list.IndexOf(goods)] && distance < 1.5f) {
 				goods.SetActive(true);
@@ -136,6 +114,7 @@ public class RefrigeratorManager : MonoBehaviour {
 				goods.SetActive(false);
 			}
 			*/
+			/*
 			if(calib_system.calibration_state > 2) {
 				if (goods_state[goods_list.IndexOf(goods)] && distance < distance_to_display) {
 					if(distance_old >= distance_to_display) {
@@ -143,16 +122,9 @@ public class RefrigeratorManager : MonoBehaviour {
 						//StartCoroutine(refrigerator_shaderchange.ChangeShaderCoroutine(Shader.Find("Custom/Transparent")));
 						refrigerator_shaderchange.alpha = 0.4f;
 						refrigerator_shaderchange.ChangeColors();
-
-						//goods_shaderchange.ChangeShader(Shader.Find("Custom/Transparent"));
 					}
 
 					//goods.SetActive(true);
-					/*
-					goods_shaderchange_list[goods_list.IndexOf(goods)].ChangeShader(Shader.Find("Custom/Transparent"));
-					goods_shaderchange_list[goods_list.IndexOf(goods)].alpha = 0.4f;
-					goods_shaderchange_list[goods_list.IndexOf(goods)].ChangeColors();
-					*/
 					ShaderChange goods_shaderchange = goods.GetComponent<ShaderChange>();
 					goods_shaderchange.alpha = 0.4f;
 					goods_shaderchange.ChangeColors();
@@ -171,9 +143,81 @@ public class RefrigeratorManager : MonoBehaviour {
 				}
 			}
 		}
-		
-		//データベースとの通信
-		if(calib_system.calibration_state > 1) {
+		*/
+
+		if(calib_system.calibration_state > 2 && finish_coroutine) {
+			//近づいたとき
+			if (distance < distance_to_display && distance_old >= distance_to_display) {
+				refrigerator_shaderchange.ChangeShader(Shader.Find("Custom/Transparent"));
+				refrigerator_shaderchange.alpha = 0.4f;
+				refrigerator_shaderchange.ChangeColors();
+
+				/*
+				foreach(GameObject goods in goods_list) {
+					if (goods_state[goods_list.IndexOf(goods)]) {
+						ShaderChange goods_shaderchange = goods.GetComponent<ShaderChange>();
+						goods_shaderchange.alpha = 0.4f;
+						goods_shaderchange.ChangeColors();
+					}
+				}
+				*/
+				IEnumerator coroutine = AppearSlowly();
+				StartCoroutine(coroutine);
+			}
+			//遠ざかったとき
+			/*
+			else if (distance >= distance_to_display && distance_old < distance_to_display) {
+				foreach(GameObject goods in goods_list) {
+					ShaderChange goods_shaderchange = goods.GetComponent<ShaderChange>();
+					goods_shaderchange.alpha = 0.0f;
+					goods_shaderchange.ChangeColors();
+				}
+
+				refrigerator_shaderchange.ChangeShader(Shader.Find("Custom/ARTransparent"));
+				refrigerator_shaderchange.alpha = rostms_shaderchange.alpha;
+				refrigerator_shaderchange.ChangeColors();
+			}
+			*/
+			//遠くにいるとき
+			else if(distance >= distance_to_display) {
+				foreach (GameObject goods in goods_list) {
+					ShaderChange goods_shaderchange = goods.GetComponent<ShaderChange>();
+					goods_shaderchange.alpha = 0.0f;
+					goods_shaderchange.ChangeColors();
+				}
+				if(refrigerator_shaderchange.shader_now != Shader.Find("Custom/ARTransparent")){
+					refrigerator_shaderchange.ChangeShader(Shader.Find("Custom/ARTransparent"));
+					refrigerator_shaderchange.alpha = rostms_shaderchange.alpha;
+					refrigerator_shaderchange.ChangeColors();
+				}
+			}
+			//ずっと近くにいるとき
+			else if (distance < distance_to_display && distance_old < distance_to_display){
+				foreach(GameObject goods in goods_list) {
+					ShaderChange goods_shaderchange = goods.GetComponent<ShaderChange>();
+					if (goods_state[goods_list.IndexOf(goods)]) {
+						goods_shaderchange.alpha = 0.4f;
+					}
+					else {
+						goods_shaderchange.alpha = 0.0f;
+					}
+					goods_shaderchange.ChangeColors();
+				}
+			}
+			//ずっと遠くにいるとき
+			/*
+			else {
+				foreach (GameObject goods in goods_list) {
+					ShaderChange goods_shaderchange = goods.GetComponent<ShaderChange>();
+					goods_shaderchange.alpha = 0.0f;
+					goods_shaderchange.ChangeColors();
+				}
+			}
+			*/
+		}
+
+			//データベースとの通信
+		if (calib_system.calibration_state > 1) {
 			time += Time.deltaTime;
 			if(time > 1.0f) {
 				time = 0.0f;
@@ -212,6 +256,46 @@ public class RefrigeratorManager : MonoBehaviour {
 				}
 			}
 		}
+	}
+
+	IEnumerator AppearSlowly() {
+		finish_coroutine = false;
+		for (int i = 0; i < 5; i++) {
+			yield return null;
+		}
+
+		/*
+		foreach (GameObject goods in goods_list) {
+			if (goods_state[goods_list.IndexOf(goods)]) {
+				ShaderChange goods_shaderchange = goods.GetComponent<ShaderChange>();
+				goods_shaderchange.alpha = 0.4f;
+				goods_shaderchange.ChangeColors();
+				for (int i = 0; i < 5; i++) {
+					yield return null;
+				}
+			}
+		}
+		*/
+		Dictionary<float, int> object_dictionary = new Dictionary<float, int>();
+		foreach (GameObject goods in goods_list) {
+			object_dictionary.Add(CalcDistance(ar_camera, goods), goods_list.IndexOf(goods));
+		}
+
+		var sorted = object_dictionary.OrderBy((x) => x.Key);
+
+		foreach(KeyValuePair<float, int> goods_dictionary in sorted) {
+			int goods_num = goods_dictionary.Value;
+			if (goods_state[goods_num]) {
+				ShaderChange goods_shaderchange = goods_list[goods_num].GetComponent<ShaderChange>();
+				goods_shaderchange.alpha = 0.4f;
+				goods_shaderchange.ChangeColors();
+				for (int i = 0; i < 5; i++) {
+					yield return null;
+				}
+			}
+		}
+
+		finish_coroutine = true;
 	}
 
 	/*****************************************************************

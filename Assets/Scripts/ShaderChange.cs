@@ -16,6 +16,9 @@ public class ShaderChange : MonoBehaviour {
 	[NonSerialized]
 	public float alpha = 0.0f;
 
+	[NonSerialized]
+	public Shader shader_now;
+
 	// Start is called before the first frame update
 	void Start() {
 		renderers = GetComponentsInChildren<Renderer>();
@@ -37,6 +40,7 @@ public class ShaderChange : MonoBehaviour {
 				mats[i].shader = shader;
 			}
 		}
+		shader_now = shader;
 	}
 
 	public void SaveColors() {
