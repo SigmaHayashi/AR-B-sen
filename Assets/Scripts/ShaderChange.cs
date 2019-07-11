@@ -19,8 +19,8 @@ public class ShaderChange : MonoBehaviour {
 	// Start is called before the first frame update
 	void Start() {
 		renderers = GetComponentsInChildren<Renderer>();
-		ChangeShader(Shader.Find("Custom/ARTransparent"));
 		//ChangeShader(Shader.Find("Custom/SemiTransparent"));
+		ChangeShader(Shader.Find("Custom/ARTransparent"));
 		SaveColors();
 		ChangeColors();
 	}
@@ -58,6 +58,18 @@ public class ShaderChange : MonoBehaviour {
 				mats[i].SetColor("_Color", tmp_color);
 			}
 			ren.materials = mats;
+		}
+	}
+
+	public IEnumerator ChangeShaderCoroutine(Shader shader) {
+		foreach (Renderer ren in renderers) {
+			mats = ren.materials;
+			for (int i = 0; i < ren.materials.Length; i++) {
+				mats[i].shader = shader;
+
+				yield return null;
+				yield return null;
+			}
 		}
 	}
 

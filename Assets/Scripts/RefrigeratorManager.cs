@@ -28,6 +28,18 @@ public class RefrigeratorManager : MonoBehaviour {
 
 	// 距離の制御
 	private float distance;
+	private float distance_old;
+
+	[SerializeField]
+	private float distance_to_display = 1.5f;
+
+	//ShaderChange
+	private ShaderChange refrigerator_shaderchange;
+	private ShaderChange rostms_shaderchange;
+	//private List<ShaderChange> goods_shaderchange_list = new List<ShaderChange>();
+	private bool change_goods_shader = false;
+
+	//private bool changed = false;
 
 	//public Text debug_text;
 
@@ -47,9 +59,16 @@ public class RefrigeratorManager : MonoBehaviour {
 		goods_state[1] = false;
 		goods_state[2] = false;
 
+		foreach(GameObject goods in goods_list) {
+			goods.AddComponent<ShaderChange>();
+			//goods_shaderchange_list.Add(goods.GetComponent<ShaderChange>());
+		}
+		
+		/*
 		greentea.SetActive(false);
 		cancoffee.SetActive(false);
 		soysauce.SetActive(false);
+		*/
 
 		GameObject prefab = (GameObject)Resources.Load("Coordinates Adapter");
 		coordinates_adapter = (GameObject)Instantiate(prefab, this.transform);
@@ -61,56 +80,104 @@ public class RefrigeratorManager : MonoBehaviour {
 		//wsc.ServiceCallerDB(srvName, srvReq);
 
 		time = 0.0f;
+
 		calib_system = GameObject.Find("B-sen Calibration System").GetComponent<BsenCalibrationSystem>();
+
+		refrigerator.AddComponent<ShaderChange>();
+		refrigerator_shaderchange = refrigerator.GetComponent<ShaderChange>();
+
+		rostms_shaderchange = GameObject.Find("rostms").GetComponent<ShaderChange>();
 	}
+
 
 	// Update is called once per frame
 	void Update() {
+		//CoordinatesAdapterの位置を調整してカメラとの距離を計算
 		coordinates_adapter.transform.localPosition = new Vector3(-0.23f, 0.0f, -0.3f);
+		distance_old = distance;
 		distance = CalcDistance(coordinates_adapter, ar_camera);
-		//debug_text.text = distance.ToString("f2");
-		//Debug.Log(distance.ToString("f2"));
-		
-		/*
-		if(distance < 1.5f) {
-			greentea.SetActive(true);
-			cancoffee.SetActive(true);
-			soysauce.SetActive(true);
-		}
-		else {
-			greentea.SetActive(false);
-			cancoffee.SetActive(false);
-			soysauce.SetActive(false);
-		}
-		*/
 
+		if (!change_goods_shader) {
+			foreach(GameObject goods in goods_list) {
+				//goods.SetActive(true);
+				/*
+				goods_shaderchange_list[goods_list.IndexOf(goods)].ChangeShader(Shader.Find("Custom/Transparent"));
+				goods_shaderchange_list[goods_list.IndexOf(goods)].alpha = 0.4f;
+				goods_shaderchange_list[goods_list.IndexOf(goods)].ChangeColors();
+				*/
+				ShaderChange shaderchange = goods.GetComponent<ShaderChange>();
+				shaderchange.ChangeShader(Shader.Find("Custom/Transparent"));
+				//shaderchange.alpha = 0.4f;
+				//shaderchange.ChangeColors();
+
+				//goods.SetActive(false);
+			}
+			change_goods_shader = true;
+		}
+
+		//距離が閾値以下でデータベースのstateが1だったら表示，違ったら非表示
 		foreach(GameObject goods in goods_list) {
 			/*
-			if (goods_state[goods_list.IndexOf(goods)]) {
-				if(distance < 1.5f) {
-					goods.SetActive(true);
-				}
-				else {
-					goods.SetActive(false);
-				}
-			}
-			else {
-				goods.SetActive(false);
+			if(goods.GetComponent<ShaderChange>() == null) {
+				goods.AddComponent<ShaderChange>();
+				ShaderChange goods_shaderchange = goods.GetComponent<ShaderChange>();
+				goods_shaderchange.ChangeShader(Shader.Find("Custom/Transparent"));
+				goods_shaderchange.SaveColors();
+				goods_shaderchange.alpha = 0.6f;
+				goods_shaderchange.ChangeColors();
 			}
 			*/
+
+			/*
 			if (goods_state[goods_list.IndexOf(goods)] && distance < 1.5f) {
 				goods.SetActive(true);
 			}
 			else {
 				goods.SetActive(false);
 			}
+			*/
+			if(calib_system.calibration_state > 2) {
+				if (goods_state[goods_list.IndexOf(goods)] && distance < distance_to_display) {
+					if(distance_old >= distance_to_display) {
+						refrigerator_shaderchange.ChangeShader(Shader.Find("Custom/Transparent"));
+						//StartCoroutine(refrigerator_shaderchange.ChangeShaderCoroutine(Shader.Find("Custom/Transparent")));
+						refrigerator_shaderchange.alpha = 0.4f;
+						refrigerator_shaderchange.ChangeColors();
+
+						//goods_shaderchange.ChangeShader(Shader.Find("Custom/Transparent"));
+					}
+
+					//goods.SetActive(true);
+					/*
+					goods_shaderchange_list[goods_list.IndexOf(goods)].ChangeShader(Shader.Find("Custom/Transparent"));
+					goods_shaderchange_list[goods_list.IndexOf(goods)].alpha = 0.4f;
+					goods_shaderchange_list[goods_list.IndexOf(goods)].ChangeColors();
+					*/
+					ShaderChange goods_shaderchange = goods.GetComponent<ShaderChange>();
+					goods_shaderchange.alpha = 0.4f;
+					goods_shaderchange.ChangeColors();
+				}
+				else {
+					//goods.SetActive(false);
+					ShaderChange goods_shaderchange = goods.GetComponent<ShaderChange>();
+					goods_shaderchange.alpha = 0.0f;
+					goods_shaderchange.ChangeColors();
+				
+					if (distance_old < distance_to_display && distance >= distance_to_display) {
+						refrigerator_shaderchange.ChangeShader(Shader.Find("Custom/ARTransparent"));
+						refrigerator_shaderchange.alpha = rostms_shaderchange.alpha;
+						refrigerator_shaderchange.ChangeColors();
+					}
+				}
+			}
 		}
 		
+		//データベースとの通信
 		if(calib_system.calibration_state > 1) {
 			time += Time.deltaTime;
 			if(time > 1.0f) {
 				time = 0.0f;
-				Debug.Log("Retry...");
+				//Debug.Log("Retry...");
 
 				wsc.Connect();
 
@@ -130,7 +197,6 @@ public class RefrigeratorManager : MonoBehaviour {
 						if(goods.name.IndexOf(data.name) != -1) {
 							//if(data.x != -1 && data.y != -1 && data.z != -1) {
 							if(data.state == 1) {
-								//goods.SetActive(true);
 								goods_state[goods_list.IndexOf(goods)] = true;
 								Vector3 place = new Vector3((float)data.x, (float)data.y, (float)data.z);
 								place = Ros2UnityPosition(place);
@@ -139,7 +205,6 @@ public class RefrigeratorManager : MonoBehaviour {
 								goods.transform.localPosition = place;
 							}
 							else {
-								//goods.SetActive(false);
 								goods_state[goods_list.IndexOf(goods)] = false;
 							}
 						}
@@ -149,6 +214,9 @@ public class RefrigeratorManager : MonoBehaviour {
 		}
 	}
 
+	/*****************************************************************
+	 * オブジェクトどうしの距離を計算
+	 *****************************************************************/
 	float CalcDistance(GameObject obj_a, GameObject obj_b) {
 		Vector3 obj_a_pos = obj_a.transform.position;
 		Vector3 obj_b_pos = obj_b.transform.position;
