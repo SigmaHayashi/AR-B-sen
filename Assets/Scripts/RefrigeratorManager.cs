@@ -157,20 +157,21 @@ public class RefrigeratorManager : MonoBehaviour {
 				foreach(tmsdb data in responce.values.tmsdb) {
 					//Debug.Log(data.name);
 					//Debug.Log(data.x + ", " + data.y + ", " + data.z);
+					if(data.sensor == 3018) {
+						foreach(GameObject goods in goods_list) {
+							if(goods.name.IndexOf(data.name) != -1) {
+								//if(data.x != -1 && data.y != -1 && data.z != -1) {
+								if(data.state == 1) {
+									goods_state[goods_list.IndexOf(goods)] = true;
+									Vector3 place = new Vector3((float)data.x, (float)data.y, (float)data.z);
+									place = Ros2UnityPosition(place);
+									Debug.Log(data.name + " pos: " + place.ToString("f2"));
 
-					foreach(GameObject goods in goods_list) {
-						if(goods.name.IndexOf(data.name) != -1) {
-							//if(data.x != -1 && data.y != -1 && data.z != -1) {
-							if(data.state == 1) {
-								goods_state[goods_list.IndexOf(goods)] = true;
-								Vector3 place = new Vector3((float)data.x, (float)data.y, (float)data.z);
-								place = Ros2UnityPosition(place);
-								Debug.Log(data.name + " pos: " + place.ToString("f2"));
-
-								goods.transform.localPosition = place;
-							}
-							else {
-								goods_state[goods_list.IndexOf(goods)] = false;
+									goods.transform.localPosition = place;
+								}
+								else {
+									goods_state[goods_list.IndexOf(goods)] = false;
+								}
 							}
 						}
 					}
