@@ -253,7 +253,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	}
 
 	void onPosXplusClick() {
-		Vector3 tmp = new Vector3(0.05f, 0.0f, 0.0f);
+		Vector3 tmp = new Vector3(0.025f, 0.0f, 0.0f);
 		coordinates_adapter.transform.localPosition = tmp;
 
 		tmp = coordinates_adapter.transform.position;
@@ -261,7 +261,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	}
 
 	void onPosXminusClick() {
-		Vector3 tmp = new Vector3(-0.05f, 0.0f, 0.0f);
+		Vector3 tmp = new Vector3(-0.025f, 0.0f, 0.0f);
 		coordinates_adapter.transform.localPosition = tmp;
 
 		tmp = coordinates_adapter.transform.position;
@@ -269,7 +269,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	}
 
 	void onPosYplusClick() {
-		Vector3 tmp = new Vector3(0.0f, 0.05f, 0.0f);
+		Vector3 tmp = new Vector3(0.0f, 0.025f, 0.0f);
 		coordinates_adapter.transform.localPosition = tmp;
 
 		tmp = coordinates_adapter.transform.position;
@@ -277,7 +277,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	}
 
 	void onPosYminusClick() {
-		Vector3 tmp = new Vector3(0.0f, -0.05f, 0.0f);
+		Vector3 tmp = new Vector3(0.0f, -0.025f, 0.0f);
 		coordinates_adapter.transform.localPosition = tmp;
 
 		tmp = coordinates_adapter.transform.position;
@@ -285,14 +285,14 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	}
 
 	void onPosZplusClick() {
-		Vector3 tmp = new Vector3(0.0f, 0.0f, 0.05f);
+		Vector3 tmp = new Vector3(0.0f, 0.0f, 0.025f);
 		coordinates_adapter.transform.localPosition = tmp;
 
 		tmp = coordinates_adapter.transform.position;
 		bsen_model.transform.position = tmp;
 	}
 	void onPosZminusClick() {
-		Vector3 tmp = new Vector3(0.0f, 0.0f, -0.05f);
+		Vector3 tmp = new Vector3(0.0f, 0.0f, -0.025f);
 		coordinates_adapter.transform.localPosition = tmp;
 
 		tmp = coordinates_adapter.transform.position;
@@ -302,37 +302,37 @@ public class BsenCalibrationSystem : MonoBehaviour {
 
 	void onRotXplusClick() {
 		Vector3 tmp = bsen_model.transform.eulerAngles;
-		tmp.x += 0.5f;
+		tmp.x += 0.25f;
 		bsen_model.transform.eulerAngles = tmp;
 	}
 
 	void onRotXminusClick() {
 		Vector3 tmp = bsen_model.transform.eulerAngles;
-		tmp.x -= 0.5f;
+		tmp.x -= 0.25f;
 		bsen_model.transform.eulerAngles = tmp;
 	}
 
 	void onRotYplusClick() {
 		Vector3 tmp = bsen_model.transform.eulerAngles;
-		tmp.y += 0.5f;
+		tmp.y += 0.25f;
 		bsen_model.transform.eulerAngles = tmp;
 	}
 
 	void onRotYminusClick() {
 		Vector3 tmp = bsen_model.transform.eulerAngles;
-		tmp.y -= 0.5f;
+		tmp.y -= 0.25f;
 		bsen_model.transform.eulerAngles = tmp;
 	}
 
 	void onRotZplusClick() {
 		Vector3 tmp = bsen_model.transform.eulerAngles;
-		tmp.z += 0.5f;
+		tmp.z += 0.25f;
 		bsen_model.transform.eulerAngles = tmp;
 	}
 
 	void onRotZminusClick() {
 		Vector3 tmp = bsen_model.transform.eulerAngles;
-		tmp.z -= 0.5f;
+		tmp.z -= 0.25f;
 		bsen_model.transform.eulerAngles = tmp;
 	}
 
