@@ -41,6 +41,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	[NonSerialized]
 	public int calibration_state = 0;
 
+	/*
 	//Android Ros Socket Client関連
 	private AndroidRosSocketClient wsc;
 	private string srvName = "tms_db_reader";
@@ -48,6 +49,9 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	private string srvRes;
 
 	float time;
+	*/
+
+	private TMSDatabaseAdapter DBAdapter;
 
 	private ShaderChange rostms_shader;
 
@@ -67,11 +71,15 @@ public class BsenCalibrationSystem : MonoBehaviour {
 
 		calibration_state = 1;
 
+		/*
 		//ROSTMSに接続
 		wsc = GameObject.Find("Android Ros Socket Client").GetComponent<AndroidRosSocketClient>();
-		srvReq.tmsdb = new tmsdb("ID_SENSOR", 7030, 3001);
-		wsc.ServiceCallerDB(srvName, srvReq);
+		//srvReq.tmsdb = new tmsdb("ID_SENSOR", 7030, 3001);
+		//wsc.ServiceCallerDB(srvName, srvReq);
 		time = 0.0f;
+		*/
+
+		DBAdapter = GameObject.Find("Database Adapter").GetComponent<TMSDatabaseAdapter>();
 	}
 
 	// Update is called once per frame
@@ -95,62 +103,95 @@ public class BsenCalibrationSystem : MonoBehaviour {
 			//ROSTMSにアクセスしてマーカーの座標取得
 			//irvs_marker = Instantiate(prefab); //マーカーの座標にオブジェクトを配置
 			case 1:
-			time += Time.deltaTime;
-			if(time > 3.0f) {
-				time = 0.0f;
-				Debug.Log("Retry...");
-
-				wsc.Connect();
-
-				wsc.ServiceCallerDB(srvName, srvReq);
-			}
-			if(wsc.IsReceiveSrvRes() && wsc.GetSrvResValue("service") == srvName) {
-				srvRes = wsc.GetSrvResMsg();
-				Debug.Log("ROS: " + srvRes);
-
-				ServiceResponseDB responce = JsonUtility.FromJson<ServiceResponseDB>(srvRes);
-
-				//位置を取得＆変換
-				Vector3 marker_position = new Vector3((float)responce.values.tmsdb[0].x, (float)responce.values.tmsdb[0].y, (float)responce.values.tmsdb[0].z);
-				marker_position = Ros2UnityPosition(marker_position);
-				marker_position.z += 0.2f;
-				Debug.Log("Marker Pos: " + marker_position);
-
-				//回転を取得＆変換
-				Vector3 marker_euler = new Vector3(Rad2Euler((float)responce.values.tmsdb[0].rr), Rad2Euler((float)responce.values.tmsdb[0].rp), Rad2Euler((float)responce.values.tmsdb[0].ry));
-				marker_euler = Ros2UnityRotation(marker_euler);
-				//Debug.Log("Marker rot raw: " + marker_euler);
-
 				/*
-				Quaternion marker_rot = Quaternion.Euler(marker_euler * -1);
-				//marker_rot *= Quaternion.Euler(0, 0, 180);
-				//marker_rot *= Quaternion.Euler(0, 180, 0);
-				marker_euler = marker_rot.eulerAngles;
-				marker_euler.x = 0.0f;
-				marker_euler.z = 0.0f;
+				time += Time.deltaTime;
+				if(time > 3.0f) {
+					time = 0.0f;
+					Debug.Log("Retry...");
+
+					wsc.Connect();
+
+					wsc.ServiceCallerDB(srvName, srvReq);
+				}
+				if(wsc.IsReceiveSrvRes() && wsc.GetSrvResValue("service") == srvName) {
+					srvRes = wsc.GetSrvResMsg();
+					Debug.Log("ROS: " + srvRes);
+
+					ServiceResponseDB responce = JsonUtility.FromJson<ServiceResponseDB>(srvRes);
+
+					//位置を取得＆変換
+					Vector3 marker_position = new Vector3((float)responce.values.tmsdb[0].x, (float)responce.values.tmsdb[0].y, (float)responce.values.tmsdb[0].z);
+					marker_position = Ros2UnityPosition(marker_position);
+					marker_position.z += 0.2f;
+					Debug.Log("Marker Pos: " + marker_position);
+
+					//回転を取得＆変換
+					Vector3 marker_euler = new Vector3(Rad2Euler((float)responce.values.tmsdb[0].rr), Rad2Euler((float)responce.values.tmsdb[0].rp), Rad2Euler((float)responce.values.tmsdb[0].ry));
+					marker_euler = Ros2UnityRotation(marker_euler);
+					//Debug.Log("Marker rot raw: " + marker_euler);
+
+					marker_euler *= -1.0f;
+					marker_euler.x = 0.0f;
+					marker_euler.z = 0.0f;
+					Debug.Log("Marker rot: " + marker_euler);
+
+					//回転をモデルに適用
+					bsen_model.transform.eulerAngles = marker_euler;
+
+					//位置をモデル上のマーカーに適用
+					GameObject prefab = (GameObject)Resources.Load("Coordinates Adapter");
+					irvs_marker = Instantiate(prefab);
+					irvs_marker.transform.parent = GameObject.Find("rostms/world_link").transform;
+					irvs_marker.transform.localPosition = marker_position;
+
+					//回転軸をマーカーの位置に合わせる
+					GameObject world_link = GameObject.Find("rostms/world_link");
+					world_link.transform.localPosition = marker_position * -1;
+
+					time = 0.0f;
+					calibration_state = 2;
+				}
 				*/
-				marker_euler *= -1.0f;
-				marker_euler.x = 0.0f;
-				marker_euler.z = 0.0f;
-				Debug.Log("Marker rot: " + marker_euler);
+				if (!DBAdapter.access_db) {
+					IEnumerator coroutine = DBAdapter.ReadMarkerPos();
+					StartCoroutine(coroutine);
+				}
+				if (DBAdapter.success_access) {
+					ServiceResponseDB responce = DBAdapter.responce;
+					DBAdapter.FinishReadData();
+					
+					//位置を取得＆変換
+					Vector3 marker_position = new Vector3((float)responce.values.tmsdb[0].x, (float)responce.values.tmsdb[0].y, (float)responce.values.tmsdb[0].z);
+					marker_position = Ros2UnityPosition(marker_position);
+					marker_position.z += 0.2f;
+					Debug.Log("Marker Pos: " + marker_position);
 
-				//回転をモデルに適用
-				bsen_model.transform.eulerAngles = marker_euler;
-				
-				//位置をモデル上のマーカーに適用
-				GameObject prefab = (GameObject)Resources.Load("Coordinates Adapter");
-				irvs_marker = Instantiate(prefab);
-				irvs_marker.transform.parent = GameObject.Find("rostms/world_link").transform;
-				irvs_marker.transform.localPosition = marker_position;
+					//回転を取得＆変換
+					Vector3 marker_euler = new Vector3(Rad2Euler((float)responce.values.tmsdb[0].rr), Rad2Euler((float)responce.values.tmsdb[0].rp), Rad2Euler((float)responce.values.tmsdb[0].ry));
+					marker_euler = Ros2UnityRotation(marker_euler);
+					//Debug.Log("Marker rot raw: " + marker_euler);
 
-				//回転軸をマーカーの位置に合わせる
-				GameObject world_link = GameObject.Find("rostms/world_link");
-				world_link.transform.localPosition = marker_position * -1;
+					marker_euler *= -1.0f;
+					marker_euler.x = 0.0f;
+					marker_euler.z = 0.0f;
+					Debug.Log("Marker rot: " + marker_euler);
 
-				time = 0.0f;
-				calibration_state = 2;
-			}
-			break;
+					//回転をモデルに適用
+					bsen_model.transform.eulerAngles = marker_euler;
+
+					//位置をモデル上のマーカーに適用
+					GameObject prefab = (GameObject)Resources.Load("Coordinates Adapter");
+					irvs_marker = Instantiate(prefab);
+					irvs_marker.transform.parent = GameObject.Find("rostms/world_link").transform;
+					irvs_marker.transform.localPosition = marker_position;
+
+					//回転軸をマーカーの位置に合わせる
+					GameObject world_link = GameObject.Find("rostms/world_link");
+					world_link.transform.localPosition = marker_position * -1;
+
+					calibration_state = 2;
+				}
+				break;
 
 			//phase2
 			//画像認識待ち
