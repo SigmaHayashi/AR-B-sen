@@ -91,7 +91,9 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		//毎回すること
 		//AugmentedImageの更新
 		//CameraとB-senのポジション表示
-		Session.GetTrackables<AugmentedImage>(m_AugmentedImages, TrackableQueryFilter.Updated);
+		if (!Application.isEditor) {
+			Session.GetTrackables<AugmentedImage>(m_AugmentedImages, TrackableQueryFilter.Updated);
+		}
 
 		cameraPositionText.text = "Camera Position : " + Camera.main.transform.position.ToString("f2") + "\n";
 		cameraPositionText.text += "Camera Rotation : " + Camera.main.transform.eulerAngles.ToString();
@@ -240,6 +242,13 @@ public class BsenCalibrationSystem : MonoBehaviour {
 								finish_calibration = true;
 							}
 						}
+					}
+					if (Application.isEditor) {
+						rostms_shader.alpha = 0.6f;
+						rostms_shader.ChangeColors();
+
+						calibration_state = 4;
+						finish_calibration = true;
 					}
 					break;
 			}

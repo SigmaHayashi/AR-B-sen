@@ -28,6 +28,7 @@ public class RefrigeratorManager : MonoBehaviour {
 	*/
 	private float time = 0.0f;
 	private TMSDatabaseAdapter DBAdapter;
+	private bool searching = false;
 
 	private BsenCalibrationSystem calib_system;
 
@@ -194,35 +195,41 @@ public class RefrigeratorManager : MonoBehaviour {
 				time = 0.0f;
 				IEnumerator coroutine = DBAdapter.GetRefrigeratorItem();
 				StartCoroutine(coroutine);
+
+				searching = true;
 			}
 
-			if (DBAdapter.abort_access) {
-				DBAdapter.ConfirmAbort();
-			}
+			if (searching) {
+				if (DBAdapter.abort_access) {
+					DBAdapter.ConfirmAbort();
+					searching = false;
+				}
 
-			if (DBAdapter.success_access) {
-				ServiceResponseDB responce = DBAdapter.responce;
-				DBAdapter.FinishReadData();
-				foreach (tmsdb data in responce.values.tmsdb) {
-					//Debug.Log(data.name);
-					//Debug.Log(data.x + ", " + data.y + ", " + data.z);
-					if (data.sensor == 3018) {
-						foreach (GameObject goods in goods_list) {
-							if (goods.name.IndexOf(data.name) != -1) {
-								if (data.state == 1) {
-									goods_state[goods_list.IndexOf(goods)] = true;
-									Vector3 place = new Vector3((float)data.x, (float)data.y, (float)data.z);
-									place = Ros2UnityPosition(place);
-									Debug.Log(data.name + " pos: " + place.ToString("f2"));
+				if (DBAdapter.success_access) {
+					ServiceResponseDB responce = DBAdapter.responce;
+					DBAdapter.FinishReadData();
+					foreach (tmsdb data in responce.values.tmsdb) {
+						//Debug.Log(data.name);
+						//Debug.Log(data.x + ", " + data.y + ", " + data.z);
+						if (data.sensor == 3018) {
+							foreach (GameObject goods in goods_list) {
+								if (goods.name.IndexOf(data.name) != -1) {
+									if (data.state == 1) {
+										goods_state[goods_list.IndexOf(goods)] = true;
+										Vector3 place = new Vector3((float)data.x, (float)data.y, (float)data.z);
+										place = Ros2UnityPosition(place);
+										Debug.Log(data.name + " pos: " + place.ToString("f2"));
 
-									goods.transform.localPosition = place;
-								}
-								else {
-									goods_state[goods_list.IndexOf(goods)] = false;
+										goods.transform.localPosition = place;
+									}
+									else {
+										goods_state[goods_list.IndexOf(goods)] = false;
+									}
 								}
 							}
 						}
 					}
+					searching = false;
 				}
 			}
 		}

@@ -13,13 +13,15 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 
 	private float time = 0.0f;
 
-	public bool access_db = false;
-	public bool success_access = false;
-	public bool abort_access = false;
+	[NonSerialized] public bool access_db = false;
+	[NonSerialized] public bool success_access = false;
+	[NonSerialized] public bool abort_access = false;
+
 	private bool read_marker_pos = false;
 	private bool get_refrigerator_item = false;
+	private bool read_smartpal_pos = false;
 
-	public ServiceResponseDB responce;
+	[NonSerialized] public ServiceResponseDB responce;
 
 	// Start is called before the first frame update
 	void Start() {
@@ -81,6 +83,25 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 						get_refrigerator_item = false;
 					}
 				}
+
+				if (read_smartpal_pos) {
+					time += Time.deltaTime;
+					if (time > 0.5f) {
+						time = 0.0f;
+
+						abort_access = true;
+						read_smartpal_pos = false;
+					}
+					if (wsc.IsReceiveSrvRes() && wsc.GetSrvResValue("service") == srvName) {
+						srvRes = wsc.GetSrvResMsg();
+						Debug.Log("ROS: " + srvRes);
+
+						responce = JsonUtility.FromJson<ServiceResponseDB>(srvRes);
+
+						success_access = true;
+						read_smartpal_pos = false;
+					}
+				}
 			}
 		}
 	}
@@ -95,9 +116,11 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 
 
 	public IEnumerator ReadMarkerPos() {
+		/*
 		if (access_db) {
 			yield return null;
 		}
+		*/
 
 		access_db = read_marker_pos = true;
 
@@ -116,9 +139,11 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 	}
 
 	public IEnumerator GetRefrigeratorItem() {
+		/*
 		if (access_db) {
 			yield return null;
 		}
+		*/
 
 		access_db = get_refrigerator_item = true;
 
@@ -127,6 +152,23 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 		wsc.ServiceCallerDB(srvName, srvReq);
 
 		while (get_refrigerator_item) {
+			yield return null;
+		}
+
+		while (success_access || abort_access) {
+			yield return null;
+		}
+		access_db = false;
+	}
+
+	public IEnumerator ReadSmartPalPos() {
+		access_db = read_smartpal_pos = true;
+
+		time = 0.0f;
+		srvReq.tmsdb = new tmsdb("ID_SENSOR", 2003, 3001);
+		wsc.ServiceCallerDB(srvName, srvReq);
+
+		while (read_smartpal_pos) {
 			yield return null;
 		}
 

@@ -551,6 +551,24 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c539aa4fa1bac4b4da61761b0699b48b, type: 3}
+--- !u!1 &140388723 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1535366430393256, guid: 49826ccd6b8f88140b796de1d0c5a1c1,
+    type: 3}
+  m_PrefabInstance: {fileID: 936618295}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &140388725
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 140388723}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93c6c9fa99e6c4b48a6f6fe68b76ff02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &142758615
 GameObject:
   m_ObjectHideFlags: 0
@@ -4254,14 +4272,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa290ad96a4ce0a49a9781eb5d6c88c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  access_db: 0
-  success_access: 0
-  responce:
-    result: 0
-    service: 
-    op: 
-    values:
-      tmsdb: []
 --- !u!4 &1121401444
 Transform:
   m_ObjectHideFlags: 0
