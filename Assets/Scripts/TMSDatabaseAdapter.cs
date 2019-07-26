@@ -15,7 +15,9 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 
 	public bool access_db = false;
 	public bool success_access = false;
+	public bool abort_access = false;
 	private bool read_marker_pos = false;
+	private bool get_refrigerator_item = false;
 
 	public ServiceResponseDB responce;
 
@@ -58,57 +60,77 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 						read_marker_pos = false;
 					}
 				}
+
+				if (get_refrigerator_item) {
+					time += Time.deltaTime;
+					if(time > 1.0f) {
+						time = 0.0f;
+						//srvReq.tmsdb = new tmsdb("PLACE", 2009);
+						//wsc.ServiceCallerDB(srvName, srvReq);
+
+						abort_access = true;
+						get_refrigerator_item = false;
+					}
+					if (wsc.IsReceiveSrvRes() && wsc.GetSrvResValue("service") == srvName) {
+						srvRes = wsc.GetSrvResMsg();
+						Debug.Log("ROS: " + srvRes);
+
+						responce = JsonUtility.FromJson<ServiceResponseDB>(srvRes);
+
+						success_access = true;
+						get_refrigerator_item = false;
+					}
+				}
 			}
 		}
 	}
 
-	/*
-	public bool ReadMarkerPos(ref ServiceResponseDB responce) {
-		if (access_db) {
-			return false;
-		}
-
-		time = 0.0f;
-		srvReq.tmsdb = new tmsdb("ID_SENSOR", 7030, 3001);
-		wsc.ServiceCallerDB(srvName, srvReq);
-
-		access_db = read_marker_pos = true;
-
-		while (access_db) {
-
-		}
-
-		responce = this.responce;
-		return true;
-	}
-
-	IEnumerator WaitDB() {
-		while (access_db) {
-			yield return null;
-		}
-	}
-	*/
-
 	public void FinishReadData() {
 		success_access = false;
 	}
+
+	public void ConfirmAbort() {
+		abort_access = false;
+	}
+
 
 	public IEnumerator ReadMarkerPos() {
 		if (access_db) {
 			yield return null;
 		}
 
+		access_db = read_marker_pos = true;
+
 		time = 0.0f;
 		srvReq.tmsdb = new tmsdb("ID_SENSOR", 7030, 3001);
 		wsc.ServiceCallerDB(srvName, srvReq);
-
-		access_db = read_marker_pos = true;
 
 		while (read_marker_pos) {
 			yield return null;
 		}
 
 		while (success_access) {
+			yield return null;
+		}
+		access_db = false;
+	}
+
+	public IEnumerator GetRefrigeratorItem() {
+		if (access_db) {
+			yield return null;
+		}
+
+		access_db = get_refrigerator_item = true;
+
+		time = 0.0f;
+		srvReq.tmsdb = new tmsdb("PLACE", 2009);
+		wsc.ServiceCallerDB(srvName, srvReq);
+
+		while (get_refrigerator_item) {
+			yield return null;
+		}
+
+		while (success_access || abort_access) {
 			yield return null;
 		}
 		access_db = false;

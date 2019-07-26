@@ -18,14 +18,17 @@ public class RefrigeratorManager : MonoBehaviour {
 	private GameObject soysauce;
 	private List<GameObject> goods_list = new List<GameObject>();
 	private bool[] goods_state = new bool[3];
-	
+
+	/*
 	//Android Ros Socket Client関連
 	private AndroidRosSocketClient wsc;
 	private string srvName = "tms_db_reader";
 	private TmsDBReq srvReq = new TmsDBReq();
 	private string srvRes;
+	*/
+	private float time = 0.0f;
+	private TMSDatabaseAdapter DBAdapter;
 
-	float time;
 	private BsenCalibrationSystem calib_system;
 
 	// 距離の制御
@@ -66,13 +69,16 @@ public class RefrigeratorManager : MonoBehaviour {
 		GameObject prefab = (GameObject)Resources.Load("Coordinates Adapter");
 		coordinates_adapter = (GameObject)Instantiate(prefab, this.transform);
 		coordinates_adapter.transform.parent = refrigerator.transform;
-		
+
+		/*
 		//ROSTMSに接続
 		wsc = GameObject.Find("Android Ros Socket Client").GetComponent<AndroidRosSocketClient>();
 		srvReq.tmsdb = new tmsdb("PLACE", 2009);
 		//wsc.ServiceCallerDB(srvName, srvReq);
 
 		time = 0.0f;
+		*/
+		DBAdapter = GameObject.Find("Database Adapter").GetComponent<TMSDatabaseAdapter>();
 
 		calib_system = GameObject.Find("B-sen Calibration System").GetComponent<BsenCalibrationSystem>();
 
@@ -99,7 +105,8 @@ public class RefrigeratorManager : MonoBehaviour {
 		}
 
 		//距離が閾値以下でデータベースのstateが1だったら表示，違ったら非表示
-		if(calib_system.calibration_state > 2 && finish_coroutine) {
+		//if(calib_system.calibration_state > 2 && finish_coroutine) {
+		if (calib_system.finish_calibration && finish_coroutine) {
 			//近づいたとき
 			if (distance < distance_to_display && distance_old >= distance_to_display) {
 				refrigerator_shaderchange.ChangeShader(Shader.Find("Custom/Transparent"));
@@ -137,6 +144,7 @@ public class RefrigeratorManager : MonoBehaviour {
 			}
 		}
 
+		/*
 		//データベースとの通信
 		if (calib_system.calibration_state > 1) {
 			time += Time.deltaTime;
@@ -162,6 +170,46 @@ public class RefrigeratorManager : MonoBehaviour {
 							if(goods.name.IndexOf(data.name) != -1) {
 								//if(data.x != -1 && data.y != -1 && data.z != -1) {
 								if(data.state == 1) {
+									goods_state[goods_list.IndexOf(goods)] = true;
+									Vector3 place = new Vector3((float)data.x, (float)data.y, (float)data.z);
+									place = Ros2UnityPosition(place);
+									Debug.Log(data.name + " pos: " + place.ToString("f2"));
+
+									goods.transform.localPosition = place;
+								}
+								else {
+									goods_state[goods_list.IndexOf(goods)] = false;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		*/
+
+		if (calib_system.finish_calibration) {
+			time += Time.deltaTime;
+			if (!DBAdapter.access_db && time > 1.0f) {
+				time = 0.0f;
+				IEnumerator coroutine = DBAdapter.GetRefrigeratorItem();
+				StartCoroutine(coroutine);
+			}
+
+			if (DBAdapter.abort_access) {
+				DBAdapter.ConfirmAbort();
+			}
+
+			if (DBAdapter.success_access) {
+				ServiceResponseDB responce = DBAdapter.responce;
+				DBAdapter.FinishReadData();
+				foreach (tmsdb data in responce.values.tmsdb) {
+					//Debug.Log(data.name);
+					//Debug.Log(data.x + ", " + data.y + ", " + data.z);
+					if (data.sensor == 3018) {
+						foreach (GameObject goods in goods_list) {
+							if (goods.name.IndexOf(data.name) != -1) {
+								if (data.state == 1) {
 									goods_state[goods_list.IndexOf(goods)] = true;
 									Vector3 place = new Vector3((float)data.x, (float)data.y, (float)data.z);
 									place = Ros2UnityPosition(place);
