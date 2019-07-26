@@ -28,7 +28,7 @@ public class RefrigeratorManager : MonoBehaviour {
 	*/
 	private float time = 0.0f;
 	private TMSDatabaseAdapter DBAdapter;
-	private bool searching = false;
+	//private bool searching = false;
 
 	private BsenCalibrationSystem calib_system;
 
@@ -191,22 +191,30 @@ public class RefrigeratorManager : MonoBehaviour {
 
 		if (calib_system.finish_calibration) {
 			time += Time.deltaTime;
-			if (!DBAdapter.access_db && time > 1.0f) {
+			//if (!DBAdapter.access_db && time > 1.0f) {
+			//if (!DBAdapter.wait_anything && time > 1.0f) {
+			//if (!DBAdapter.CheckGetRefrigeratorItem() && time > 1.0f) {
+			if (!DBAdapter.CheckWaitAnything() && time > 1.0f) {
 				time = 0.0f;
 				IEnumerator coroutine = DBAdapter.GetRefrigeratorItem();
 				StartCoroutine(coroutine);
 
-				searching = true;
+				//searching = true;
 			}
 
-			if (searching) {
-				if (DBAdapter.abort_access) {
+			//if (searching) {
+			//if (DBAdapter.wait_anything) {
+			if (DBAdapter.CheckGetRefrigeratorItem()) {
+				//if (DBAdapter.abort_access) {
+				if (DBAdapter.CheckAbort()) {
 					DBAdapter.ConfirmAbort();
-					searching = false;
+					//searching = false;
 				}
 
-				if (DBAdapter.success_access) {
-					ServiceResponseDB responce = DBAdapter.responce;
+				//if (DBAdapter.success_access) {
+				if (DBAdapter.CheckSuccess()) {
+					//ServiceResponseDB responce = DBAdapter.responce;
+					ServiceResponseDB responce = DBAdapter.GetResponce();
 					DBAdapter.FinishReadData();
 					foreach (tmsdb data in responce.values.tmsdb) {
 						//Debug.Log(data.name);
@@ -229,7 +237,7 @@ public class RefrigeratorManager : MonoBehaviour {
 							}
 						}
 					}
-					searching = false;
+					//searching = false;
 				}
 			}
 		}

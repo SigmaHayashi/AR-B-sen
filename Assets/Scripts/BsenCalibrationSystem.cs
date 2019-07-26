@@ -181,7 +181,10 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		if (!finish_calibration) {
 			switch (calibration_state) {
 				case 1:
-					if (!DBAdapter.access_db) {
+					//if (!DBAdapter.access_db) {
+					//if (!DBAdapter.wait_anything) {
+					//if (!DBAdapter.CheckReadMarkerPos()) {
+					if (!DBAdapter.CheckWaitAnything()) {
 						IEnumerator coroutine = DBAdapter.ReadMarkerPos();
 						StartCoroutine(coroutine);
 						calibration_state = 2;
@@ -189,8 +192,10 @@ public class BsenCalibrationSystem : MonoBehaviour {
 					break;
 
 				case 2:
-					if (DBAdapter.success_access) {
-						ServiceResponseDB responce = DBAdapter.responce;
+					//if (DBAdapter.success_access) {
+					if (DBAdapter.CheckSuccess()) {
+						//ServiceResponseDB responce = DBAdapter.responce;
+						ServiceResponseDB responce = DBAdapter.GetResponce();
 						DBAdapter.FinishReadData();
 					
 						//位置を取得＆変換
@@ -206,6 +211,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 
 						marker_euler *= -1.0f;
 						marker_euler.x = 0.0f;
+						marker_euler.y -= 1.5f;
 						marker_euler.z = 0.0f;
 						Debug.Log("Marker rot: " + marker_euler);
 
