@@ -107,7 +107,8 @@ public class RefrigeratorManager : MonoBehaviour {
 
 		//距離が閾値以下でデータベースのstateが1だったら表示，違ったら非表示
 		//if(calib_system.calibration_state > 2 && finish_coroutine) {
-		if (calib_system.finish_calibration && finish_coroutine) {
+		//if (calib_system.finish_calibration && finish_coroutine) {
+		if (calib_system.CheckFinishCalibration() && finish_coroutine) {
 			//近づいたとき
 			if (distance < distance_to_display && distance_old >= distance_to_display) {
 				refrigerator_shaderchange.ChangeShader(Shader.Find("Custom/Transparent"));
@@ -189,7 +190,7 @@ public class RefrigeratorManager : MonoBehaviour {
 		}
 		*/
 
-		if (calib_system.finish_calibration) {
+		if (calib_system.CheckFinishCalibration()) {
 			time += Time.deltaTime;
 			//if (!DBAdapter.access_db && time > 1.0f) {
 			//if (!DBAdapter.wait_anything && time > 1.0f) {

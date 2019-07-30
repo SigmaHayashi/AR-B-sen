@@ -21,7 +21,7 @@ public class SmartPalControll : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update() {
-		if (calib_system.finish_calibration) {
+		if (calib_system.CheckFinishCalibration()) {
 			time += Time.deltaTime;
 			//if (!DBAdapter.access_db && time > 1.0f) {
 			//if (!DBAdapter.wait_anything && time > 1.0f) {

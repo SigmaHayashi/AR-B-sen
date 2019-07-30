@@ -38,9 +38,14 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	private bool detected_marker = false;
 	private AugmentedImage marker_image;
 
-	[NonSerialized]
-	public bool finish_calibration = false;
+	//[NonSerialized]
+	//public bool finish_calibration = false;
+	private bool finish_calibration = false;
 	private int calibration_state = 0;
+
+	public bool CheckFinishCalibration() {
+		return finish_calibration;
+	}
 
 	/*
 	//Android Ros Socket Client関連
@@ -178,7 +183,8 @@ public class BsenCalibrationSystem : MonoBehaviour {
 			}
 			*/
 
-		if (!finish_calibration) {
+		//if (!finish_calibration) {
+		if (!CheckFinishCalibration()) {
 			switch (calibration_state) {
 				case 1:
 					//if (!DBAdapter.access_db) {

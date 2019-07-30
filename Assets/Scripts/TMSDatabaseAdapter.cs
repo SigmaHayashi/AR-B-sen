@@ -21,6 +21,7 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 	private bool read_marker_pos = false;
 	private bool get_refrigerator_item = false;
 	private bool read_smartpal_pos = false;
+	private bool read_whs1 = false;
 
 	private ServiceResponseDB responce;
 
@@ -28,9 +29,6 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 	void Start() {
 		//ROSTMSに接続
 		wsc = GameObject.Find("Android Ros Socket Client").GetComponent<AndroidRosSocketClient>();
-		//srvReq.tmsdb = new tmsdb("ID_SENSOR", 7030, 3001);
-		//wsc.ServiceCallerDB(srvName, srvReq);
-		//time = 0.0f;
 	}
 
 	// Update is called once per frame
@@ -45,67 +43,6 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 		}
 
 		if (wsc.conneciton_state == wscCONST.STATE_CONNECTED) {
-			/*
-			if (access_db) {
-				if (read_marker_pos) {
-					time += Time.deltaTime;
-					if (time > 1.0f) {
-						time = 0.0f;
-						srvReq.tmsdb = new tmsdb("ID_SENSOR", 7030, 3001);
-						wsc.ServiceCallerDB(srvName, srvReq);
-					}
-					if (wsc.IsReceiveSrvRes() && wsc.GetSrvResValue("service") == srvName) {
-						srvRes = wsc.GetSrvResMsg();
-						Debug.Log("ROS: " + srvRes);
-
-						responce = JsonUtility.FromJson<ServiceResponseDB>(srvRes);
-
-						success_access = true;
-						read_marker_pos = false;
-					}
-				}
-
-				if (get_refrigerator_item) {
-					time += Time.deltaTime;
-					if(time > 1.0f) {
-						time = 0.0f;
-						//srvReq.tmsdb = new tmsdb("PLACE", 2009);
-						//wsc.ServiceCallerDB(srvName, srvReq);
-
-						abort_access = true;
-						get_refrigerator_item = false;
-					}
-					if (wsc.IsReceiveSrvRes() && wsc.GetSrvResValue("service") == srvName) {
-						srvRes = wsc.GetSrvResMsg();
-						Debug.Log("ROS: " + srvRes);
-
-						responce = JsonUtility.FromJson<ServiceResponseDB>(srvRes);
-
-						success_access = true;
-						get_refrigerator_item = false;
-					}
-				}
-
-				if (read_smartpal_pos) {
-					time += Time.deltaTime;
-					if (time > 0.5f) {
-						time = 0.0f;
-
-						abort_access = true;
-						read_smartpal_pos = false;
-					}
-					if (wsc.IsReceiveSrvRes() && wsc.GetSrvResValue("service") == srvName) {
-						srvRes = wsc.GetSrvResMsg();
-						Debug.Log("ROS: " + srvRes);
-
-						responce = JsonUtility.FromJson<ServiceResponseDB>(srvRes);
-
-						success_access = true;
-						read_smartpal_pos = false;
-					}
-				}
-			}*/
-
 			if(!success_access && !abort_access) {
 				if (access_db) {
 					if (read_marker_pos) {
@@ -130,8 +67,6 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 						time += Time.deltaTime;
 						if (time > 1.0f) {
 							time = 0.0f;
-							//srvReq.tmsdb = new tmsdb("PLACE", 2009);
-							//wsc.ServiceCallerDB(srvName, srvReq);
 
 							abort_access = true;
 							access_db = false;
@@ -150,6 +85,25 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 					if (read_smartpal_pos) {
 						time += Time.deltaTime;
 						if (time > 0.5f) {
+							time = 0.0f;
+
+							abort_access = true;
+							access_db = false;
+						}
+						if (wsc.IsReceiveSrvRes() && wsc.GetSrvResValue("service") == srvName) {
+							srvRes = wsc.GetSrvResMsg();
+							Debug.Log("ROS: " + srvRes);
+
+							responce = JsonUtility.FromJson<ServiceResponseDB>(srvRes);
+
+							success_access = true;
+							access_db = false;
+						}
+					}
+
+					if (read_whs1) {
+						time += Time.deltaTime;
+						if(time > 0.5f) {
 							time = 0.0f;
 
 							abort_access = true;
@@ -194,29 +148,16 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 		return responce;
 	}
 
-
+	/**************************************************
+	 * キャリブレーション用マーカーのVICONデータ
+	 **************************************************/
 	public IEnumerator ReadMarkerPos() {
-		/*
-		if (access_db) {
-			yield return null;
-		}
-		*/
-
 		wait_anything =  access_db = read_marker_pos = true;
 
 		time = 0.0f;
 		srvReq.tmsdb = new tmsdb("ID_SENSOR", 7030, 3001);
 		wsc.ServiceCallerDB(srvName, srvReq);
-		/*
-		while (read_marker_pos) {
-			yield return null;
-		}
 
-		while (success_access) {
-			yield return null;
-		}
-		access_db = false;
-		*/
 		while (access_db) {
 			yield return null;
 		}
@@ -230,29 +171,16 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 	public bool CheckReadMarkerPos() {
 		return read_marker_pos;
 	}
-
+	
+	/**************************************************
+	 * 冷蔵庫の中身のデータ
+	 **************************************************/
 	public IEnumerator GetRefrigeratorItem() {
-		/*
-		if (access_db) {
-			yield return null;
-		}
-		*/
-
 		wait_anything = access_db = get_refrigerator_item = true;
 
 		time = 0.0f;
 		srvReq.tmsdb = new tmsdb("PLACE", 2009);
 		wsc.ServiceCallerDB(srvName, srvReq);
-		/*
-		while (get_refrigerator_item) {
-			yield return null;
-		}
-
-		while (success_access || abort_access) {
-			yield return null;
-		}
-		access_db = false;
-		*/
 
 		while (access_db) {
 			yield return null;
@@ -267,23 +195,16 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 	public bool CheckGetRefrigeratorItem() {
 		return get_refrigerator_item;
 	}
-
+	
+	/**************************************************
+	 * SmartPalのVICONデータ
+	 **************************************************/
 	public IEnumerator ReadSmartPalPos() {
 		wait_anything = access_db = read_smartpal_pos = true;
 
 		time = 0.0f;
 		srvReq.tmsdb = new tmsdb("ID_SENSOR", 2003, 3001);
 		wsc.ServiceCallerDB(srvName, srvReq);
-		/*
-		while (read_smartpal_pos) {
-			yield return null;
-		}
-
-		while (success_access || abort_access) {
-			yield return null;
-		}
-		access_db = false;
-		*/
 
 		while (access_db) {
 			yield return null;
@@ -297,5 +218,29 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 
 	public bool CheckReadSmartPalPos() {
 		return read_smartpal_pos;
+	}
+
+	/**************************************************
+	 * WHS1データ
+	 **************************************************/
+	public IEnumerator ReadWHS1() {
+		wait_anything = access_db = read_whs1 = true;
+
+		time = 0.0f;
+		srvReq.tmsdb = new tmsdb("ID_SENSOR", 3021, 3021);
+		wsc.ServiceCallerDB(srvName, srvReq);
+
+		while (access_db) {
+			yield return null;
+		}
+
+		while (success_access || abort_access) {
+			yield return null;
+		}
+		wait_anything = read_whs1 = false;
+	}
+
+	public bool CheckReadWHS1() {
+		return read_whs1;
 	}
 }
