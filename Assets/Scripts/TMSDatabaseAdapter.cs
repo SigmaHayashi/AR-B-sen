@@ -22,6 +22,10 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 	private bool get_refrigerator_item = false;
 	private bool read_smartpal_pos = false;
 	private bool read_whs1 = false;
+	private bool read_expiration = false;
+
+	private List<int> id_list = new List<int>();
+	private Dictionary<int, string> expiration_dicionary = new Dictionary<int, string>();
 
 	private ServiceResponseDB responce;
 
@@ -119,6 +123,24 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 							access_db = false;
 						}
 					}
+
+					if (read_expiration) {
+						time += Time.deltaTime;
+						if (time > 0.5f) {
+							time = 0.0f;
+
+							abort_access = true;
+							access_db = false;
+						}
+						if (wsc.IsReceiveSrvRes() && wsc.GetSrvResValue("service") == srvName) {
+							srvRes = wsc.GetSrvResMsg();
+							Debug.Log("ROS: " + srvRes);
+
+							responce = JsonUtility.FromJson<ServiceResponseDB>(srvRes);
+
+							access_db = false;
+						}
+					}
 				}
 			}
 		}
@@ -195,7 +217,7 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 	public bool CheckGetRefrigeratorItem() {
 		return get_refrigerator_item;
 	}
-	
+
 	/**************************************************
 	 * SmartPalのVICONデータ
 	 **************************************************/
@@ -242,5 +264,67 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 
 	public bool CheckReadWHS1() {
 		return read_whs1;
+	}
+
+	/**************************************************
+	 * 消費期限のデータ
+	 **************************************************/
+	public void GiveItemIDList(List<int> id_list) {
+		this.id_list = id_list;
+	}
+	
+	public IEnumerator ReadExpiration() {
+		wait_anything = access_db = read_expiration = true;
+
+		/*
+		time = 0.0f;
+		//srvReq.tmsdb = new tmsdb("ID_SENSOR", 3021, 3021);
+		wsc.ServiceCallerDB(srvName, srvReq);
+
+		while (access_db) {
+			yield return null;
+		}
+
+		while (success_access || abort_access) {
+			yield return null;
+		}
+		wait_anything = read_expiration = false;
+		*/
+		expiration_dicionary = new Dictionary<int, string>();
+		foreach (int id in id_list) {
+			access_db = true;
+
+			time = 0.0f;
+			srvReq.tmsdb = new tmsdb("ID_SENSOR", id, 3005);
+			wsc.ServiceCallerDB(srvName, srvReq);
+
+			while (access_db) {
+				yield return null;
+			}
+
+			if (abort_access) { //1回でもabortしたら出る
+				break;
+			}
+
+			if (responce.values.tmsdb[0].state == 1) {
+				expiration_dicionary.Add(id, responce.values.tmsdb[0].etcdata);
+			}
+		}
+		if (!abort_access) { //すべて成功した場合のみ入れる
+			success_access = true;
+		}
+
+		while(success_access || abort_access) {
+			yield return null;
+		}
+		wait_anything = read_expiration = false;
+	}
+
+	public bool CheckReadExpiration() {
+		return read_expiration;
+	}
+
+	public Dictionary<int, string> ReadExpirationData() {
+		return expiration_dicionary;
 	}
 }

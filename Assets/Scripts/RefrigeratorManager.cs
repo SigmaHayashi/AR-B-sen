@@ -18,17 +18,12 @@ public class RefrigeratorManager : MonoBehaviour {
 	private GameObject soysauce;
 	private List<GameObject> goods_list = new List<GameObject>();
 	private bool[] goods_state = new bool[3];
-
-	/*
-	//Android Ros Socket Client関連
-	private AndroidRosSocketClient wsc;
-	private string srvName = "tms_db_reader";
-	private TmsDBReq srvReq = new TmsDBReq();
-	private string srvRes;
-	*/
-	private float time = 0.0f;
+	
+	//TMSDB関連
+	private float time_1 = 0.0f;
+	private float time_2 = 0.0f;
 	private TMSDatabaseAdapter DBAdapter;
-	//private bool searching = false;
+	private List<int> id_list = new List<int>();
 
 	private BsenCalibrationSystem calib_system;
 
@@ -70,15 +65,7 @@ public class RefrigeratorManager : MonoBehaviour {
 		GameObject prefab = (GameObject)Resources.Load("Coordinates Adapter");
 		coordinates_adapter = (GameObject)Instantiate(prefab, this.transform);
 		coordinates_adapter.transform.parent = refrigerator.transform;
-
-		/*
-		//ROSTMSに接続
-		wsc = GameObject.Find("Android Ros Socket Client").GetComponent<AndroidRosSocketClient>();
-		srvReq.tmsdb = new tmsdb("PLACE", 2009);
-		//wsc.ServiceCallerDB(srvName, srvReq);
-
-		time = 0.0f;
-		*/
+		
 		DBAdapter = GameObject.Find("Database Adapter").GetComponent<TMSDatabaseAdapter>();
 
 		calib_system = GameObject.Find("B-sen Calibration System").GetComponent<BsenCalibrationSystem>();
@@ -146,75 +133,22 @@ public class RefrigeratorManager : MonoBehaviour {
 			}
 		}
 
-		/*
-		//データベースとの通信
-		if (calib_system.calibration_state > 1) {
-			time += Time.deltaTime;
-			if(time > 1.0f) {
-				time = 0.0f;
-				//Debug.Log("Retry...");
-
-				wsc.Connect();
-
-				wsc.ServiceCallerDB(srvName, srvReq);
-			}
-			if(wsc.IsReceiveSrvRes() && wsc.GetSrvResValue("service") == srvName) {
-				srvRes = wsc.GetSrvResMsg();
-				Debug.Log("ROS: " + srvRes);
-
-				ServiceResponseDB responce = JsonUtility.FromJson<ServiceResponseDB>(srvRes);
-			
-				foreach(tmsdb data in responce.values.tmsdb) {
-					//Debug.Log(data.name);
-					//Debug.Log(data.x + ", " + data.y + ", " + data.z);
-					if(data.sensor == 3018) {
-						foreach(GameObject goods in goods_list) {
-							if(goods.name.IndexOf(data.name) != -1) {
-								//if(data.x != -1 && data.y != -1 && data.z != -1) {
-								if(data.state == 1) {
-									goods_state[goods_list.IndexOf(goods)] = true;
-									Vector3 place = new Vector3((float)data.x, (float)data.y, (float)data.z);
-									place = Ros2UnityPosition(place);
-									Debug.Log(data.name + " pos: " + place.ToString("f2"));
-
-									goods.transform.localPosition = place;
-								}
-								else {
-									goods_state[goods_list.IndexOf(goods)] = false;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		*/
-
 		if (calib_system.CheckFinishCalibration()) {
-			time += Time.deltaTime;
-			//if (!DBAdapter.access_db && time > 1.0f) {
-			//if (!DBAdapter.wait_anything && time > 1.0f) {
-			//if (!DBAdapter.CheckGetRefrigeratorItem() && time > 1.0f) {
-			if (!DBAdapter.CheckWaitAnything() && time > 1.0f) {
-				time = 0.0f;
+			time_1 += Time.deltaTime;
+			if (!DBAdapter.CheckWaitAnything() && time_1 > 1.0f) {
+				time_1 = 0.0f;
 				IEnumerator coroutine = DBAdapter.GetRefrigeratorItem();
 				StartCoroutine(coroutine);
-
-				//searching = true;
 			}
-
-			//if (searching) {
-			//if (DBAdapter.wait_anything) {
+			
 			if (DBAdapter.CheckGetRefrigeratorItem()) {
-				//if (DBAdapter.abort_access) {
 				if (DBAdapter.CheckAbort()) {
 					DBAdapter.ConfirmAbort();
-					//searching = false;
 				}
-
-				//if (DBAdapter.success_access) {
+				
 				if (DBAdapter.CheckSuccess()) {
-					//ServiceResponseDB responce = DBAdapter.responce;
+					id_list = new List<int>();
+
 					ServiceResponseDB responce = DBAdapter.GetResponce();
 					DBAdapter.FinishReadData();
 					foreach (tmsdb data in responce.values.tmsdb) {
@@ -230,6 +164,8 @@ public class RefrigeratorManager : MonoBehaviour {
 										Debug.Log(data.name + " pos: " + place.ToString("f2"));
 
 										goods.transform.localPosition = place;
+
+										id_list.Add(data.id);
 									}
 									else {
 										goods_state[goods_list.IndexOf(goods)] = false;
@@ -238,7 +174,26 @@ public class RefrigeratorManager : MonoBehaviour {
 							}
 						}
 					}
-					//searching = false;
+				}
+			}
+
+			time_2 += Time.deltaTime;
+			if(!DBAdapter.CheckWaitAnything() && time_2 > 1.0f) {
+				time_2 = 0.0f;
+				DBAdapter.GiveItemIDList(id_list);
+				IEnumerator coroutine = DBAdapter.ReadExpiration();
+				StartCoroutine(coroutine);
+			}
+			if (DBAdapter.CheckReadExpiration()) {
+				if (DBAdapter.CheckAbort()) {
+					DBAdapter.ConfirmAbort();
+				}
+				if (DBAdapter.CheckSuccess()) {
+					Dictionary<int, string> expiration_dictionary = DBAdapter.ReadExpirationData();
+					DBAdapter.FinishReadData();
+					foreach(KeyValuePair<int, string> item in expiration_dictionary) {
+						Debug.Log("id: " + item.Key + ", " + item.Value);
+					}
 				}
 			}
 		}
