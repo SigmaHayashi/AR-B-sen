@@ -16,8 +16,10 @@ public class RefrigeratorManager : MonoBehaviour {
 	private GameObject greentea;
 	private GameObject cancoffee;
 	private GameObject soysauce;
-	private List<GameObject> goods_list = new List<GameObject>();
-	private bool[] goods_state = new bool[3];
+	//private List<GameObject> goods_list = new List<GameObject>();
+	private Dictionary<int, GameObject> goods_object_dictionary = new Dictionary<int, GameObject>();
+	//private bool[] goods_state = new bool[3];
+	private Dictionary<int, bool> goods_state_dictionary = new Dictionary<int, bool>();
 	
 	//TMSDB関連
 	private float time_1 = 0.0f;
@@ -51,14 +53,23 @@ public class RefrigeratorManager : MonoBehaviour {
 		cancoffee = GameObject.Find("cancoffee_x_link");
 		soysauce = GameObject.Find("soysauce_bottle_black_x_link");
 
+		/*
 		goods_list.Add(greentea);
 		goods_list.Add(cancoffee);
 		goods_list.Add(soysauce);
 		goods_state[0] = false;
 		goods_state[1] = false;
 		goods_state[2] = false;
+		*/
+		goods_object_dictionary.Add(7004, greentea);
+		goods_object_dictionary.Add(7006, cancoffee);
+		goods_object_dictionary.Add(7009, soysauce);
+		goods_state_dictionary.Add(7004, false);
+		goods_state_dictionary.Add(7006, false);
+		goods_state_dictionary.Add(7009, false);
 
-		foreach(GameObject goods in goods_list) {
+		//foreach (GameObject goods in goods_list) {
+		foreach (GameObject goods in goods_object_dictionary.Values) {
 			goods.AddComponent<ShaderChange>();
 		}
 
@@ -85,7 +96,8 @@ public class RefrigeratorManager : MonoBehaviour {
 		distance = CalcDistance(coordinates_adapter, ar_camera);
 
 		if (!change_goods_shader) {
-			foreach(GameObject goods in goods_list) {
+			//foreach(GameObject goods in goods_list) {
+			foreach (GameObject goods in goods_object_dictionary.Values) {
 				ShaderChange shaderchange = goods.GetComponent<ShaderChange>();
 				shaderchange.ChangeShader(Shader.Find("Custom/Transparent"));
 			}
@@ -107,7 +119,8 @@ public class RefrigeratorManager : MonoBehaviour {
 			}
 			//遠くにいるとき
 			else if(distance >= distance_to_display) {
-				foreach (GameObject goods in goods_list) {
+				//foreach (GameObject goods in goods_list) {
+				foreach (GameObject goods in goods_object_dictionary.Values) {
 					ShaderChange goods_shaderchange = goods.GetComponent<ShaderChange>();
 					goods_shaderchange.alpha = 0.0f;
 					goods_shaderchange.ChangeColors();
@@ -120,9 +133,21 @@ public class RefrigeratorManager : MonoBehaviour {
 			}
 			//ずっと近くにいるとき
 			else if (distance < distance_to_display && distance_old < distance_to_display){
-				foreach(GameObject goods in goods_list) {
+				/*
+				foreach (GameObject goods in goods_list) {
 					ShaderChange goods_shaderchange = goods.GetComponent<ShaderChange>();
 					if (goods_state[goods_list.IndexOf(goods)]) {
+						goods_shaderchange.alpha = 0.4f;
+					}
+					else {
+						goods_shaderchange.alpha = 0.0f;
+					}
+					goods_shaderchange.ChangeColors();
+				}
+				*/
+				foreach(KeyValuePair<int, GameObject> goods in goods_object_dictionary) {
+					ShaderChange goods_shaderchange = goods.Value.GetComponent<ShaderChange>();
+					if (goods_state_dictionary[goods.Key]) {
 						goods_shaderchange.alpha = 0.4f;
 					}
 					else {
@@ -155,20 +180,25 @@ public class RefrigeratorManager : MonoBehaviour {
 						//Debug.Log(data.name);
 						//Debug.Log(data.x + ", " + data.y + ", " + data.z);
 						if (data.sensor == 3018) {
-							foreach (GameObject goods in goods_list) {
-								if (goods.name.IndexOf(data.name) != -1) {
+							//foreach (GameObject goods in goods_list) {
+							foreach (KeyValuePair<int, GameObject> goods in goods_object_dictionary) {
+								//if (goods.name.IndexOf(data.name) != -1) {
+								if (goods.Value.name.IndexOf(data.name) != -1) {
 									if (data.state == 1) {
-										goods_state[goods_list.IndexOf(goods)] = true;
+										//goods_state[goods_list.IndexOf(goods)] = true;
+										goods_state_dictionary[goods.Key] = true;
 										Vector3 place = new Vector3((float)data.x, (float)data.y, (float)data.z);
 										place = Ros2UnityPosition(place);
 										Debug.Log(data.name + " pos: " + place.ToString("f2"));
 
-										goods.transform.localPosition = place;
+										//goods.transform.localPosition = place;
+										goods.Value.transform.localPosition = place;
 
 										id_list.Add(data.id);
 									}
 									else {
-										goods_state[goods_list.IndexOf(goods)] = false;
+										//goods_state[goods_list.IndexOf(goods)] = false;
+										goods_state_dictionary[goods.Key] = false;
 									}
 								}
 							}
@@ -208,29 +238,29 @@ public class RefrigeratorManager : MonoBehaviour {
 			yield return null;
 		}
 
+		//Dictionary<float, int> object_dictionary = new Dictionary<float, int>();
+		Dictionary<int, float> goods_distance_dictionary = new Dictionary<int, float>();
 		/*
-		foreach (GameObject goods in goods_list) {
-			if (goods_state[goods_list.IndexOf(goods)]) {
-				ShaderChange goods_shaderchange = goods.GetComponent<ShaderChange>();
-				goods_shaderchange.alpha = 0.4f;
-				goods_shaderchange.ChangeColors();
-				for (int i = 0; i < 5; i++) {
-					yield return null;
-				}
-			}
-		}
-		*/
-		Dictionary<float, int> object_dictionary = new Dictionary<float, int>();
 		foreach (GameObject goods in goods_list) {
 			object_dictionary.Add(CalcDistance(ar_camera, goods), goods_list.IndexOf(goods));
 		}
+		*/
+		foreach (KeyValuePair<int, GameObject> goods in goods_object_dictionary) {
+			//object_dictionary.Add(CalcDistance(ar_camera, goods.Value), goods.Key);
+			goods_distance_dictionary.Add(goods.Key, CalcDistance(ar_camera, goods.Value));
+		}
 
-		var sorted = object_dictionary.OrderBy((x) => x.Key);
+		//var sorted = object_dictionary.OrderBy((x) => x.Key);
+		var sorted = goods_distance_dictionary.OrderBy((x) => x.Value);
 
-		foreach(KeyValuePair<float, int> goods_dictionary in sorted) {
-			int goods_num = goods_dictionary.Value;
-			if (goods_state[goods_num]) {
-				ShaderChange goods_shaderchange = goods_list[goods_num].GetComponent<ShaderChange>();
+		//foreach (KeyValuePair<float, int> goods_dictionary in sorted) {
+		foreach (KeyValuePair<int, float> goods in sorted) {
+			//int goods_num = goods_dictionary.Value;
+			int goods_num = goods.Key;
+			//if (goods_state[goods_num]) {
+			if (goods_state_dictionary[goods_num]) {
+				//ShaderChange goods_shaderchange = goods_list[goods_num].GetComponent<ShaderChange>();
+				ShaderChange goods_shaderchange = goods_object_dictionary[goods_num].GetComponent<ShaderChange>();
 				goods_shaderchange.alpha = 0.4f;
 				goods_shaderchange.ChangeColors();
 				for (int i = 0; i < 5; i++) {
