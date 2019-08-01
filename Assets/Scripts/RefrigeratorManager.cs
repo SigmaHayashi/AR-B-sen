@@ -111,17 +111,10 @@ public class RefrigeratorManager : MonoBehaviour {
 			}
 			//遠くにいるとき
 			else if(distance >= distance_to_display) {
-				//foreach (GameObject goods in goods_object_dictionary.Values) {
 				foreach (KeyValuePair<int, GameObject> goods in goods_object_dictionary) {
-					//ShaderChange goods_shaderchange = goods.GetComponent<ShaderChange>();
 					ShaderChange goods_shaderchange = goods.Value.GetComponent<ShaderChange>();
 					goods_shaderchange.alpha = 0.0f;
 					goods_shaderchange.ChangeColors();
-					/*
-					if (goods_3dtext_dictionary.ContainsKey(goods.Key)) {
-						goods_3dtext_dictionary[goods.Key].SetActive(false);
-					}
-					*/
 					Change3DTextActive(goods.Key, false);
 				}
 				if(refrigerator_shaderchange.shader_now != Shader.Find("Custom/ARTransparent")){
@@ -136,20 +129,10 @@ public class RefrigeratorManager : MonoBehaviour {
 					ShaderChange goods_shaderchange = goods.Value.GetComponent<ShaderChange>();
 					if (goods_state_dictionary[goods.Key]) {
 						goods_shaderchange.alpha = 0.4f;
-						/*
-						if (goods_3dtext_dictionary.ContainsKey(goods.Key)) {
-							goods_3dtext_dictionary[goods.Key].SetActive(true);
-						}
-						*/
 						Change3DTextActive(goods.Key, true);
 					}
 					else {
 						goods_shaderchange.alpha = 0.0f;
-						/*
-						if (goods_3dtext_dictionary.ContainsKey(goods.Key)) {
-							goods_3dtext_dictionary[goods.Key].SetActive(false);
-						}
-						*/
 						Change3DTextActive(goods.Key, false);
 					}
 					goods_shaderchange.ChangeColors();
@@ -223,7 +206,6 @@ public class RefrigeratorManager : MonoBehaviour {
 						string expiration = expiration_data.expiration;
 						Debug.Log("id: " + item.Key + ", name: " + goods_object_dictionary[item.Key].name + ", expiration: " + expiration);
 
-						//if(goods_3dtext_dictionary[item.Key] != null) {
 						if (goods_3dtext_dictionary.ContainsKey(item.Key)) {
 							goods_3dtext_dictionary[item.Key].GetComponent<TextMesh>().text = expiration;
 						}
@@ -235,7 +217,6 @@ public class RefrigeratorManager : MonoBehaviour {
 							TextMesh textmesh = goods_3dtext_dictionary[item.Key].GetComponent<TextMesh>();
 							textmesh.fontSize = 40;
 							textmesh.color = new Color(0, 0, 0);
-							//textmesh.text = goods_object_dictionary[item.Key].name + "\n" + expiration;
 							textmesh.text = expiration;
 							Change3DTextActive(item.Key, false);
 						}
@@ -262,18 +243,11 @@ public class RefrigeratorManager : MonoBehaviour {
 		var sorted = goods_distance_dictionary.OrderBy((x) => x.Value);
 
 		foreach (KeyValuePair<int, float> goods in sorted) {
-			//int goods_num = goods.Key;
-			//if (goods_state_dictionary[goods_num]) {
 			if (goods_state_dictionary[goods.Key]) {
-				//ShaderChange goods_shaderchange = goods_object_dictionary[goods_num].GetComponent<ShaderChange>();
 				ShaderChange goods_shaderchange = goods_object_dictionary[goods.Key].GetComponent<ShaderChange>();
 				goods_shaderchange.alpha = 0.4f;
 				goods_shaderchange.ChangeColors();
-				/*
-				if (goods_3dtext_dictionary.ContainsKey(goods.Key)) {
-					goods_3dtext_dictionary[goods.Key].SetActive(true);
-				}
-				*/
+
 				Change3DTextActive(goods.Key, true);
 
 				for (int i = 0; i < 5; i++) {
