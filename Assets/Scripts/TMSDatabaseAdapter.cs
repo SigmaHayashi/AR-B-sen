@@ -23,6 +23,7 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 	private bool read_smartpal_pos = false;
 	private bool read_whs1 = false;
 	private bool read_expiration = false;
+	private bool read_battery = false;
 
 	private List<int> id_list = new List<int>();
 	private Dictionary<int, string> expiration_dicionary = new Dictionary<int, string>();
@@ -138,6 +139,25 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 
 							responce = JsonUtility.FromJson<ServiceResponseDB>(srvRes);
 
+							access_db = false;
+						}
+					}
+
+					if (read_battery) {
+						time += Time.deltaTime;
+						if (time > 0.5f) {
+							time = 0.0f;
+
+							abort_access = true;
+							access_db = false;
+						}
+						if (wsc.IsReceiveSrvRes() && wsc.GetSrvResValue("service") == srvName) {
+							srvRes = wsc.GetSrvResMsg();
+							Debug.Log("ROS: " + srvRes);
+
+							responce = JsonUtility.FromJson<ServiceResponseDB>(srvRes);
+
+							success_access = true;
 							access_db = false;
 						}
 					}
@@ -326,5 +346,29 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 
 	public Dictionary<int, string> ReadExpirationData() {
 		return expiration_dicionary;
+	}
+
+	/**************************************************
+	 * バッテリー情報
+	 **************************************************/
+	public IEnumerator ReadBattery() {
+		wait_anything = access_db = read_battery = true;
+
+		time = 0.0f;
+		srvReq.tmsdb = new tmsdb("ID_SENSOR", 2003, 3005);
+		wsc.ServiceCallerDB(srvName, srvReq);
+
+		while (access_db) {
+			yield return null;
+		}
+
+		while (success_access || abort_access) {
+			yield return null;
+		}
+		wait_anything = read_battery = false;
+	}
+
+	public bool CheckReadBattery() {
+		return read_battery;
 	}
 }
