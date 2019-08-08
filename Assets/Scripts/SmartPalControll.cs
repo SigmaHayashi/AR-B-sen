@@ -28,40 +28,6 @@ public class SmartPalControll : MonoBehaviour {
 	// Update is called once per frame
 	void Update() {
 		if (calib_system.CheckFinishCalibration()) {
-			/*
-			time += Time.deltaTime;
-			if (!DBAdapter.CheckWaitAnything() && time > 1.0f) {
-				time = 0.0f;
-				IEnumerator coroutine = DBAdapter.ReadSmartPalPos();
-				StartCoroutine(coroutine);
-			}
-			
-			if (DBAdapter.CheckReadSmartPalPos()) {
-				if (DBAdapter.CheckAbort()) {
-					DBAdapter.ConfirmAbort();
-				}
-				
-				if (DBAdapter.CheckSuccess()) {
-					ServiceResponseDB responce = DBAdapter.GetResponce();
-					DBAdapter.FinishReadData();
-
-					Vector3 sp5_pos = new Vector3((float)responce.values.tmsdb[0].x, (float)responce.values.tmsdb[0].y, (float)responce.values.tmsdb[0].z);
-					sp5_pos = Ros2UnityPosition(sp5_pos);
-					sp5_pos.y = 0.0f;
-					sp5_pos.z += 0.25f;
-
-					Vector3 sp5_euler = new Vector3(Rad2Euler((float)responce.values.tmsdb[0].rr), Rad2Euler((float)responce.values.tmsdb[0].rp), Rad2Euler((float)responce.values.tmsdb[0].ry));
-					sp5_euler = Ros2UnityRotation(sp5_euler);
-					sp5_euler.x = 0.0f;
-					sp5_euler.z = 0.0f;
-
-					transform.localPosition = sp5_pos;
-					transform.localEulerAngles = sp5_euler;
-					Debug.Log(responce.values.tmsdb[0].name + " pos: " + sp5_pos);
-					Debug.Log(responce.values.tmsdb[0].name + " eul: " + sp5_euler);
-				}
-			}
-			*/
 			PositionTracking();
 			UpdateBatteryInformation();
 		}
@@ -133,9 +99,9 @@ public class SmartPalControll : MonoBehaviour {
 				if (!finish_battery_text) {
 					Battery_3DText = (GameObject)Instantiate(Resources.Load("3D Text"));
 					Battery_3DText.transform.parent = transform;
-					Battery_3DText.transform.localPosition = new Vector3(0.0f, 1.4f, 0.0f);
+					Battery_3DText.transform.localPosition = new Vector3(0.0f, 1.5f, 0.0f);
 					TextMesh textmesh = Battery_3DText.GetComponent<TextMesh>();
-					textmesh.fontSize = 60;
+					textmesh.fontSize = 80;
 					textmesh.color = new Color(0, 0, 0);
 					textmesh.text = "Battery: " + battery_per.ToString() + "[%]";
 
@@ -146,8 +112,26 @@ public class SmartPalControll : MonoBehaviour {
 				}
 			}
 		}
+
+		if(Battery_3DText != null) {
+			if(CalcDistance(Camera.main.gameObject, transform.gameObject) < 2.0f) {
+				Battery_3DText.SetActive(true);
+			}
+			else {
+				Battery_3DText.SetActive(false);
+			}
+		}
 	}
-	
+
+	/*****************************************************************
+	 * オブジェクトどうしの距離を計算
+	 *****************************************************************/
+	float CalcDistance(GameObject obj_a, GameObject obj_b) {
+		Vector3 obj_a_pos = obj_a.transform.position;
+		Vector3 obj_b_pos = obj_b.transform.position;
+		return Mathf.Sqrt(Mathf.Pow((obj_a_pos.x - obj_b_pos.x), 2) + Mathf.Pow((obj_a_pos.z - obj_b_pos.z), 2));
+	}
+
 	/*****************************************************************
 	 * ROSの座標系（右手系）からUnityの座標系（左手系）への変換
 	 *****************************************************************/
