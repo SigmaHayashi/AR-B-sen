@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class WHS1Data {
 	public float temp;
@@ -17,7 +18,8 @@ public class WHS1Viewer : MonoBehaviour {
 	private BsenCalibrationSystem calib_system;
 
 	private GameObject WHS1_3D_Text;
-	private TextMesh WHS1_3D_TextMesh;
+	//private TextMesh WHS1_3D_TextMesh;
+	private TextMeshPro WHS1_3D_TextMeshPro;
 
 	private GameObject wave_graph;
 
@@ -45,13 +47,18 @@ public class WHS1Viewer : MonoBehaviour {
 	 * 3Dテキストオブジェクトを生成
 	 *****************************************************************/
 	private void InitThisSystem() {
-		GameObject prefab = (GameObject)Resources.Load("3D Text");
+		//GameObject prefab = (GameObject)Resources.Load("3D Text");
+		GameObject prefab = (GameObject)Resources.Load("TextMeshPro");
 		WHS1_3D_Text = Instantiate(prefab);
 		WHS1_3D_Text.transform.parent = GameObject.Find("rostms/world_link").transform;
 		WHS1_3D_Text.transform.localPosition = new Vector3(-2.7f, 0.7f, 10.8f);
 
+		/*
 		WHS1_3D_TextMesh = WHS1_3D_Text.GetComponent<TextMesh>();
 		WHS1_3D_TextMesh.text = "";
+		*/
+		WHS1_3D_TextMeshPro = WHS1_3D_Text.GetComponent<TextMeshPro>();
+		WHS1_3D_TextMeshPro.text = "";
 
 		wave_graph = new GameObject("Wave Graph");
 		wave_graph.transform.parent = GameObject.Find("rostms/world_link").transform;
@@ -93,8 +100,12 @@ public class WHS1Viewer : MonoBehaviour {
 				}
 				Debug.Log("Wave: " + debug_string);
 
+				/*
 				WHS1_3D_TextMesh.text = "Temp: " + whs1_data.temp.ToString() + "[degC]\n";
 				WHS1_3D_TextMesh.text += "Rate: " + whs1_data.rate.ToString() + "[bpm]";
+				*/
+				WHS1_3D_TextMeshPro.text = "Temp: " + whs1_data.temp.ToString() + "[degC]\n";
+				WHS1_3D_TextMeshPro.text += "Rate: " + whs1_data.rate.ToString() + "[bpm]";
 
 				UpdateWaveGraph(whs1_data.wave);
 			}
