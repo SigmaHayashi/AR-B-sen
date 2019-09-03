@@ -50,8 +50,12 @@ public class WHS1Viewer : MonoBehaviour {
 		//GameObject prefab = (GameObject)Resources.Load("3D Text");
 		GameObject prefab = (GameObject)Resources.Load("TextMeshPro");
 		WHS1_3D_Text = Instantiate(prefab);
+		/*
 		WHS1_3D_Text.transform.parent = GameObject.Find("rostms/world_link").transform;
 		WHS1_3D_Text.transform.localPosition = new Vector3(-2.7f, 0.7f, 10.8f);
+		*/
+		WHS1_3D_Text.transform.parent = GameObject.Find("rostms/world_link/bsen_room_link/bed_link").transform;
+		WHS1_3D_Text.transform.localPosition = new Vector3(0.0f, 0.7f, 0.0f);
 
 		/*
 		WHS1_3D_TextMesh = WHS1_3D_Text.GetComponent<TextMesh>();
@@ -61,9 +65,14 @@ public class WHS1Viewer : MonoBehaviour {
 		WHS1_3D_TextMeshPro.text = "";
 
 		wave_graph = new GameObject("Wave Graph");
+		/*
 		wave_graph.transform.parent = GameObject.Find("rostms/world_link").transform;
 		wave_graph.transform.localPosition = new Vector3(-2.7f, 1.0f, 10.8f);
+		*/
+		wave_graph.transform.parent = GameObject.Find("rostms/world_link/bsen_room_link/bed_link").transform;
+		wave_graph.transform.localPosition = new Vector3(0.0f, 1.2f, 0.0f);
 		wave_graph.transform.localEulerAngles = new Vector3(0, 0, 0);
+		wave_graph.transform.localScale = new Vector3(-1, 1, 1);
 		wave_graph.AddComponent<LookAtMainCamera>();
 
 		init_this_system = true;
@@ -165,6 +174,7 @@ public class WHS1Viewer : MonoBehaviour {
 				Destroy(obj);
 			}
 
+			/*
 			for (int n = 0; n < wave_list.Length - 1; n++) {
 				GameObject line = new GameObject("Line" + n.ToString());
 				line.transform.parent = wave_graph.transform;
@@ -180,6 +190,26 @@ public class WHS1Viewer : MonoBehaviour {
 				line_rend.widthMultiplier = 0.1f;
 				line_rend.SetPosition(0, new Vector3(n * 0.01f - 0.5f, (float)wave_list[n] / 1000, 0));
 				line_rend.SetPosition(1, new Vector3((n + 1) * 0.01f - 0.5f, (float)wave_list[n + 1] / 1000, 0));
+				}
+			}
+			*/
+			GameObject line_prefab = (GameObject)Resources.Load("Line");
+			for (int n = 0; n < wave_list.Length - 1; n++) {
+				GameObject line = Instantiate(line_prefab);
+				line.name = "Line" + n.ToString();
+				line.transform.parent = wave_graph.transform;
+				line.transform.localPosition = new Vector3(0, 0, 0);
+				line.transform.localEulerAngles = new Vector3(0, 0, 0);
+				line.transform.localScale = new Vector3(1, 1, 1);
+
+				LineRenderer line_rend = line.GetComponent<LineRenderer>();
+				/*
+				line_rend.SetPosition(0, new Vector3(n * 0.01f - 0.5f, (float)wave_list[n] / 1000, 0));
+				line_rend.SetPosition(1, new Vector3((n + 1) * 0.01f - 0.5f, (float)wave_list[n + 1] / 1000, 0));
+				*/
+				line_rend.SetPosition(0, new Vector3(n * 0.01f - 0.5f, ((float)wave_list[n] - 500) / 1500, 0));
+				line_rend.SetPosition(1, new Vector3((n + 1) * 0.01f - 0.5f, ((float)wave_list[n + 1] - 500) / 1500, 0));
+
 			}
 		}
 		else {
