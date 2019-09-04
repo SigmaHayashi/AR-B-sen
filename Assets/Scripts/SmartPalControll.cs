@@ -43,7 +43,6 @@ public class SmartPalControll : MonoBehaviour {
 			time_pos = 0.0f;
 			IEnumerator coroutine = DBAdapter.ReadSmartPalPos();
 			StartCoroutine(coroutine);
-			//StartCoroutine(coroutine);
 		}
 
 		if (DBAdapter.CheckReadSmartPalPos()) {
@@ -98,16 +97,9 @@ public class SmartPalControll : MonoBehaviour {
 				Debug.Log("SmartPal Battery: " + battery_per + "[%]");
 
 				if (!finish_battery_text) {
-					//Battery_3DText = (GameObject)Instantiate(Resources.Load("3D Text"));
 					Battery_3DText = (GameObject)Instantiate(Resources.Load("TextMeshPro"));
 					Battery_3DText.transform.parent = transform;
 					Battery_3DText.transform.localPosition = new Vector3(0.0f, 1.5f, 0.0f);
-					/*
-					TextMesh textmesh = Battery_3DText.GetComponent<TextMesh>();
-					textmesh.fontSize = 80;
-					textmesh.color = new Color(0, 0, 0);
-					textmesh.text = "Battery: " + battery_per.ToString() + "[%]";
-					*/
 					TextMeshPro TMP = Battery_3DText.GetComponent<TextMeshPro>();
 					TMP.fontSize = 1.0f;
 					TMP.text = "Battery: " + battery_per.ToString() + "[%]";
@@ -115,7 +107,6 @@ public class SmartPalControll : MonoBehaviour {
 					finish_battery_text = true;
 				}
 				else {
-					//Battery_3DText.GetComponent<TextMesh>().text = "Battery: " + battery_per.ToString() + "[%]";
 					Battery_3DText.GetComponent<TextMeshPro>().text = "Battery: " + battery_per.ToString() + "[%]";
 				}
 			}

@@ -18,7 +18,6 @@ public class WHS1Viewer : MonoBehaviour {
 	private BsenCalibrationSystem calib_system;
 
 	private GameObject WHS1_3D_Text;
-	//private TextMesh WHS1_3D_TextMesh;
 	private TextMeshPro WHS1_3D_TextMeshPro;
 
 	private GameObject wave_graph;
@@ -47,28 +46,15 @@ public class WHS1Viewer : MonoBehaviour {
 	 * 3Dテキストオブジェクトを生成
 	 *****************************************************************/
 	private void InitThisSystem() {
-		//GameObject prefab = (GameObject)Resources.Load("3D Text");
 		GameObject prefab = (GameObject)Resources.Load("TextMeshPro");
 		WHS1_3D_Text = Instantiate(prefab);
-		/*
-		WHS1_3D_Text.transform.parent = GameObject.Find("rostms/world_link").transform;
-		WHS1_3D_Text.transform.localPosition = new Vector3(-2.7f, 0.7f, 10.8f);
-		*/
 		WHS1_3D_Text.transform.parent = GameObject.Find("rostms/world_link/bsen_room_link/bed_link").transform;
 		WHS1_3D_Text.transform.localPosition = new Vector3(0.0f, 0.7f, 0.0f);
-
-		/*
-		WHS1_3D_TextMesh = WHS1_3D_Text.GetComponent<TextMesh>();
-		WHS1_3D_TextMesh.text = "";
-		*/
+		
 		WHS1_3D_TextMeshPro = WHS1_3D_Text.GetComponent<TextMeshPro>();
 		WHS1_3D_TextMeshPro.text = "";
 
 		wave_graph = new GameObject("Wave Graph");
-		/*
-		wave_graph.transform.parent = GameObject.Find("rostms/world_link").transform;
-		wave_graph.transform.localPosition = new Vector3(-2.7f, 1.0f, 10.8f);
-		*/
 		wave_graph.transform.parent = GameObject.Find("rostms/world_link/bsen_room_link/bed_link").transform;
 		wave_graph.transform.localPosition = new Vector3(0.0f, 1.2f, 0.0f);
 		wave_graph.transform.localEulerAngles = new Vector3(0, 0, 0);
@@ -108,11 +94,7 @@ public class WHS1Viewer : MonoBehaviour {
 					debug_string += count + ",";
 				}
 				Debug.Log("Wave: " + debug_string);
-
-				/*
-				WHS1_3D_TextMesh.text = "Temp: " + whs1_data.temp.ToString() + "[degC]\n";
-				WHS1_3D_TextMesh.text += "Rate: " + whs1_data.rate.ToString() + "[bpm]";
-				*/
+				
 				WHS1_3D_TextMeshPro.text = "Temp: " + whs1_data.temp.ToString() + "[degC]\n";
 				WHS1_3D_TextMeshPro.text += "Rate: " + whs1_data.rate.ToString() + "[bpm]";
 
@@ -139,31 +121,6 @@ public class WHS1Viewer : MonoBehaviour {
 			debug_string += count + ",";
 		}
 		Debug.Log("Update Wave Graph: " + debug_string);
-
-		/*
-		List<GameObject> line_list = new List<GameObject>();
-		GetAllChildren(wave_graph, ref line_list);
-		foreach(GameObject obj in line_list) {
-			Destroy(obj);
-		}
-
-		for(int n = 0; n < wave_list.Length - 1; n++) {	
-			GameObject line = new GameObject("Line" + n.ToString());
-			line.transform.parent = wave_graph.transform;
-			line.transform.localPosition = new Vector3(0, 0, 0);
-			line.transform.localEulerAngles = new Vector3(0, 0, 0);
-			line.transform.localScale = new Vector3(1, 1, 1);
-
-			LineRenderer line_rend = line.AddComponent<LineRenderer>();
-			line_rend.useWorldSpace = false;
-			line_rend.positionCount = 2;
-			line_rend.startWidth = 0.1f;
-			line_rend.endWidth = 0.1f;
-			line_rend.widthMultiplier = 0.1f;
-			line_rend.SetPosition(0, new Vector3(n * 0.01f - 0.5f, (float)wave_list[n] / 1000, 0));
-			line_rend.SetPosition(1, new Vector3((n + 1) * 0.01f - 0.5f, (float)wave_list[n + 1] / 1000, 0));
-		}
-		*/
 		
 		if (CalcDistance(Camera.main.gameObject, wave_graph) < 3.0f) {
 			wave_graph.SetActive(true);
@@ -173,26 +130,7 @@ public class WHS1Viewer : MonoBehaviour {
 			foreach (GameObject obj in line_list) {
 				Destroy(obj);
 			}
-
-			/*
-			for (int n = 0; n < wave_list.Length - 1; n++) {
-				GameObject line = new GameObject("Line" + n.ToString());
-				line.transform.parent = wave_graph.transform;
-				line.transform.localPosition = new Vector3(0, 0, 0);
-				line.transform.localEulerAngles = new Vector3(0, 0, 0);
-				line.transform.localScale = new Vector3(1, 1, 1);
-
-				LineRenderer line_rend = line.AddComponent<LineRenderer>();
-				line_rend.useWorldSpace = false;
-				line_rend.positionCount = 2;
-				line_rend.startWidth = 0.1f;
-				line_rend.endWidth = 0.1f;
-				line_rend.widthMultiplier = 0.1f;
-				line_rend.SetPosition(0, new Vector3(n * 0.01f - 0.5f, (float)wave_list[n] / 1000, 0));
-				line_rend.SetPosition(1, new Vector3((n + 1) * 0.01f - 0.5f, (float)wave_list[n + 1] / 1000, 0));
-				}
-			}
-			*/
+			
 			GameObject line_prefab = (GameObject)Resources.Load("Line");
 			for (int n = 0; n < wave_list.Length - 1; n++) {
 				GameObject line = Instantiate(line_prefab);
@@ -203,10 +141,6 @@ public class WHS1Viewer : MonoBehaviour {
 				line.transform.localScale = new Vector3(1, 1, 1);
 
 				LineRenderer line_rend = line.GetComponent<LineRenderer>();
-				/*
-				line_rend.SetPosition(0, new Vector3(n * 0.01f - 0.5f, (float)wave_list[n] / 1000, 0));
-				line_rend.SetPosition(1, new Vector3((n + 1) * 0.01f - 0.5f, (float)wave_list[n + 1] / 1000, 0));
-				*/
 				line_rend.SetPosition(0, new Vector3(n * 0.01f - 0.5f, ((float)wave_list[n] - 500) / 1500, 0));
 				line_rend.SetPosition(1, new Vector3((n + 1) * 0.01f - 0.5f, ((float)wave_list[n + 1] - 500) / 1500, 0));
 

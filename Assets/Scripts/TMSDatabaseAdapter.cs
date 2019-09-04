@@ -295,21 +295,7 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 	
 	public IEnumerator ReadExpiration() {
 		wait_anything = access_db = read_expiration = true;
-
-		/*
-		time = 0.0f;
-		//srvReq.tmsdb = new tmsdb("ID_SENSOR", 3021, 3021);
-		wsc.ServiceCallerDB(srvName, srvReq);
-
-		while (access_db) {
-			yield return null;
-		}
-
-		while (success_access || abort_access) {
-			yield return null;
-		}
-		wait_anything = read_expiration = false;
-		*/
+		
 		expiration_dicionary = new Dictionary<int, string>();
 		foreach (int id in id_list) {
 			access_db = true;

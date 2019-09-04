@@ -47,7 +47,6 @@ public class RefrigeratorManager : MonoBehaviour {
 	private bool change_goods_shader = false;
 	private bool finish_coroutine = true;
 
-	//public Text debug_text;
 
 	// Start is called before the first frame update
 	void Start() {
@@ -208,22 +207,13 @@ public class RefrigeratorManager : MonoBehaviour {
 						Debug.Log("id: " + item.Key + ", name: " + goods_object_dictionary[item.Key].name + ", expiration: " + expiration);
 
 						if (goods_3dtext_dictionary.ContainsKey(item.Key)) {
-							//goods_3dtext_dictionary[item.Key].GetComponent<TextMesh>().text = expiration;
 							goods_3dtext_dictionary[item.Key].GetComponent<TextMeshPro>().text = expiration;
 						}
 						else {
-							//GameObject new_3dtext = (GameObject)Instantiate(Resources.Load("3D Text"));
 							GameObject new_3dtext = (GameObject)Instantiate(Resources.Load("TextMeshPro"));
 							goods_3dtext_dictionary.Add(item.Key, new_3dtext);
 							goods_3dtext_dictionary[item.Key].transform.parent = goods_object_dictionary[item.Key].transform;
 							goods_3dtext_dictionary[item.Key].transform.localPosition = new Vector3(0.0f, 0.15f, 0.0f);
-							/*
-							TextMesh textmesh = goods_3dtext_dictionary[item.Key].GetComponent<TextMesh>();
-							textmesh.fontSize = 40;
-							textmesh.color = new Color(0, 0, 0);
-							textmesh.text = expiration;
-							Change3DTextActive(item.Key, false);
-							*/
 							TextMeshPro TMP = goods_3dtext_dictionary[item.Key].GetComponent<TextMeshPro>();
 							TMP.fontSize = 0.6f;
 							TMP.text = expiration;
