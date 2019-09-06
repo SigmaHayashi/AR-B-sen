@@ -36,6 +36,8 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	*/
 	private MainScript mainSystem;
 
+	private Vector3 not_offset_pos, not_offset_rot;
+
 	//AugmentedImageでつかうものたち
 	private List<AugmentedImage> m_AugmentedImages = new List<AugmentedImage>();
 	private bool detected_marker = false;
@@ -95,7 +97,11 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		bsenPositionText.text += "B-sen Rotation : " + bsen_model.transform.eulerAngles.ToString();
 		*/
 		mainSystem.UpdateCalibrationInfoCamera(Camera.main.transform.position, Camera.main.transform.eulerAngles);
-		mainSystem.UpdateCalibrationInfoBsen(bsen_model.transform.localPosition, bsen_model.transform.localEulerAngles);
+		mainSystem.UpdateCalibrationInfoBsen(bsen_model.transform.position, bsen_model.transform.eulerAngles);
+
+		Vector3 offset_pos = bsen_model.transform.position - not_offset_pos;
+		Vector3 offset_rot = bsen_model.transform.eulerAngles - not_offset_rot;
+		mainSystem.UpdateCalibrationInfoOffset(offset_pos, offset_rot);
 
 		if (!CheckFinishCalibration()) {
 			switch (calibration_state) {
@@ -129,6 +135,8 @@ public class BsenCalibrationSystem : MonoBehaviour {
 						marker_euler.y -= 1.5f;
 						marker_euler.z = 0.0f;
 						Debug.Log("Marker rot: " + marker_euler);
+
+						mainSystem.UpdateDatabaseInfoViconIRVSMarker(marker_position, marker_euler);
 
 						//回転をモデルに適用
 						bsen_model.transform.eulerAngles = marker_euler;
@@ -173,6 +181,9 @@ public class BsenCalibrationSystem : MonoBehaviour {
 						calibration_state = 4;
 						finish_calibration = true;
 					}
+
+					not_offset_pos = bsen_model.transform.position;
+					not_offset_rot = bsen_model.transform.eulerAngles;
 					break;
 			}
 		}
@@ -304,7 +315,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		bsen_model.transform.position = tmp;
 	}
 
-	/**/
+	/*
 	void onRotXplusClick() {
 		Vector3 tmp = bsen_model.transform.eulerAngles;
 		tmp.x += 0.25f;
@@ -340,7 +351,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		tmp.z -= 0.25f;
 		bsen_model.transform.eulerAngles = tmp;
 	}
-	/**/
+	*/
 
 	public void onRotRightClick() {
 		Vector3 tmp = bsen_model.transform.eulerAngles;

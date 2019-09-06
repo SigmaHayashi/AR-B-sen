@@ -263,14 +263,15 @@ public class MainScript : MonoBehaviour {
 					new_text.name = "Info of " + goods_info.Key.ToString();
 					new_text.transform.parent = GameObject.Find("Main System/Database Info Canvas/Refrigerator Goods Info").transform;
 
-					float new_posY = Database_RefrigeratorGoodsTextSample.GetComponent<RectTransform>().anchoredPosition.y;
+					RectTransform sample_rect = Database_RefrigeratorGoodsTextSample.GetComponent<RectTransform>();
+					float new_posY = sample_rect.anchoredPosition.y;
 					foreach (GameObject goods_info_text in Database_RefrigeratorGoodsTextDictionary.Values) {
 						new_posY = goods_info_text.GetComponent<RectTransform>().anchoredPosition.y;
 					}
-					new_posY -= Database_RefrigeratorGoodsTextSample.GetComponent<RectTransform>().sizeDelta.y;
-					RectTransform new_text_rect = new_text.GetComponent<RectTransform>();
-					Vector2 new_pos = new Vector2(new_text_rect.anchoredPosition.x, new_posY);
+					new_posY -= sample_rect.sizeDelta.y;
+					Vector2 new_pos = new Vector2(sample_rect.anchoredPosition.x, new_posY);
 					new_text.GetComponent<RectTransform>().anchoredPosition = new_pos;
+					new_text.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
 
 					new_text.GetComponent<Text>().text = goods_info.Value;
 
@@ -434,14 +435,15 @@ public class MainScript : MonoBehaviour {
 					new_text.name = "Info of " + goods_info.Key.ToString();
 					new_text.transform.parent = GameObject.Find("Main System/Database Info Canvas/Refrigerator Goods Info").transform;
 
-					float new_posY = Database_RefrigeratorGoodsTextSample.GetComponent<RectTransform>().anchoredPosition.y;
-					foreach(GameObject goods_info_text in Database_RefrigeratorGoodsTextDictionary.Values) {
+					RectTransform sample_rect = Database_RefrigeratorGoodsTextSample.GetComponent<RectTransform>();
+					float new_posY = sample_rect.anchoredPosition.y;
+					foreach (GameObject goods_info_text in Database_RefrigeratorGoodsTextDictionary.Values) {
 						new_posY = goods_info_text.GetComponent<RectTransform>().anchoredPosition.y;
 					}
-					new_posY -= Database_RefrigeratorGoodsTextSample.GetComponent<RectTransform>().sizeDelta.y;
-					RectTransform new_text_rect = new_text.GetComponent<RectTransform>();
-					Vector2 new_pos = new Vector2(new_text_rect.anchoredPosition.x, new_posY);
+					new_posY -= sample_rect.sizeDelta.y;
+					Vector2 new_pos = new Vector2(sample_rect.anchoredPosition.x, new_posY);
 					new_text.GetComponent<RectTransform>().anchoredPosition = new_pos;
+					new_text.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
 
 					new_text.GetComponent<Text>().text = goods_info.Value;
 

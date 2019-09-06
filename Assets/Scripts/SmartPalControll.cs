@@ -11,6 +11,8 @@ public class BatteryData {
 
 public class SmartPalControll : MonoBehaviour {
 
+	private MainScript mainSystem;
+
 	private TMSDatabaseAdapter DBAdapter;
 	private float time_pos = 0.0f;
 	private float time_bat = 0.0f;
@@ -21,6 +23,8 @@ public class SmartPalControll : MonoBehaviour {
 
 	// Start is called before the first frame update
 	void Start() {
+		mainSystem = GameObject.Find("Main System").GetComponent<MainScript>();
+
 		DBAdapter = GameObject.Find("Database Adapter").GetComponent<TMSDatabaseAdapter>();
 
 		calib_system = GameObject.Find("B-sen Calibration System").GetComponent<BsenCalibrationSystem>();
@@ -68,6 +72,8 @@ public class SmartPalControll : MonoBehaviour {
 				transform.localEulerAngles = sp5_euler;
 				Debug.Log(responce.values.tmsdb[0].name + " pos: " + sp5_pos);
 				Debug.Log(responce.values.tmsdb[0].name + " eul: " + sp5_euler);
+
+				mainSystem.UpdateDatabaseInfoViconSmartPal(sp5_pos, sp5_euler);
 			}
 		}
 	}
@@ -109,6 +115,8 @@ public class SmartPalControll : MonoBehaviour {
 				else {
 					Battery_3DText.GetComponent<TextMeshPro>().text = "Battery: " + battery_per.ToString() + "[%]";
 				}
+
+				mainSystem.UpdateDatabaseInfoSmartPalBattery(battery_per);
 			}
 		}
 

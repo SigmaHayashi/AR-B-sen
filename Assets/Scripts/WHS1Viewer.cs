@@ -11,6 +11,8 @@ public class WHS1Data {
 }
 
 public class WHS1Viewer : MonoBehaviour {
+
+	private MainScript mainSystem;
 	
 	private float time = 0.0f;
 	private TMSDatabaseAdapter DBAdapter;
@@ -26,6 +28,7 @@ public class WHS1Viewer : MonoBehaviour {
 
 	// Start is called before the first frame update
 	void Start() {
+		mainSystem = GameObject.Find("Main System").GetComponent<MainScript>();
 		DBAdapter = GameObject.Find("Database Adapter").GetComponent<TMSDatabaseAdapter>();
 		calib_system = GameObject.Find("B-sen Calibration System").GetComponent<BsenCalibrationSystem>();
 	}
@@ -99,6 +102,9 @@ public class WHS1Viewer : MonoBehaviour {
 				WHS1_3D_TextMeshPro.text += "Rate: " + whs1_data.rate.ToString() + "[bpm]";
 
 				UpdateWaveGraph(whs1_data.wave);
+				
+				mainSystem.UpdateDatabaseInfoWHS1Info(whs1_data.temp, whs1_data.rate);
+				mainSystem.UpdateDatabaseInfoWHS1Wave(whs1_data.wave);
 			}
 		}
 

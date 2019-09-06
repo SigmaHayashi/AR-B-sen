@@ -10,7 +10,17 @@ public class ExpirationData {
 	public string expiration;
 }
 
+class GoodsInfo {
+	public string name;
+	public int id;
+	public int state;
+	public Vector3 pos;
+	public string expiration;
+}
+
 public class RefrigeratorManager : MonoBehaviour {
+
+	private MainScript mainSystem;
 
 	//GameObjectたち
 	private GameObject refrigerator;
@@ -25,6 +35,8 @@ public class RefrigeratorManager : MonoBehaviour {
 	private Dictionary<int, bool> goods_state_dictionary = new Dictionary<int, bool>();
 
 	private Dictionary<int, GameObject> goods_3dtext_dictionary = new Dictionary<int, GameObject>();
+
+	private Dictionary<int, GoodsInfo> goods_info_dictionary = new Dictionary<int, GoodsInfo>();
 	
 	//TMSDB関連
 	private float time_1 = 0.0f;
@@ -50,6 +62,8 @@ public class RefrigeratorManager : MonoBehaviour {
 
 	// Start is called before the first frame update
 	void Start() {
+		mainSystem = GameObject.Find("Main System").GetComponent<MainScript>();
+
 		refrigerator = GameObject.Find("refrigerator_link");
 		ar_camera = GameObject.Find("First Person Camera");
 
@@ -166,12 +180,12 @@ public class RefrigeratorManager : MonoBehaviour {
 						if (data.sensor == 3018) {
 							foreach (KeyValuePair<int, GameObject> goods in goods_object_dictionary) {
 								if (goods.Value.name.IndexOf(data.name) != -1) {
+									Vector3 place = new Vector3((float)data.x, (float)data.y, (float)data.z);
+									place = Ros2UnityPosition(place);
 									if (data.state == 1) {
 										goods_state_dictionary[goods.Key] = true;
-										Vector3 place = new Vector3((float)data.x, (float)data.y, (float)data.z);
-										place = Ros2UnityPosition(place);
-										Debug.Log(data.name + " pos: " + place.ToString("f2"));
 
+										Debug.Log(data.name + " pos: " + place.ToString("f2"));
 										goods.Value.transform.localPosition = place;
 
 										id_list.Add(data.id);
@@ -179,6 +193,15 @@ public class RefrigeratorManager : MonoBehaviour {
 									else {
 										goods_state_dictionary[goods.Key] = false;
 									}
+
+									if (!goods_info_dictionary.ContainsKey(goods.Key)) {
+										goods_info_dictionary.Add(goods.Key, new GoodsInfo());
+										goods_info_dictionary[goods.Key].id = data.id;
+										goods_info_dictionary[goods.Key].name = data.name;
+										goods_info_dictionary[goods.Key].expiration = "don't know";
+									}
+									goods_info_dictionary[goods.Key].state = data.state;
+									goods_info_dictionary[goods.Key].pos = place;
 								}
 							}
 						}
@@ -219,9 +242,22 @@ public class RefrigeratorManager : MonoBehaviour {
 							TMP.text = expiration;
 							Change3DTextActive(item.Key, false);
 						}
+
+						goods_info_dictionary[item.Key].expiration = expiration;
 					}
 				}
 			}
+
+			Dictionary<int, string> goods_info_string_dictionary = new Dictionary<int, string>();
+			foreach(GoodsInfo goods_info in goods_info_dictionary.Values) {
+				string info = goods_info.name + ", "
+					+ goods_info.id.ToString() + ", "
+					+ goods_info.state.ToString() + ", "
+					+ goods_info.pos.ToString("f3") + ", "
+					+ goods_info.expiration;
+				goods_info_string_dictionary.Add(goods_info.id, info);
+			}
+			mainSystem.UpdateDatabaseInfoRefrigerator(goods_info_string_dictionary);
 		}
 	}
 	
