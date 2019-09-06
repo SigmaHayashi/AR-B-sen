@@ -13,6 +13,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	private GameObject irvs_marker;
 
 	//ボタンとテキストたち
+	/*
 	private Button posXplusButton;
 	private Button posXminusButton;
 	private Button posYplusButton;
@@ -32,6 +33,8 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	private Text cameraPositionText;
 	private Text bsenPositionText;
 	private Text debugText;
+	*/
+	private MainScript mainSystem;
 
 	//AugmentedImageでつかうものたち
 	private List<AugmentedImage> m_AugmentedImages = new List<AugmentedImage>();
@@ -53,6 +56,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	// Start is called before the first frame update
 	// 最初の1回呼び出されるよ～
 	void Start() {
+		mainSystem = GameObject.Find("Main System").GetComponent<MainScript>();
 
 		bsen_model = GameObject.Find("rostms");
 		rostms_shader = bsen_model.GetComponent<ShaderChange>();
@@ -62,7 +66,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		coordinates_adapter = Instantiate(prefab);
 		coordinates_adapter.transform.parent = bsen_model.transform;
 
-		ButtonTextSetting();
+		//ButtonTextSetting();
 
 		calibration_state = 1;
 
@@ -72,7 +76,9 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	// Update is called once per frame
 	//ずっと繰り返し呼び出されるよ～
 	void Update() {
-		debug("state: " + calibration_state.ToString());
+		//debug("state: " + calibration_state.ToString());
+		mainSystem.UpdateMainCanvasInfoText("state : " + calibration_state.ToString());
+
 		//phase 0
 		//毎回すること
 		//AugmentedImageの更新
@@ -81,12 +87,16 @@ public class BsenCalibrationSystem : MonoBehaviour {
 			Session.GetTrackables<AugmentedImage>(m_AugmentedImages, TrackableQueryFilter.Updated);
 		}
 
+		/*
 		cameraPositionText.text = "Camera Position : " + Camera.main.transform.position.ToString("f2") + "\n";
 		cameraPositionText.text += "Camera Rotation : " + Camera.main.transform.eulerAngles.ToString();
 
 		bsenPositionText.text = "B-sen Position : " + bsen_model.transform.localPosition.ToString("f2") + "\n";
 		bsenPositionText.text += "B-sen Rotation : " + bsen_model.transform.eulerAngles.ToString();
-		
+		*/
+		mainSystem.UpdateCalibrationInfoCamera(Camera.main.transform.position, Camera.main.transform.eulerAngles);
+		mainSystem.UpdateCalibrationInfoBsen(bsen_model.transform.localPosition, bsen_model.transform.localEulerAngles);
+
 		if (!CheckFinishCalibration()) {
 			switch (calibration_state) {
 				//DBにアクセス開始
@@ -172,6 +182,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	 * ボタンとテキストを取得
 	 * ボタンにクリック時の動作を設定
 	 *****************************************************************/
+	/*
 	void ButtonTextSetting() {
 		posXplusButton = GameObject.Find("Main System/Button Canvas/pos X+ Button").GetComponent<Button>();
 		posXminusButton = GameObject.Find("Main System/Button Canvas/pos X- Button").GetComponent<Button>();
@@ -205,6 +216,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		bsenPositionText = GameObject.Find("Main System/Text Canvas/B-sen Position Text").GetComponent<Text>();
 		debugText = GameObject.Find("Main System/Text Canvas/Debug Text").GetComponent<Text>();
 	}
+	*/
 
 	/*****************************************************************
 	 * 自動キャリブレーション
@@ -230,8 +242,9 @@ public class BsenCalibrationSystem : MonoBehaviour {
 				Vector3 temp_room_position = bsen_model.transform.position;
 				temp_room_position += offset_vector;
 				bsen_model.transform.position = temp_room_position;
-				
-				debug("Auto Positioning DONE");
+
+				//debug("Auto Positioning DONE");
+				mainSystem.UpdateMainCanvasInfoText("Auto Positioning DONE");
 			}
 		}
 	}
@@ -243,7 +256,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		autoPositioning();
 	}
 
-	void onPosXplusClick() {
+	public void onPosXplusClick() {
 		Vector3 tmp = new Vector3(0.025f, 0.0f, 0.0f);
 		coordinates_adapter.transform.localPosition = tmp;
 
@@ -251,7 +264,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		bsen_model.transform.position = tmp;
 	}
 
-	void onPosXminusClick() {
+	public void onPosXminusClick() {
 		Vector3 tmp = new Vector3(-0.025f, 0.0f, 0.0f);
 		coordinates_adapter.transform.localPosition = tmp;
 
@@ -259,7 +272,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		bsen_model.transform.position = tmp;
 	}
 
-	void onPosYplusClick() {
+	public void onPosYplusClick() {
 		Vector3 tmp = new Vector3(0.0f, 0.025f, 0.0f);
 		coordinates_adapter.transform.localPosition = tmp;
 
@@ -267,7 +280,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		bsen_model.transform.position = tmp;
 	}
 
-	void onPosYminusClick() {
+	public void onPosYminusClick() {
 		Vector3 tmp = new Vector3(0.0f, -0.025f, 0.0f);
 		coordinates_adapter.transform.localPosition = tmp;
 
@@ -275,14 +288,15 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		bsen_model.transform.position = tmp;
 	}
 
-	void onPosZplusClick() {
+	public void onPosZplusClick() {
 		Vector3 tmp = new Vector3(0.0f, 0.0f, 0.025f);
 		coordinates_adapter.transform.localPosition = tmp;
 
 		tmp = coordinates_adapter.transform.position;
 		bsen_model.transform.position = tmp;
 	}
-	void onPosZminusClick() {
+
+	public void onPosZminusClick() {
 		Vector3 tmp = new Vector3(0.0f, 0.0f, -0.025f);
 		coordinates_adapter.transform.localPosition = tmp;
 
@@ -290,7 +304,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		bsen_model.transform.position = tmp;
 	}
 
-
+	/**/
 	void onRotXplusClick() {
 		Vector3 tmp = bsen_model.transform.eulerAngles;
 		tmp.x += 0.25f;
@@ -326,13 +340,27 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		tmp.z -= 0.25f;
 		bsen_model.transform.eulerAngles = tmp;
 	}
+	/**/
 
+	public void onRotRightClick() {
+		Vector3 tmp = bsen_model.transform.eulerAngles;
+		tmp.y += 0.25f;
+		bsen_model.transform.eulerAngles = tmp;
+	}
 
+	public void onRotLeftClick() {
+		Vector3 tmp = bsen_model.transform.eulerAngles;
+		tmp.y -= 0.25f;
+		bsen_model.transform.eulerAngles = tmp;
+	}
+
+	/*
 	void debug(string message) {
 		if(debugText != null) {
 			debugText.text = message;
 		}
 	}
+	*/
 	
 	/*****************************************************************
 	 * ROSの座標系（右手系）からUnityの座標系（左手系）への変換

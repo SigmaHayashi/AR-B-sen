@@ -720,7 +720,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &94305705
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -835,7 +835,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1026997606374626, guid: c539aa4fa1bac4b4da61761b0699b48b, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4430574757597842, guid: c539aa4fa1bac4b4da61761b0699b48b, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1741,7 +1741,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 30, y: -0.00005830039}
+  m_AnchoredPosition: {x: 30, y: -0.000043615848}
   m_SizeDelta: {x: -110, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &235412405
@@ -2470,7 +2470,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1248447649449928, guid: cf498fc35b538884db557f7a9a2c0ef9, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4461716624848968, guid: cf498fc35b538884db557f7a9a2c0ef9, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2703,7 +2703,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 169477587}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.99999994
+  m_Size: 0.9999999
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -3266,7 +3266,7 @@ GameObject:
   - component: {fileID: 655053507}
   - component: {fileID: 655053506}
   m_Layer: 0
-  m_Name: rot Y- Button
+  m_Name: rot Left Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3807,7 +3807,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &696092783
 Transform:
   m_ObjectHideFlags: 0
@@ -4545,7 +4545,7 @@ GameObject:
   - component: {fileID: 815141776}
   - component: {fileID: 815141775}
   m_Layer: 0
-  m_Name: SmartPal Marker Text
+  m_Name: SmartPal Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5074,9 +5074,9 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_Children:
-  - {fileID: 1182699027}
-  - {fileID: 864269838}
   - {fileID: 1001426069}
+  - {fileID: 864269838}
+  - {fileID: 1182699027}
   m_Father: {fileID: 1419947822}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -5376,7 +5376,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1382872652046454, guid: 49826ccd6b8f88140b796de1d0c5a1c1, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1535366430393256, guid: 49826ccd6b8f88140b796de1d0c5a1c1, type: 3}
       propertyPath: m_IsActive
@@ -5750,7 +5750,7 @@ RectTransform:
   m_LocalScale: {x: 0.9999879, y: 0.9999879, z: 0.9999879}
   m_Children: []
   m_Father: {fileID: 873842114}
-  m_RootOrder: 2
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -6427,7 +6427,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1121401443
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6546,7 +6546,7 @@ GameObject:
   - component: {fileID: 1166720188}
   - component: {fileID: 1166720187}
   m_Layer: 0
-  m_Name: rot Y+ Button
+  m_Name: rot Right Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6682,7 +6682,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 873842114}
-  m_RootOrder: 0
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -6994,7 +6994,7 @@ PrefabInstance:
     - target: {fileID: 5606048562917189082, guid: b7011b4bc8f9f214ca900693a917527e,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5606048562917189060, guid: b7011b4bc8f9f214ca900693a917527e,
         type: 3}
@@ -7218,7 +7218,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Name, ID, Pos, Expiration
+  m_Text: Name, ID, State, Pos, Expiration
 --- !u!222 &1390618506
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -7487,9 +7487,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -50, y: 50}
+  m_AnchoredPosition: {x: -600, y: 50}
   m_SizeDelta: {x: 550, y: 400}
-  m_Pivot: {x: 1, y: 0}
+  m_Pivot: {x: 0, y: 0}
 --- !u!1 &1526719252
 GameObject:
   m_ObjectHideFlags: 0
@@ -9193,7 +9193,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1945036954
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9623,7 +9623,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Y +
+  m_Text: Right
 --- !u!222 &2063320593
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -10017,7 +10017,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Y -
+  m_Text: Left
 --- !u!222 &2143161894
 CanvasRenderer:
   m_ObjectHideFlags: 0

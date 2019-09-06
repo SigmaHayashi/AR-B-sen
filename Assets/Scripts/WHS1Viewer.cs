@@ -143,7 +143,6 @@ public class WHS1Viewer : MonoBehaviour {
 				LineRenderer line_rend = line.GetComponent<LineRenderer>();
 				line_rend.SetPosition(0, new Vector3(n * 0.01f - 0.5f, ((float)wave_list[n] - 500) / 1500, 0));
 				line_rend.SetPosition(1, new Vector3((n + 1) * 0.01f - 0.5f, ((float)wave_list[n + 1] - 500) / 1500, 0));
-
 			}
 		}
 		else {
@@ -163,7 +162,7 @@ public class WHS1Viewer : MonoBehaviour {
 	/*****************************************************************
 	 * すべての子オブジェクトを取得
 	 *****************************************************************/
-	 void GetAllChildren(GameObject obj, ref List<GameObject> all_children) {
+	void GetAllChildren(GameObject obj, ref List<GameObject> all_children) {
 		Transform children = obj.GetComponentInChildren<Transform>();
 		if (children.childCount == 0) {
 			return;
