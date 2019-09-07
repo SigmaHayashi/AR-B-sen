@@ -235,7 +235,8 @@ public class RefrigeratorManager : MonoBehaviour {
 						else {
 							GameObject new_3dtext = (GameObject)Instantiate(Resources.Load("TextMeshPro"));
 							goods_3dtext_dictionary.Add(item.Key, new_3dtext);
-							goods_3dtext_dictionary[item.Key].transform.parent = goods_object_dictionary[item.Key].transform;
+							//goods_3dtext_dictionary[item.Key].transform.parent = goods_object_dictionary[item.Key].transform;
+							goods_3dtext_dictionary[item.Key].transform.SetParent(goods_object_dictionary[item.Key].transform, false);
 							goods_3dtext_dictionary[item.Key].transform.localPosition = new Vector3(0.0f, 0.15f, 0.0f);
 							TextMeshPro TMP = goods_3dtext_dictionary[item.Key].GetComponent<TextMeshPro>();
 							TMP.fontSize = 0.6f;

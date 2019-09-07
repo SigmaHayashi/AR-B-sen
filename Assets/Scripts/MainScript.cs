@@ -261,7 +261,8 @@ public class MainScript : MonoBehaviour {
 					GameObject new_text = Instantiate(Database_RefrigeratorGoodsTextSample);
 
 					new_text.name = "Info of " + goods_info.Key.ToString();
-					new_text.transform.parent = GameObject.Find("Main System/Database Info Canvas/Refrigerator Goods Info").transform;
+					//new_text.transform.parent = GameObject.Find("Main System/Database Info Canvas/Refrigerator Goods Info").transform;
+					new_text.transform.SetParent(GameObject.Find("Main System/Database Info Canvas/Refrigerator Goods Info").transform, false);
 
 					RectTransform sample_rect = Database_RefrigeratorGoodsTextSample.GetComponent<RectTransform>();
 					float new_posY = sample_rect.anchoredPosition.y;
@@ -308,6 +309,7 @@ public class MainScript : MonoBehaviour {
 				Destroy(obj);
 			}
 
+			/*
 			GameObject line_prefab = (GameObject)Resources.Load("Line");
 			for (int n = 0; n < Database_WHS1WaveGraph_Buffer.Length - 1; n++) {
 				GameObject line = Instantiate(line_prefab);
@@ -323,6 +325,27 @@ public class MainScript : MonoBehaviour {
 				line_rend.endWidth = 1.0f;
 				line_rend.SetPosition(0, new Vector3(n * (550.0f / (float)Database_WHS1WaveGraph_Buffer.Length), (float)Database_WHS1WaveGraph_Buffer[n] * (400.0f / 1000.0f), 0));
 				line_rend.SetPosition(1, new Vector3((n + 1) * (550.0f / (float)Database_WHS1WaveGraph_Buffer.Length), (float)Database_WHS1WaveGraph_Buffer[n + 1] * (400.0f / 1000.0f), 0));
+			}
+			*/
+			GameObject line_prefab = (GameObject)Resources.Load("UI Line");
+			for (int n = 0; n < Database_WHS1WaveGraph_Buffer.Length - 1; n++) {
+				GameObject line = Instantiate(line_prefab);
+				line.name = "UI Line" + n.ToString();
+				//line.transform.parent = Database_WHS1WaveGraph.transform;
+				line.transform.SetParent(Database_WHS1WaveGraph.transform, false);
+
+				RectTransform line_rect = line.GetComponent<RectTransform>();
+				Vector2 start = new Vector2(n * 550.0f / Database_WHS1WaveGraph_Buffer.Length, Database_WHS1WaveGraph_Buffer[n] * 400.0f / 1000.0f);
+				Vector2 end = new Vector2((n + 1) * 550.0f / Database_WHS1WaveGraph_Buffer.Length, Database_WHS1WaveGraph_Buffer[n + 1] * 400.0f / 1000.0f);
+				Vector2 vector = new Vector2(end.x - start.x, end.y - start.y);
+
+				float vector_size = Vector2.Distance(start, end);
+				float vector_angle = Mathf.Rad2Deg * Mathf.Atan2(vector.y, vector.x);
+
+				line_rect.anchoredPosition = start;
+				line_rect.sizeDelta = new Vector2(line_rect.sizeDelta.x, vector_size * 1.1f);
+				line_rect.localEulerAngles = new Vector3(0, 0, vector_angle - 90);
+				line_rect.localScale = new Vector3(1, 1, 1);
 			}
 		}
 		Database_WHS1WaveGraph_Buffer = null;
@@ -433,7 +456,8 @@ public class MainScript : MonoBehaviour {
 					GameObject new_text = Instantiate(Database_RefrigeratorGoodsTextSample);
 
 					new_text.name = "Info of " + goods_info.Key.ToString();
-					new_text.transform.parent = GameObject.Find("Main System/Database Info Canvas/Refrigerator Goods Info").transform;
+					//new_text.transform.parent = GameObject.Find("Main System/Database Info Canvas/Refrigerator Goods Info").transform;
+					new_text.transform.SetParent(GameObject.Find("Main System/Database Info Canvas/Refrigerator Goods Info").transform, false);
 
 					RectTransform sample_rect = Database_RefrigeratorGoodsTextSample.GetComponent<RectTransform>();
 					float new_posY = sample_rect.anchoredPosition.y;
@@ -499,7 +523,8 @@ public class MainScript : MonoBehaviour {
 			foreach (GameObject obj in line_list) {
 				Destroy(obj);
 			}
-			
+
+			/*
 			GameObject line_prefab = (GameObject)Resources.Load("Line");
 			for (int n = 0; n < wave_list.Length - 1; n++) {
 				GameObject line = Instantiate(line_prefab);
@@ -515,6 +540,27 @@ public class MainScript : MonoBehaviour {
 				line_rend.endWidth = 1.0f;
 				line_rend.SetPosition(0, new Vector3(n * (550.0f / (float)wave_list.Length), (float)wave_list[n] * (400.0f / 1000.0f), 0));
 				line_rend.SetPosition(1, new Vector3((n + 1) * (550.0f / (float)wave_list.Length), (float)wave_list[n + 1] * (400.0f / 1000.0f), 0));
+			}
+			*/
+			GameObject line_prefab = (GameObject)Resources.Load("UI Line");
+			for(int n = 0; n < wave_list.Length - 1; n++) {
+				GameObject line = Instantiate(line_prefab);
+				line.name = "UI Line" + n.ToString();
+				//line.transform.parent = Database_WHS1WaveGraph.transform;
+				line.transform.SetParent(Database_WHS1WaveGraph.transform, false);
+
+				RectTransform line_rect = line.GetComponent<RectTransform>();
+				Vector2 start = new Vector2(n * 550.0f / wave_list.Length, wave_list[n] * 400.0f / 1000.0f);
+				Vector2 end = new Vector2((n + 1) * 550.0f / wave_list.Length, wave_list[n + 1] * 400.0f / 1000.0f);
+				Vector2 vector = new Vector2(end.x - start.x, end.y - start.y);
+
+				float vector_size = Vector2.Distance(start, end);
+				float vector_angle = Mathf.Rad2Deg * Mathf.Atan2(vector.y, vector.x);
+
+				line_rect.anchoredPosition = start;
+				line_rect.sizeDelta = new Vector2(line_rect.sizeDelta.x, vector_size * 1.1f);
+				line_rect.localEulerAngles = new Vector3(0, 0, vector_angle - 90);
+				line_rect.localScale = new Vector3(1, 1, 1);
 			}
 		}
 		else {

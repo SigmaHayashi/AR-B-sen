@@ -104,7 +104,8 @@ public class SmartPalControll : MonoBehaviour {
 
 				if (!finish_battery_text) {
 					Battery_3DText = (GameObject)Instantiate(Resources.Load("TextMeshPro"));
-					Battery_3DText.transform.parent = transform;
+					//Battery_3DText.transform.parent = transform;
+					Battery_3DText.transform.SetParent(transform, false);
 					Battery_3DText.transform.localPosition = new Vector3(0.0f, 1.5f, 0.0f);
 					TextMeshPro TMP = Battery_3DText.GetComponent<TextMeshPro>();
 					TMP.fontSize = 1.0f;
