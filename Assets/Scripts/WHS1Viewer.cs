@@ -88,17 +88,21 @@ public class WHS1Viewer : MonoBehaviour {
 				DBAdapter.FinishReadData();
 
 				Debug.Log(responce.values.tmsdb[0].note);
+				//mainSystem.MyConsole_Add(responce.values.tmsdb[0].note);
 
 				WHS1Data whs1_data = JsonUtility.FromJson<WHS1Data>(responce.values.tmsdb[0].note);
-				Debug.Log("Temp: " + whs1_data.temp);
+				Debug.Log("Temp: " + whs1_data.temp.ToString("f1"));
+				mainSystem.MyConsole_Add("Temp: " + whs1_data.temp.ToString("f1"));
 				Debug.Log("Rate: " + whs1_data.rate);
+				mainSystem.MyConsole_Add("Rate: " + whs1_data.rate);
 				string debug_string = null;
 				foreach (int count in whs1_data.wave) {
 					debug_string += count + ",";
 				}
 				Debug.Log("Wave: " + debug_string);
-				
-				WHS1_3D_TextMeshPro.text = "Temp: " + whs1_data.temp.ToString() + "[degC]\n";
+				//mainSystem.MyConsole_Add("Wave: " + debug_string);
+
+				WHS1_3D_TextMeshPro.text = "Temp: " + whs1_data.temp.ToString("f1") + "[degC]\n";
 				WHS1_3D_TextMeshPro.text += "Rate: " + whs1_data.rate.ToString() + "[bpm]";
 
 				UpdateWaveGraph(whs1_data.wave);
@@ -127,7 +131,8 @@ public class WHS1Viewer : MonoBehaviour {
 			debug_string += count + ",";
 		}
 		Debug.Log("Update Wave Graph: " + debug_string);
-		
+		//mainSystem.MyConsole_Add("Update Wave Graph: " + debug_string);
+
 		if (CalcDistance(Camera.main.gameObject, wave_graph) < 3.0f) {
 			wave_graph.SetActive(true);
 

@@ -71,7 +71,9 @@ public class SmartPalControll : MonoBehaviour {
 				transform.localPosition = sp5_pos;
 				transform.localEulerAngles = sp5_euler;
 				Debug.Log(responce.values.tmsdb[0].name + " pos: " + sp5_pos);
+				mainSystem.MyConsole_Add(responce.values.tmsdb[0].name + " pos: " + sp5_pos);
 				Debug.Log(responce.values.tmsdb[0].name + " eul: " + sp5_euler);
+				mainSystem.MyConsole_Add(responce.values.tmsdb[0].name + " eul: " + sp5_euler);
 
 				mainSystem.UpdateDatabaseInfoViconSmartPal(sp5_pos, sp5_euler);
 			}
@@ -101,6 +103,7 @@ public class SmartPalControll : MonoBehaviour {
 				BatteryData battery_data = JsonUtility.FromJson<BatteryData>(responce.values.tmsdb[0].etcdata);
 				float battery_per = battery_data.battery * 100;
 				Debug.Log("SmartPal Battery: " + battery_per + "[%]");
+				mainSystem.MyConsole_Add("SmartPal Battery: " + battery_per + "[%]");
 
 				if (!finish_battery_text) {
 					Battery_3DText = (GameObject)Instantiate(Resources.Load("TextMeshPro"));

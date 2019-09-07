@@ -186,6 +186,7 @@ public class RefrigeratorManager : MonoBehaviour {
 										goods_state_dictionary[goods.Key] = true;
 
 										Debug.Log(data.name + " pos: " + place.ToString("f2"));
+										mainSystem.MyConsole_Add(data.name + " pos: " + place.ToString("f2"));
 										goods.Value.transform.localPosition = place;
 
 										id_list.Add(data.id);
@@ -228,6 +229,7 @@ public class RefrigeratorManager : MonoBehaviour {
 						ExpirationData expiration_data = JsonUtility.FromJson<ExpirationData>(item.Value);
 						string expiration = expiration_data.expiration;
 						Debug.Log("id: " + item.Key + ", name: " + goods_object_dictionary[item.Key].name + ", expiration: " + expiration);
+						mainSystem.MyConsole_Add("id: " + item.Key + ", name: " + goods_object_dictionary[item.Key].name + ", expiration: " + expiration);
 
 						if (goods_3dtext_dictionary.ContainsKey(item.Key)) {
 							goods_3dtext_dictionary[item.Key].GetComponent<TextMeshPro>().text = expiration;

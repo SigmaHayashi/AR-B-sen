@@ -29,7 +29,13 @@ public class MyConsole : MonoBehaviour {
 			text_rect.pivot = new_pivot;
 		}
 
-		if(delta_size.y > 10000) {
+		/*
+		while(delta_size.y > 10000) {
+			int index = text_text.text.IndexOf("\n", 1);
+			text_text.text = text_text.text.Remove(1, index);
+		}
+		*/
+		while(text_text.text.Length > 2100) {
 			int index = text_text.text.IndexOf("\n", 1);
 			text_text.text = text_text.text.Remove(1, index);
 		}
@@ -37,6 +43,7 @@ public class MyConsole : MonoBehaviour {
 
 	public void Add(object message) {
 		text_text.text += message.ToString() + "\n";
+		//Debug.Log(text_text.text.Length);
 	}
 
 	public void Delete() {

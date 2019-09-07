@@ -123,8 +123,9 @@ public class BsenCalibrationSystem : MonoBehaviour {
 						//位置を取得＆変換
 						Vector3 marker_position = new Vector3((float)responce.values.tmsdb[0].x, (float)responce.values.tmsdb[0].y, (float)responce.values.tmsdb[0].z);
 						marker_position = Ros2UnityPosition(marker_position);
-						marker_position.z += 0.2f;
+						marker_position.z += 0.25f;
 						Debug.Log("Marker Pos: " + marker_position);
+						mainSystem.MyConsole_Add("Marker Pos: " + marker_position);
 
 						//回転を取得＆変換
 						Vector3 marker_euler = new Vector3(Rad2Euler((float)responce.values.tmsdb[0].rr), Rad2Euler((float)responce.values.tmsdb[0].rp), Rad2Euler((float)responce.values.tmsdb[0].ry));
@@ -134,7 +135,8 @@ public class BsenCalibrationSystem : MonoBehaviour {
 						marker_euler.x = 0.0f;
 						marker_euler.y -= 1.5f;
 						marker_euler.z = 0.0f;
-						Debug.Log("Marker rot: " + marker_euler);
+						Debug.Log("Marker Rot: " + marker_euler);
+						mainSystem.MyConsole_Add("Marker Rot: " + marker_euler);
 
 						mainSystem.UpdateDatabaseInfoViconIRVSMarker(marker_position, marker_euler);
 
