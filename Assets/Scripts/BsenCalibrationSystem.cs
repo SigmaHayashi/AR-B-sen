@@ -12,28 +12,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	private GameObject coordinates_adapter;
 	private GameObject irvs_marker;
 
-	//ボタンとテキストたち
-	/*
-	private Button posXplusButton;
-	private Button posXminusButton;
-	private Button posYplusButton;
-	private Button posYminusButton;
-	private Button posZplusButton;
-	private Button posZminusButton;
-
-	private Button rotXplusButton;
-	private Button rotXminusButton;
-	private Button rotYplusButton;
-	private Button rotYminusButton;
-	private Button rotZplusButton;
-	private Button rotZminusButton;
-
-	private Button autoPositioningButton;
-
-	private Text cameraPositionText;
-	private Text bsenPositionText;
-	private Text debugText;
-	*/
+	//UI制御用
 	private MainScript mainSystem;
 
 	private Vector3 not_offset_pos, not_offset_rot;
@@ -84,25 +63,20 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		//phase 0
 		//毎回すること
 		//AugmentedImageの更新
-		//CameraとB-senのポジション表示
 		if (!Application.isEditor) {
 			Session.GetTrackables<AugmentedImage>(m_AugmentedImages, TrackableQueryFilter.Updated);
 		}
-
-		/*
-		cameraPositionText.text = "Camera Position : " + Camera.main.transform.position.ToString("f2") + "\n";
-		cameraPositionText.text += "Camera Rotation : " + Camera.main.transform.eulerAngles.ToString();
-
-		bsenPositionText.text = "B-sen Position : " + bsen_model.transform.localPosition.ToString("f2") + "\n";
-		bsenPositionText.text += "B-sen Rotation : " + bsen_model.transform.eulerAngles.ToString();
-		*/
+		
+		//CameraとB-senのポジション表示
 		mainSystem.UpdateCalibrationInfoCamera(Camera.main.transform.position, Camera.main.transform.eulerAngles);
 		mainSystem.UpdateCalibrationInfoBsen(bsen_model.transform.position, bsen_model.transform.eulerAngles);
 
+		//どれだけ手動キャリブしてるか表示
 		Vector3 offset_pos = bsen_model.transform.position - not_offset_pos;
 		Vector3 offset_rot = bsen_model.transform.eulerAngles - not_offset_rot;
 		mainSystem.UpdateCalibrationInfoOffset(offset_pos, offset_rot);
 
+		//自動キャリブ終了後
 		if (!CheckFinishCalibration()) {
 			switch (calibration_state) {
 				//DBにアクセス開始
@@ -184,74 +158,41 @@ public class BsenCalibrationSystem : MonoBehaviour {
 						finish_calibration = true;
 					}
 
+					//自動キャリブ終了時の位置と回転を保存
 					not_offset_pos = bsen_model.transform.position;
 					not_offset_rot = bsen_model.transform.eulerAngles;
 					break;
 			}
 		}
 	}
-	
-	/*****************************************************************
-	 * ボタンとテキストを取得
-	 * ボタンにクリック時の動作を設定
-	 *****************************************************************/
-	/*
-	void ButtonTextSetting() {
-		posXplusButton = GameObject.Find("Main System/Button Canvas/pos X+ Button").GetComponent<Button>();
-		posXminusButton = GameObject.Find("Main System/Button Canvas/pos X- Button").GetComponent<Button>();
-		posYplusButton = GameObject.Find("Main System/Button Canvas/pos Y+ Button").GetComponent<Button>();
-		posYminusButton = GameObject.Find("Main System/Button Canvas/pos Y- Button").GetComponent<Button>();
-		posZplusButton = GameObject.Find("Main System/Button Canvas/pos Z+ Button").GetComponent<Button>();
-		posZminusButton = GameObject.Find("Main System/Button Canvas/pos Z- Button").GetComponent<Button>();
-
-		rotXplusButton = GameObject.Find("Main System/Button Canvas/rot X+ Button").GetComponent<Button>();
-		rotXminusButton = GameObject.Find("Main System/Button Canvas/rot X- Button").GetComponent<Button>();
-		rotYplusButton = GameObject.Find("Main System/Button Canvas/rot Y+ Button").GetComponent<Button>();
-		rotYminusButton = GameObject.Find("Main System/Button Canvas/rot Y- Button").GetComponent<Button>();
-		rotZplusButton = GameObject.Find("Main System/Button Canvas/rot Z+ Button").GetComponent<Button>();
-		rotZminusButton = GameObject.Find("Main System/Button Canvas/rot Z- Button").GetComponent<Button>();
-
-		posXplusButton.onClick.AddListener(onPosXplusClick);
-		posXminusButton.onClick.AddListener(onPosXminusClick);
-		posYplusButton.onClick.AddListener(onPosYplusClick);
-		posYminusButton.onClick.AddListener(onPosYminusClick);
-		posZplusButton.onClick.AddListener(onPosZplusClick);
-		posZminusButton.onClick.AddListener(onPosZminusClick);
-
-		rotXplusButton.onClick.AddListener(onRotXplusClick);
-		rotXminusButton.onClick.AddListener(onRotXminusClick);
-		rotYplusButton.onClick.AddListener(onRotYplusClick);
-		rotYminusButton.onClick.AddListener(onRotYminusClick);
-		rotZplusButton.onClick.AddListener(onRotZplusClick);
-		rotZminusButton.onClick.AddListener(onRotZminusClick);
-
-		cameraPositionText = GameObject.Find("Main System/Text Canvas/Camera Position Text").GetComponent<Text>();
-		bsenPositionText = GameObject.Find("Main System/Text Canvas/B-sen Position Text").GetComponent<Text>();
-		debugText = GameObject.Find("Main System/Text Canvas/Debug Text").GetComponent<Text>();
-	}
-	*/
 
 	/*****************************************************************
 	 * 自動キャリブレーション
 	 *****************************************************************/
 	void autoPositioning() {
+		//画像認識ができたら
 		if (detected_marker) {
 			if (marker_image.TrackingState == TrackingState.Tracking) {
+				//画像の回転を取得し，手前をX軸，鉛直方向をY軸にするように回転
 				Quaternion new_rot = new Quaternion();
 				new_rot = marker_image.CenterPose.rotation;
 				new_rot *= Quaternion.Euler(0, 0, 90);
 				new_rot *= Quaternion.Euler(90, 0, 0);
 
+				//傾きはないものとする
 				Vector3 new_euler = new_rot.eulerAngles;
 				new_euler.x = 0.0f;
 				new_euler.z = 0.0f;
 				
+				//モデルを画像の向きをもとに回転
 				bsen_model.transform.eulerAngles += new_euler;
 				
+				//Unity空間における画像の位置，VICONから得たマーカーの座標からどれだけずれてるか計算
 				Vector3 image_position = marker_image.CenterPose.position;
 				Vector3 real_position = irvs_marker.transform.position;
 				Vector3 offset_vector = image_position - real_position;
 
+				//どれだけずれてるかの値からモデルを移動
 				Vector3 temp_room_position = bsen_model.transform.position;
 				temp_room_position += offset_vector;
 				bsen_model.transform.position = temp_room_position;
@@ -265,10 +206,6 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	/*****************************************************************
 	 * ボタン押したときの動作
 	 *****************************************************************/
-	void onAutoPositioningClick() {
-		autoPositioning();
-	}
-
 	public void onPosXplusClick() {
 		Vector3 tmp = new Vector3(0.025f, 0.0f, 0.0f);
 		coordinates_adapter.transform.localPosition = tmp;
@@ -317,44 +254,6 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		bsen_model.transform.position = tmp;
 	}
 
-	/*
-	void onRotXplusClick() {
-		Vector3 tmp = bsen_model.transform.eulerAngles;
-		tmp.x += 0.25f;
-		bsen_model.transform.eulerAngles = tmp;
-	}
-
-	void onRotXminusClick() {
-		Vector3 tmp = bsen_model.transform.eulerAngles;
-		tmp.x -= 0.25f;
-		bsen_model.transform.eulerAngles = tmp;
-	}
-
-	void onRotYplusClick() {
-		Vector3 tmp = bsen_model.transform.eulerAngles;
-		tmp.y += 0.25f;
-		bsen_model.transform.eulerAngles = tmp;
-	}
-
-	void onRotYminusClick() {
-		Vector3 tmp = bsen_model.transform.eulerAngles;
-		tmp.y -= 0.25f;
-		bsen_model.transform.eulerAngles = tmp;
-	}
-
-	void onRotZplusClick() {
-		Vector3 tmp = bsen_model.transform.eulerAngles;
-		tmp.z += 0.25f;
-		bsen_model.transform.eulerAngles = tmp;
-	}
-
-	void onRotZminusClick() {
-		Vector3 tmp = bsen_model.transform.eulerAngles;
-		tmp.z -= 0.25f;
-		bsen_model.transform.eulerAngles = tmp;
-	}
-	*/
-
 	public void onRotRightClick() {
 		Vector3 tmp = bsen_model.transform.eulerAngles;
 		tmp.y += 0.25f;
@@ -366,14 +265,6 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		tmp.y -= 0.25f;
 		bsen_model.transform.eulerAngles = tmp;
 	}
-
-	/*
-	void debug(string message) {
-		if(debugText != null) {
-			debugText.text = message;
-		}
-	}
-	*/
 	
 	/*****************************************************************
 	 * ROSの座標系（右手系）からUnityの座標系（左手系）への変換

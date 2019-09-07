@@ -5,24 +5,29 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+//バッテリー情報を取得するためのクラス
 public class BatteryData {
 	public float battery;
 }
 
 public class SmartPalControll : MonoBehaviour {
 
+	//UI制御用
 	private MainScript mainSystem;
 
+	//データベースと通信するやつ
 	private TMSDatabaseAdapter DBAdapter;
 	private float time_pos = 0.0f;
 	private float time_bat = 0.0f;
 	bool finish_battery_text = false;
 	GameObject Battery_3DText;
 	
+	//キャリブシステム
 	private BsenCalibrationSystem calib_system;
 
 	// Start is called before the first frame update
 	void Start() {
+		//各種オブジェクトを取得
 		mainSystem = GameObject.Find("Main System").GetComponent<MainScript>();
 
 		DBAdapter = GameObject.Find("Database Adapter").GetComponent<TMSDatabaseAdapter>();
@@ -32,6 +37,7 @@ public class SmartPalControll : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update() {
+		//キャリブが終わってからポジショントラッキングとバッテリー情報アクセスする
 		if (calib_system.CheckFinishCalibration()) {
 			PositionTracking();
 			UpdateBatteryInformation();
@@ -107,7 +113,6 @@ public class SmartPalControll : MonoBehaviour {
 
 				if (!finish_battery_text) {
 					Battery_3DText = (GameObject)Instantiate(Resources.Load("TextMeshPro"));
-					//Battery_3DText.transform.parent = transform;
 					Battery_3DText.transform.SetParent(transform, false);
 					Battery_3DText.transform.localPosition = new Vector3(0.0f, 1.5f, 0.0f);
 					TextMeshPro TMP = Battery_3DText.GetComponent<TextMeshPro>();
@@ -124,6 +129,7 @@ public class SmartPalControll : MonoBehaviour {
 			}
 		}
 
+		//カメラとSmartPalの距離が近づいたら表示
 		if(Battery_3DText != null) {
 			if(CalcDistance(Camera.main.gameObject, transform.gameObject) < 2.0f) {
 				Battery_3DText.SetActive(true);

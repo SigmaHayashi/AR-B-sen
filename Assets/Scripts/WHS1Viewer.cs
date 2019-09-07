@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
+//WHS1のデータを取得するためのクラス
 public class WHS1Data {
 	public float temp;
 	public int rate;
@@ -12,22 +13,28 @@ public class WHS1Data {
 
 public class WHS1Viewer : MonoBehaviour {
 
+	//UI制御用
 	private MainScript mainSystem;
 	
+	//データベースと通信するやつ
 	private float time = 0.0f;
 	private TMSDatabaseAdapter DBAdapter;
 	
+	//キャリブシステム
 	private BsenCalibrationSystem calib_system;
 
+	//3DText
 	private GameObject WHS1_3D_Text;
 	private TextMeshPro WHS1_3D_TextMeshPro;
 
+	//心拍波形のグラフ
 	private GameObject wave_graph;
 
 	private bool init_this_system = false;
 
 	// Start is called before the first frame update
 	void Start() {
+		//各種オブジェクトを取得
 		mainSystem = GameObject.Find("Main System").GetComponent<MainScript>();
 		DBAdapter = GameObject.Find("Database Adapter").GetComponent<TMSDatabaseAdapter>();
 		calib_system = GameObject.Find("B-sen Calibration System").GetComponent<BsenCalibrationSystem>();
@@ -36,6 +43,7 @@ public class WHS1Viewer : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update() {
+		//キャリブが終わってから
 		if (calib_system.CheckFinishCalibration()) {
 			if (!init_this_system) {
 				InitThisSystem();
@@ -112,6 +120,7 @@ public class WHS1Viewer : MonoBehaviour {
 			}
 		}
 
+		//カメラと近いときに表示
 		if (WHS1_3D_Text != null) {
 			if (CalcDistance(Camera.main.gameObject, WHS1_3D_Text) < 3.0f) {
 				WHS1_3D_Text.SetActive(true);

@@ -6,28 +6,25 @@ using UnityEngine.SceneManagement;
 
 public class MainScript : MonoBehaviour {
 
+	//スクリーンが消えないようにする
 	public bool ScreenNOTSleep = true;
-
-	/*
-	public Button changeMainSceneButton;
-	public Button changeTestSceneButton;
-	*/
-
+	
+	//キャプチャモードかどうか
 	private bool capture_mode = false;
-	/*
-	public Canvas TextCanvas;
-	public Canvas ButtonCanvas;
-	*/
+
+	//Canvasたち
 	public GameObject MainCanvas;
 	public GameObject CalibrationCanvas;
 	public GameObject MyConsoleCanvas;
 	public GameObject DatabaseInfoCanvas;
 
+	//Canvasを遷移させるボタンたち
 	private Button ChangeToCalibrationButton;
 	private Button ChangeToMyConsoleButton;
 	private Button ChangeToDatabaseButton;
 	private List<Button> BackToMainButton = new List<Button>();
 
+	//いまどのCanvasを使用中か示す変数，それに対応する辞書
 	private int CanvasState = 0;
 	private Dictionary<int, GameObject> CanvasDictionary = new Dictionary<int, GameObject>();
 
@@ -65,7 +62,6 @@ public class MainScript : MonoBehaviour {
 	private GameObject Database_WHS1WaveGraph;
 	private Text Database_ViconIRVSMarkerText;
 	private Text Database_ViconSmartPalText;
-	//private string Database_RefrigeratorGoodsText_Buffer;
 	private Dictionary<int, string> Database_RefrigeratorGoodsText_BufferDictionary = new Dictionary<int, string>();
 	private string Database_SmartPalBatteryText_Buffer;
 	private string Database_WHS1InfoText_Buffer;
@@ -82,15 +78,6 @@ public class MainScript : MonoBehaviour {
 		else {
 			Screen.sleepTimeout = SleepTimeout.SystemSetting;
 		}
-
-		/*
-		if (changeMainSceneButton != null) {
-			changeMainSceneButton.onClick.AddListener(changeMainScene);
-		}
-		if (changeTestSceneButton != null) {
-			changeTestSceneButton.onClick.AddListener(changeTestScene);
-		}
-		*/
 
 		//CanvasをDictionaryに追加
 		CanvasDictionary.Add(0, MainCanvas);
@@ -116,7 +103,7 @@ public class MainScript : MonoBehaviour {
 		//Main Canvasのオブジェクトを取得
 		Main_InfoText = GameObject.Find("Main System/Main Canvas/Info Text").GetComponent<Text>();
 
-		//Calibration Canvasのオブジェクトを取得
+		//Calibration Canvasのオブジェクトを取得，ボタンにキャリブシステムの機能を持たせる
 		Calibration_OffsetInfoText = GameObject.Find("Main System/Calibration Canvas/Text Canvas/Offset Position Text").GetComponent<Text>();
 		Calibration_BsenInfoText = GameObject.Find("Main System/Calibration Canvas/Text Canvas/B-sen Position Text").GetComponent<Text>();
 		Calibration_CameraInfoText = GameObject.Find("Main System/Calibration Canvas/Text Canvas/Camera Position Text").GetComponent<Text>();
@@ -174,17 +161,9 @@ public class MainScript : MonoBehaviour {
 				if(touch.phase == TouchPhase.Began) {
 					capture_mode = !capture_mode;
 					if (capture_mode) {
-						/*
-						TextCanvas.gameObject.SetActive(false);
-						ButtonCanvas.gameObject.SetActive(false);
-						*/
 						MainCanvas.SetActive(false);
 					}
 					else {
-						/*
-						TextCanvas.gameObject.SetActive(true);
-						ButtonCanvas.gameObject.SetActive(true);
-						*/
 						MainCanvas.SetActive(true);
 					}
 				}
@@ -261,7 +240,6 @@ public class MainScript : MonoBehaviour {
 					GameObject new_text = Instantiate(Database_RefrigeratorGoodsTextSample);
 
 					new_text.name = "Info of " + goods_info.Key.ToString();
-					//new_text.transform.parent = GameObject.Find("Main System/Database Info Canvas/Refrigerator Goods Info").transform;
 					new_text.transform.SetParent(GameObject.Find("Main System/Database Info Canvas/Refrigerator Goods Info").transform, false);
 
 					RectTransform sample_rect = Database_RefrigeratorGoodsTextSample.GetComponent<RectTransform>();
@@ -308,30 +286,11 @@ public class MainScript : MonoBehaviour {
 			foreach (GameObject obj in line_list) {
 				Destroy(obj);
 			}
-
-			/*
-			GameObject line_prefab = (GameObject)Resources.Load("Line");
-			for (int n = 0; n < Database_WHS1WaveGraph_Buffer.Length - 1; n++) {
-				GameObject line = Instantiate(line_prefab);
-				line.name = "Line" + n.ToString();
-				line.transform.parent = Database_WHS1WaveGraph.transform;
-				line.transform.localPosition = new Vector3(0, 0, 0);
-				line.transform.localEulerAngles = new Vector3(0, 0, 0);
-				line.transform.localScale = new Vector3(1, 1, 1);
-
-				LineRenderer line_rend = line.GetComponent<LineRenderer>();
-				line_rend.widthMultiplier = 2.0f;
-				line_rend.startWidth = 1.0f;
-				line_rend.endWidth = 1.0f;
-				line_rend.SetPosition(0, new Vector3(n * (550.0f / (float)Database_WHS1WaveGraph_Buffer.Length), (float)Database_WHS1WaveGraph_Buffer[n] * (400.0f / 1000.0f), 0));
-				line_rend.SetPosition(1, new Vector3((n + 1) * (550.0f / (float)Database_WHS1WaveGraph_Buffer.Length), (float)Database_WHS1WaveGraph_Buffer[n + 1] * (400.0f / 1000.0f), 0));
-			}
-			*/
+			
 			GameObject line_prefab = (GameObject)Resources.Load("UI Line");
 			for (int n = 0; n < Database_WHS1WaveGraph_Buffer.Length - 1; n++) {
 				GameObject line = Instantiate(line_prefab);
 				line.name = "UI Line" + n.ToString();
-				//line.transform.parent = Database_WHS1WaveGraph.transform;
 				line.transform.SetParent(Database_WHS1WaveGraph.transform, false);
 
 				RectTransform line_rect = line.GetComponent<RectTransform>();
@@ -456,7 +415,6 @@ public class MainScript : MonoBehaviour {
 					GameObject new_text = Instantiate(Database_RefrigeratorGoodsTextSample);
 
 					new_text.name = "Info of " + goods_info.Key.ToString();
-					//new_text.transform.parent = GameObject.Find("Main System/Database Info Canvas/Refrigerator Goods Info").transform;
 					new_text.transform.SetParent(GameObject.Find("Main System/Database Info Canvas/Refrigerator Goods Info").transform, false);
 
 					RectTransform sample_rect = Database_RefrigeratorGoodsTextSample.GetComponent<RectTransform>();
@@ -523,30 +481,11 @@ public class MainScript : MonoBehaviour {
 			foreach (GameObject obj in line_list) {
 				Destroy(obj);
 			}
-
-			/*
-			GameObject line_prefab = (GameObject)Resources.Load("Line");
-			for (int n = 0; n < wave_list.Length - 1; n++) {
-				GameObject line = Instantiate(line_prefab);
-				line.name = "Line" + n.ToString();
-				line.transform.parent = Database_WHS1WaveGraph.transform;
-				line.transform.localPosition = new Vector3(0, 0, 0);
-				line.transform.localEulerAngles = new Vector3(0, 0, 0);
-				line.transform.localScale = new Vector3(1, 1, 1);
-
-				LineRenderer line_rend = line.GetComponent<LineRenderer>();
-				line_rend.widthMultiplier = 2.0f;
-				line_rend.startWidth = 1.0f;
-				line_rend.endWidth = 1.0f;
-				line_rend.SetPosition(0, new Vector3(n * (550.0f / (float)wave_list.Length), (float)wave_list[n] * (400.0f / 1000.0f), 0));
-				line_rend.SetPosition(1, new Vector3((n + 1) * (550.0f / (float)wave_list.Length), (float)wave_list[n + 1] * (400.0f / 1000.0f), 0));
-			}
-			*/
+			
 			GameObject line_prefab = (GameObject)Resources.Load("UI Line");
 			for(int n = 0; n < wave_list.Length - 1; n++) {
 				GameObject line = Instantiate(line_prefab);
 				line.name = "UI Line" + n.ToString();
-				//line.transform.parent = Database_WHS1WaveGraph.transform;
 				line.transform.SetParent(Database_WHS1WaveGraph.transform, false);
 
 				RectTransform line_rect = line.GetComponent<RectTransform>();
@@ -581,16 +520,4 @@ public class MainScript : MonoBehaviour {
 			GetAllChildren(ob.gameObject, ref all_children);
 		}
 	}
-
-
-		/*
-		void changeMainScene() {
-			SceneManager.LoadScene("AR B-sen");
-		}
-
-		void changeTestScene() {
-			//SceneManager.LoadScene("Shader Test Scene");
-			SceneManager.LoadScene("VICON coordinates Test Scene");
-		}
-		*/
-	}
+}

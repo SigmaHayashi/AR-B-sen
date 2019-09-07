@@ -6,10 +6,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+//消費期限を取得する用のクラス
 public class ExpirationData {
 	public string expiration;
 }
 
+//物品の情報を入れておくクラス
 class GoodsInfo {
 	public string name;
 	public int id;
@@ -20,6 +22,7 @@ class GoodsInfo {
 
 public class RefrigeratorManager : MonoBehaviour {
 
+	//UI更新用
 	private MainScript mainSystem;
 
 	//GameObjectたち
@@ -62,6 +65,7 @@ public class RefrigeratorManager : MonoBehaviour {
 
 	// Start is called before the first frame update
 	void Start() {
+		//各オブジェクトの取得
 		mainSystem = GameObject.Find("Main System").GetComponent<MainScript>();
 
 		refrigerator = GameObject.Find("refrigerator_link");
@@ -71,6 +75,7 @@ public class RefrigeratorManager : MonoBehaviour {
 		cancoffee = GameObject.Find("cancoffee_x_link");
 		soysauce = GameObject.Find("soysauce_bottle_black_x_link");
 
+		//オブジェクトを辞書に登録
 		goods_object_dictionary.Add(7004, greentea);
 		goods_object_dictionary.Add(7006, cancoffee);
 		goods_object_dictionary.Add(7009, soysauce);
@@ -78,21 +83,27 @@ public class RefrigeratorManager : MonoBehaviour {
 		goods_state_dictionary.Add(7006, false);
 		goods_state_dictionary.Add(7009, false);
 
+		//オブジェクトにShader変更スクリプトを追加
 		foreach (GameObject goods in goods_object_dictionary.Values) {
 			goods.AddComponent<ShaderChange>();
 		}
 
+		//位置合わせするや～つを配置
 		GameObject prefab = (GameObject)Resources.Load("Coordinates Adapter");
 		coordinates_adapter = (GameObject)Instantiate(prefab, this.transform);
 		coordinates_adapter.transform.parent = refrigerator.transform;
 		
+		//データベースと通信するやつ
 		DBAdapter = GameObject.Find("Database Adapter").GetComponent<TMSDatabaseAdapter>();
 
+		//キャリブシステム
 		calib_system = GameObject.Find("B-sen Calibration System").GetComponent<BsenCalibrationSystem>();
 
+		//冷蔵庫にもShader変更スクリプトを追加
 		refrigerator.AddComponent<ShaderChange>();
 		refrigerator_shaderchange = refrigerator.GetComponent<ShaderChange>();
 
+		//rostmsのShader変更スクリプト
 		rostms_shaderchange = GameObject.Find("rostms").GetComponent<ShaderChange>();
 	}
 
@@ -104,6 +115,7 @@ public class RefrigeratorManager : MonoBehaviour {
 		distance_old = distance;
 		distance = CalcDistance(coordinates_adapter, ar_camera);
 
+		//最初の1回Shaderを変更する
 		if (!change_goods_shader) {
 			foreach (GameObject goods in goods_object_dictionary.Values) {
 				ShaderChange shaderchange = goods.GetComponent<ShaderChange>();
@@ -237,7 +249,6 @@ public class RefrigeratorManager : MonoBehaviour {
 						else {
 							GameObject new_3dtext = (GameObject)Instantiate(Resources.Load("TextMeshPro"));
 							goods_3dtext_dictionary.Add(item.Key, new_3dtext);
-							//goods_3dtext_dictionary[item.Key].transform.parent = goods_object_dictionary[item.Key].transform;
 							goods_3dtext_dictionary[item.Key].transform.SetParent(goods_object_dictionary[item.Key].transform, false);
 							goods_3dtext_dictionary[item.Key].transform.localPosition = new Vector3(0.0f, 0.15f, 0.0f);
 							TextMeshPro TMP = goods_3dtext_dictionary[item.Key].GetComponent<TextMeshPro>();
@@ -251,6 +262,7 @@ public class RefrigeratorManager : MonoBehaviour {
 				}
 			}
 
+			//UIを更新する
 			Dictionary<int, string> goods_info_string_dictionary = new Dictionary<int, string>();
 			foreach(GoodsInfo goods_info in goods_info_dictionary.Values) {
 				string info = goods_info.name + ", "
