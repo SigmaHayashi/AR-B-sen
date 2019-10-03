@@ -35,7 +35,7 @@ public class Transparent : MonoBehaviour {
 	}
 
 	void ChangeShader() {
-		debug(Shader.Find("Custom/Transparent").name.ToString());
+		debug(Shader.Find("Custom/ARTransparent").name.ToString());
 
 		foreach (Renderer ren in renderers) {
 			mats = ren.materials;
@@ -68,6 +68,7 @@ public class Transparent : MonoBehaviour {
 	}
 
 	void debug(string message) {
+		Debug.Log(message);
 		if (debug_text != null) {
 			debug_text.text += message + "\n";
 		}

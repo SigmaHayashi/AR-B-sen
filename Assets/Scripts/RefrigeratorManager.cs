@@ -12,12 +12,27 @@ public class ExpirationData {
 }
 
 //物品の情報を入れておくクラス
+/*
 class GoodsInfo {
 	public string name;
 	public int id;
 	public int state;
 	public Vector3 pos;
 	public string expiration;
+}
+*/
+
+//物品情報をまとめるクラス
+//Dictionary統合のため
+class GoodsData {
+	//public int id;
+	public string name;
+	public int state;
+	public Vector3 pos;
+	public string expiration;
+	public GameObject obj;
+	public GameObject text3d;
+	public bool state_bool;
 }
 
 public class RefrigeratorManager : MonoBehaviour {
@@ -34,12 +49,14 @@ public class RefrigeratorManager : MonoBehaviour {
 	private GameObject greentea;
 	private GameObject cancoffee;
 	private GameObject soysauce;
-	private Dictionary<int, GameObject> goods_object_dictionary = new Dictionary<int, GameObject>();
-	private Dictionary<int, bool> goods_state_dictionary = new Dictionary<int, bool>();
+	//private Dictionary<int, GameObject> goods_object_dictionary = new Dictionary<int, GameObject>();
+	//private Dictionary<int, bool> goods_state_dictionary = new Dictionary<int, bool>();
 
-	private Dictionary<int, GameObject> goods_3dtext_dictionary = new Dictionary<int, GameObject>();
+	//private Dictionary<int, GameObject> goods_3dtext_dictionary = new Dictionary<int, GameObject>();
 
-	private Dictionary<int, GoodsInfo> goods_info_dictionary = new Dictionary<int, GoodsInfo>();
+	//private Dictionary<int, GoodsInfo> goods_info_dictionary = new Dictionary<int, GoodsInfo>();
+
+	private Dictionary<int, GoodsData> goods_data_dictionary = new Dictionary<int, GoodsData>();
 	
 	//TMSDB関連
 	private float time_1 = 0.0f;
@@ -76,16 +93,38 @@ public class RefrigeratorManager : MonoBehaviour {
 		soysauce = GameObject.Find("soysauce_bottle_black_x_link");
 
 		//オブジェクトを辞書に登録
+		/*
 		goods_object_dictionary.Add(7004, greentea);
 		goods_object_dictionary.Add(7006, cancoffee);
 		goods_object_dictionary.Add(7009, soysauce);
 		goods_state_dictionary.Add(7004, false);
 		goods_state_dictionary.Add(7006, false);
 		goods_state_dictionary.Add(7009, false);
+		*/
+		goods_data_dictionary.Add(7004, new GoodsData());
+		goods_data_dictionary.Add(7006, new GoodsData());
+		goods_data_dictionary.Add(7009, new GoodsData());
+		goods_data_dictionary[7004].obj = greentea;
+		goods_data_dictionary[7006].obj = cancoffee;
+		goods_data_dictionary[7009].obj = soysauce;
 
 		//オブジェクトにShader変更スクリプトを追加
-		foreach (GameObject goods in goods_object_dictionary.Values) {
-			goods.AddComponent<ShaderChange>();
+		//foreach (GameObject goods in goods_object_dictionary.Values) {
+		foreach (GoodsData goods in goods_data_dictionary.Values) {
+			//goods.AddComponent<ShaderChange>();
+			goods.obj.AddComponent<ShaderChange>();
+		}
+
+		foreach (GoodsData goods in goods_data_dictionary.Values) {
+			goods.state_bool = false;
+
+			goods.text3d = (GameObject)Instantiate(Resources.Load("TextMeshPro"));
+			goods.text3d.transform.SetParent(goods.obj.transform, false);
+			goods.text3d.transform.localPosition = new Vector3(0.0f, 0.15f, 0.0f);
+			TextMeshPro TMP = goods.text3d.GetComponent<TextMeshPro>();
+			TMP.fontSize = 0.6f;
+			TMP.text = "";
+			goods.text3d.SetActive(false);
 		}
 
 		//位置合わせするや～つを配置
@@ -117,8 +156,10 @@ public class RefrigeratorManager : MonoBehaviour {
 
 		//最初の1回Shaderを変更する
 		if (!change_goods_shader) {
-			foreach (GameObject goods in goods_object_dictionary.Values) {
-				ShaderChange shaderchange = goods.GetComponent<ShaderChange>();
+			//foreach (GameObject goods in goods_object_dictionary.Values) {
+			foreach(GoodsData goods in goods_data_dictionary.Values) {
+				//ShaderChange shaderchange = goods.GetComponent<ShaderChange>();
+				ShaderChange shaderchange = goods.obj.GetComponent<ShaderChange>();
 				shaderchange.ChangeShader(Shader.Find("Custom/Transparent"));
 			}
 			change_goods_shader = true;
@@ -137,11 +178,14 @@ public class RefrigeratorManager : MonoBehaviour {
 			}
 			//遠くにいるとき
 			else if(distance >= distance_to_display) {
-				foreach (KeyValuePair<int, GameObject> goods in goods_object_dictionary) {
-					ShaderChange goods_shaderchange = goods.Value.GetComponent<ShaderChange>();
+				//foreach (KeyValuePair<int, GameObject> goods in goods_object_dictionary) {
+				foreach(GoodsData goods in goods_data_dictionary.Values) {
+					//ShaderChange goods_shaderchange = goods.Value.GetComponent<ShaderChange>();
+					ShaderChange goods_shaderchange = goods.obj.GetComponent<ShaderChange>();
 					goods_shaderchange.alpha = 0.0f;
 					goods_shaderchange.ChangeColors();
-					Change3DTextActive(goods.Key, false);
+					//Change3DTextActive(goods.Key, false);
+					goods.text3d.SetActive(false);
 				}
 				if(refrigerator_shaderchange.shader_now != Shader.Find("Custom/ARTransparent")){
 					refrigerator_shaderchange.ChangeShader(Shader.Find("Custom/ARTransparent"));
@@ -151,15 +195,20 @@ public class RefrigeratorManager : MonoBehaviour {
 			}
 			//ずっと近くにいるとき
 			else if (distance < distance_to_display && distance_old < distance_to_display){
-				foreach(KeyValuePair<int, GameObject> goods in goods_object_dictionary) {
-					ShaderChange goods_shaderchange = goods.Value.GetComponent<ShaderChange>();
-					if (goods_state_dictionary[goods.Key]) {
+				//foreach(KeyValuePair<int, GameObject> goods in goods_object_dictionary) {
+				foreach (GoodsData goods in goods_data_dictionary.Values) {
+					//ShaderChange goods_shaderchange = goods.Value.GetComponent<ShaderChange>();
+					ShaderChange goods_shaderchange = goods.obj.GetComponent<ShaderChange>();
+					//if (goods_state_dictionary[goods.Key]) {
+					if (goods.state_bool) {
 						goods_shaderchange.alpha = 0.4f;
-						Change3DTextActive(goods.Key, true);
+						//Change3DTextActive(goods.Key, true);
+						goods.text3d.SetActive(true);
 					}
 					else {
 						goods_shaderchange.alpha = 0.0f;
-						Change3DTextActive(goods.Key, false);
+						//Change3DTextActive(goods.Key, false);
+						goods.text3d.SetActive(false);
 					}
 					goods_shaderchange.ChangeColors();
 				}
@@ -189,6 +238,7 @@ public class RefrigeratorManager : MonoBehaviour {
 					foreach (tmsdb data in responce.values.tmsdb) {
 						//Debug.Log(data.name);
 						//Debug.Log(data.x + ", " + data.y + ", " + data.z);
+						/*
 						if (data.sensor == 3018) {
 							foreach (KeyValuePair<int, GameObject> goods in goods_object_dictionary) {
 								if (goods.Value.name.IndexOf(data.name) != -1) {
@@ -218,6 +268,33 @@ public class RefrigeratorManager : MonoBehaviour {
 								}
 							}
 						}
+						*/
+						if(data.sensor == 3018 && goods_data_dictionary.ContainsKey(data.id)) {
+							GoodsData goods = goods_data_dictionary[data.id];
+							Vector3 place = new Vector3((float)data.x, (float)data.y, (float)data.z);
+							place = Ros2UnityPosition(place);
+							if (data.state == 1) {
+								goods.state_bool = true;
+
+								Debug.Log(data.name + " pos: " + place.ToString("f2"));
+								mainSystem.MyConsole_Add(data.name + " pos: " + place.ToString("f2"));
+								goods.obj.transform.localPosition = place;
+
+								id_list.Add(data.id);
+							}
+							else {
+								goods.state_bool = false;
+							}
+
+							if(goods.name == null) {
+								goods.name = data.name;
+							}
+							if(goods.expiration == null) {
+								goods.expiration = "don't know";
+							}
+							goods.state = data.state;
+							goods.pos = place;
+						}
 					}
 				}
 			}
@@ -237,12 +314,17 @@ public class RefrigeratorManager : MonoBehaviour {
 				if (DBAdapter.CheckSuccess()) {
 					Dictionary<int, string> expiration_dictionary = DBAdapter.ReadExpirationData();
 					DBAdapter.FinishReadData();
-					foreach(KeyValuePair<int, string> item in expiration_dictionary) {
-						ExpirationData expiration_data = JsonUtility.FromJson<ExpirationData>(item.Value);
+					//foreach(KeyValuePair<int, string> item in expiration_dictionary) {
+					foreach (KeyValuePair<int, string> goods in expiration_dictionary) {
+						//ExpirationData expiration_data = JsonUtility.FromJson<ExpirationData>(item.Value);
+						ExpirationData expiration_data = JsonUtility.FromJson<ExpirationData>(goods.Value);
 						string expiration = expiration_data.expiration;
-						Debug.Log("id: " + item.Key + ", name: " + goods_object_dictionary[item.Key].name + ", expiration: " + expiration);
-						mainSystem.MyConsole_Add("id: " + item.Key + ", name: " + goods_object_dictionary[item.Key].name + ", expiration: " + expiration);
+						//Debug.Log("id: " + item.Key + ", name: " + goods_object_dictionary[item.Key].name + ", expiration: " + expiration);
+						Debug.Log("id: " + goods.Key + ", name: " + goods_data_dictionary[goods.Key].name + ", expiration: " + expiration);
+						//mainSystem.MyConsole_Add("id: " + item.Key + ", name: " + goods_object_dictionary[item.Key].name + ", expiration: " + expiration);
+						mainSystem.MyConsole_Add("id: " + goods.Key + ", name: " + goods_data_dictionary[goods.Key].name + ", expiration: " + expiration);
 
+						/*
 						if (goods_3dtext_dictionary.ContainsKey(item.Key)) {
 							goods_3dtext_dictionary[item.Key].GetComponent<TextMeshPro>().text = expiration;
 						}
@@ -256,21 +338,35 @@ public class RefrigeratorManager : MonoBehaviour {
 							TMP.text = expiration;
 							Change3DTextActive(item.Key, false);
 						}
+						*/
+						goods_data_dictionary[goods.Key].text3d.GetComponent<TextMeshPro>().text = expiration;
 
-						goods_info_dictionary[item.Key].expiration = expiration;
+						//goods_info_dictionary[item.Key].expiration = expiration;
+						goods_data_dictionary[goods.Key].expiration = expiration;
 					}
 				}
 			}
 
 			//UIを更新する
 			Dictionary<int, string> goods_info_string_dictionary = new Dictionary<int, string>();
-			foreach(GoodsInfo goods_info in goods_info_dictionary.Values) {
+			/*
+			foreach (GoodsInfo goods_info in goods_info_dictionary.Values) {
 				string info = goods_info.name + ", "
 					+ goods_info.id.ToString() + ", "
 					+ goods_info.state.ToString() + ", "
 					+ goods_info.pos.ToString("f3") + ", "
 					+ goods_info.expiration;
 				goods_info_string_dictionary.Add(goods_info.id, info);
+			}
+			mainSystem.UpdateDatabaseInfoRefrigerator(goods_info_string_dictionary);
+			*/
+			foreach (KeyValuePair<int, GoodsData> goods in goods_data_dictionary) {
+				string info = goods.Value.name + ", "
+					+ goods.Key.ToString() + ", "
+					+ goods.Value.state.ToString() + ", "
+					+ goods.Value.pos.ToString("f3") + ", "
+					+ goods.Value.expiration;
+				goods_info_string_dictionary.Add(goods.Key, info);
 			}
 			mainSystem.UpdateDatabaseInfoRefrigerator(goods_info_string_dictionary);
 		}
@@ -286,19 +382,24 @@ public class RefrigeratorManager : MonoBehaviour {
 		}
 
 		Dictionary<int, float> goods_distance_dictionary = new Dictionary<int, float>();
-		foreach (KeyValuePair<int, GameObject> goods in goods_object_dictionary) {
-			goods_distance_dictionary.Add(goods.Key, CalcDistance(ar_camera, goods.Value));
+		//foreach (KeyValuePair<int, GameObject> goods in goods_object_dictionary) {
+		foreach (KeyValuePair<int, GoodsData> goods in goods_data_dictionary) {
+			//goods_distance_dictionary.Add(goods.Key, CalcDistance(ar_camera, goods.Value));
+			goods_distance_dictionary.Add(goods.Key, CalcDistance(ar_camera, goods.Value.obj));
 		}
 
 		var sorted = goods_distance_dictionary.OrderBy((x) => x.Value);
 
 		foreach (KeyValuePair<int, float> goods in sorted) {
-			if (goods_state_dictionary[goods.Key]) {
-				ShaderChange goods_shaderchange = goods_object_dictionary[goods.Key].GetComponent<ShaderChange>();
+			//if (goods_state_dictionary[goods.Key]) {
+			if (goods_data_dictionary[goods.Key].state_bool) {
+				//ShaderChange goods_shaderchange = goods_object_dictionary[goods.Key].GetComponent<ShaderChange>();
+				ShaderChange goods_shaderchange = goods_data_dictionary[goods.Key].obj.GetComponent<ShaderChange>();
 				goods_shaderchange.alpha = 0.4f;
 				goods_shaderchange.ChangeColors();
 
-				Change3DTextActive(goods.Key, true);
+				//Change3DTextActive(goods.Key, true);
+				goods_data_dictionary[goods.Key].text3d.SetActive(true);
 
 				for (int i = 0; i < 5; i++) {
 					yield return null;
@@ -321,6 +422,7 @@ public class RefrigeratorManager : MonoBehaviour {
 	/*****************************************************************
 	 * 消費期限を表示する3Dテキストの表示非表示切り替え
 	 *****************************************************************/
+	/*
 	private void Change3DTextActive(int id, bool active) {
 		if (goods_3dtext_dictionary.ContainsKey(id)) {
 			if (active) {
@@ -331,6 +433,7 @@ public class RefrigeratorManager : MonoBehaviour {
 			}
 		}
 	}
+	*/
 
 	/*****************************************************************
 	 * ROSの座標系（右手系）からUnityの座標系（左手系）への変換
