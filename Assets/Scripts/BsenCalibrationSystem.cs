@@ -58,7 +58,27 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	//ずっと繰り返し呼び出されるよ～
 	void Update() {
 		//debug("state: " + calibration_state.ToString());
-		mainSystem.UpdateMainCanvasInfoText("state : " + calibration_state.ToString());
+		//mainSystem.UpdateMainCanvasInfoText("state : " + calibration_state.ToString());
+		switch (calibration_state) {
+			case 0:
+				mainSystem.UpdateMainCanvasInfoText("Fail to Start");
+				break;
+			case 1:
+				mainSystem.UpdateMainCanvasInfoText("Start app");
+				break;
+			case 2:
+				mainSystem.UpdateMainCanvasInfoText("Access to Database");
+				break;
+			case 3:
+				mainSystem.UpdateMainCanvasInfoText("Please Look [IRVS Marker]");
+				break;
+			case 4:
+				mainSystem.UpdateMainCanvasInfoText("Ready to AR B-sen");
+				break;
+			default:
+				mainSystem.UpdateMainCanvasInfoText("Error : " + calibration_state.ToString());
+				break;
+		}
 
 		//phase 0
 		//毎回すること
@@ -76,7 +96,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		Vector3 offset_rot = bsen_model.transform.eulerAngles - not_offset_rot;
 		mainSystem.UpdateCalibrationInfoOffset(offset_pos, offset_rot);
 
-		//自動キャリブ終了後
+		//自動キャリブ終了前
 		if (!CheckFinishCalibration()) {
 			switch (calibration_state) {
 				//DBにアクセス開始
@@ -163,6 +183,9 @@ public class BsenCalibrationSystem : MonoBehaviour {
 					not_offset_rot = bsen_model.transform.eulerAngles;
 					break;
 			}
+		}
+		else { //手動キャリブ
+			manualCalibration();
 		}
 	}
 
@@ -264,6 +287,66 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		Vector3 tmp = bsen_model.transform.eulerAngles;
 		tmp.y -= 0.25f;
 		bsen_model.transform.eulerAngles = tmp;
+	}
+
+	private void manualCalibration() {
+		foreach (string button_name in mainSystem.checkCalibrationCanvasButton()) {
+			Vector3 tmp = new Vector3();
+			switch (button_name) {
+				case "pos X+ Button":
+					tmp = new Vector3(0.1f * Time.deltaTime, 0, 0);
+					coordinates_adapter.transform.localPosition = tmp;
+
+					tmp = coordinates_adapter.transform.position;
+					bsen_model.transform.position = tmp;
+					break;
+				case "pos X- Button":
+					tmp = new Vector3(-0.1f * Time.deltaTime, 0, 0);
+					coordinates_adapter.transform.localPosition = tmp;
+
+					tmp = coordinates_adapter.transform.position;
+					bsen_model.transform.position = tmp;
+					break;
+				case "pos Y+ Button":
+					tmp = new Vector3(0, 0.1f * Time.deltaTime, 0);
+					coordinates_adapter.transform.localPosition = tmp;
+
+					tmp = coordinates_adapter.transform.position;
+					bsen_model.transform.position = tmp;
+					break;
+				case "pos Y- Button":
+					tmp = new Vector3(0, -0.1f * Time.deltaTime, 0);
+					coordinates_adapter.transform.localPosition = tmp;
+
+					tmp = coordinates_adapter.transform.position;
+					bsen_model.transform.position = tmp;
+					break;
+				case "pos Z+ Button":
+					tmp = new Vector3(0, 0, 0.1f * Time.deltaTime);
+					coordinates_adapter.transform.localPosition = tmp;
+
+					tmp = coordinates_adapter.transform.position;
+					bsen_model.transform.position = tmp;
+					break;
+				case "pos Z- Button":
+					tmp = new Vector3(0, 0, -0.1f * Time.deltaTime);
+					coordinates_adapter.transform.localPosition = tmp;
+
+					tmp = coordinates_adapter.transform.position;
+					bsen_model.transform.position = tmp;
+					break;
+				case "rot Right Button":
+					tmp = bsen_model.transform.eulerAngles;
+					tmp.y += 0.5f * Time.deltaTime;
+					bsen_model.transform.eulerAngles = tmp;
+					break;
+				case "rot Left Button":
+					tmp = bsen_model.transform.eulerAngles;
+					tmp.y -= 0.5f * Time.deltaTime;
+					bsen_model.transform.eulerAngles = tmp;
+					break;
+			}
+		}
 	}
 	
 	/*****************************************************************

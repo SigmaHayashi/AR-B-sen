@@ -32,6 +32,9 @@ public class WHS1Viewer : MonoBehaviour {
 
 	private bool init_this_system = false;
 
+	[SerializeField]
+	private float distance_to_display = 1.5f;
+
 	// Start is called before the first frame update
 	void Start() {
 		//各種オブジェクトを取得
@@ -122,7 +125,7 @@ public class WHS1Viewer : MonoBehaviour {
 
 		//カメラと近いときに表示
 		if (WHS1_3D_Text != null) {
-			if (CalcDistance(Camera.main.gameObject, WHS1_3D_Text) < 3.0f) {
+			if (CalcDistance(Camera.main.gameObject, WHS1_3D_Text) < distance_to_display) {
 				WHS1_3D_Text.SetActive(true);
 			}
 			else {
@@ -142,7 +145,7 @@ public class WHS1Viewer : MonoBehaviour {
 		Debug.Log("Update Wave Graph: " + debug_string);
 		//mainSystem.MyConsole_Add("Update Wave Graph: " + debug_string);
 
-		if (CalcDistance(Camera.main.gameObject, wave_graph) < 3.0f) {
+		if (CalcDistance(Camera.main.gameObject, wave_graph) < distance_to_display) {
 			wave_graph.SetActive(true);
 
 			List<GameObject> line_list = new List<GameObject>();

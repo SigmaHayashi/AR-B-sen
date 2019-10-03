@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
 
 public class MainScript : MonoBehaviour {
 
@@ -47,7 +48,15 @@ public class MainScript : MonoBehaviour {
 	private Button Calibration_PosZMinusButton;
 	private Button Calibration_RotRightButton;
 	private Button Calibration_RotLeftButton;
-	private BsenCalibrationSystem CalibSystem;
+	//private BsenCalibrationSystem CalibSystem;
+	private bool Calibration_push_PoxXPlus = false;
+	private bool Calibration_push_PoxXMinus = false;
+	private bool Calibration_push_PoxYPlus = false;
+	private bool Calibration_push_PoxYMinus = false;
+	private bool Calibration_push_PoxZPlus = false;
+	private bool Calibration_push_PoxZMinus = false;
+	private bool Calibration_push_RotRight = false;
+	private bool Calibration_push_RotLeft = false;
 
 	//MyConsole CanvasのUI
 	private MyConsole myconsole;
@@ -117,7 +126,8 @@ public class MainScript : MonoBehaviour {
 		Calibration_RotRightButton = GameObject.Find("Main System/Calibration Canvas/Button Canvas/rot Right Button").GetComponent<Button>();
 		Calibration_RotLeftButton = GameObject.Find("Main System/Calibration Canvas/Button Canvas/rot Left Button").GetComponent<Button>();
 
-		CalibSystem = GameObject.Find("B-sen Calibration System").GetComponent<BsenCalibrationSystem>();
+		//CalibSystem = GameObject.Find("B-sen Calibration System").GetComponent<BsenCalibrationSystem>();
+		/*
 		Calibration_PosXPlusButton.onClick.AddListener(CalibSystem.onPosXplusClick);
 		Calibration_PosXMinusButton.onClick.AddListener(CalibSystem.onPosXminusClick);
 		Calibration_PosYPlusButton.onClick.AddListener(CalibSystem.onPosYplusClick);
@@ -126,6 +136,16 @@ public class MainScript : MonoBehaviour {
 		Calibration_PosZMinusButton.onClick.AddListener(CalibSystem.onPosZminusClick);
 		Calibration_RotRightButton.onClick.AddListener(CalibSystem.onRotRightClick);
 		Calibration_RotLeftButton.onClick.AddListener(CalibSystem.onRotLeftClick);
+		*/
+		AddTrigger(Calibration_PosXPlusButton);
+		AddTrigger(Calibration_PosXMinusButton);
+		AddTrigger(Calibration_PosYPlusButton);
+		AddTrigger(Calibration_PosYMinusButton);
+		AddTrigger(Calibration_PosZPlusButton);
+		AddTrigger(Calibration_PosZMinusButton);
+		AddTrigger(Calibration_RotRightButton);
+		AddTrigger(Calibration_RotLeftButton);
+
 
 		//MyConsole Canvasのオブジェクトを取得
 		myconsole = GameObject.Find("Main System/MyConsole Canvas/Console Panel").GetComponent<MyConsole>();
@@ -144,6 +164,51 @@ public class MainScript : MonoBehaviour {
 				Canvas.Value.SetActive(false);
 			}
 		}
+	}
+
+	//キャリブレーション用ボタンに機能を持たせる
+	void AddTrigger(Button button) {
+		EventTrigger trigger = button.GetComponent<EventTrigger>();
+		EventTrigger.Entry entry_down = new EventTrigger.Entry();
+		entry_down.eventID = EventTriggerType.PointerDown;
+		EventTrigger.Entry entry_up = new EventTrigger.Entry();
+		entry_up.eventID = EventTriggerType.PointerUp;
+		switch (button.name.ToString()) {
+			case "pos X+ Button":
+				entry_down.callback.AddListener((x) => { Calibration_push_PoxXPlus = true; });
+				entry_up.callback.AddListener((x) => { Calibration_push_PoxXPlus = false; });
+				break;
+			case "pos X- Button":
+				entry_down.callback.AddListener((x) => { Calibration_push_PoxXMinus = true; });
+				entry_up.callback.AddListener((x) => { Calibration_push_PoxXMinus = false; });
+				break;
+			case "pos Y+ Button":
+				entry_down.callback.AddListener((x) => { Calibration_push_PoxYPlus = true; });
+				entry_up.callback.AddListener((x) => { Calibration_push_PoxYPlus = false; });
+				break;
+			case "pos Y- Button":
+				entry_down.callback.AddListener((x) => { Calibration_push_PoxYMinus = true; });
+				entry_up.callback.AddListener((x) => { Calibration_push_PoxYMinus = false; });
+				break;
+			case "pos Z+ Button":
+				entry_down.callback.AddListener((x) => { Calibration_push_PoxZPlus = true; });
+				entry_up.callback.AddListener((x) => { Calibration_push_PoxZPlus = false; });
+				break;
+			case "pos Z- Button":
+				entry_down.callback.AddListener((x) => { Calibration_push_PoxZMinus = true; });
+				entry_up.callback.AddListener((x) => { Calibration_push_PoxZMinus = false; });
+				break;
+			case "rot Right Button":
+				entry_down.callback.AddListener((x) => { Calibration_push_RotRight = true; });
+				entry_up.callback.AddListener((x) => { Calibration_push_RotRight = false; });
+				break;
+			case "rot Left Button":
+				entry_down.callback.AddListener((x) => { Calibration_push_RotLeft = true; });
+				entry_up.callback.AddListener((x) => { Calibration_push_RotLeft = false; });
+				break;
+		}
+		trigger.triggers.Add(entry_down);
+		trigger.triggers.Add(entry_up);
 	}
 	
 	// Update is called once per frame
@@ -378,6 +443,35 @@ public class MainScript : MonoBehaviour {
 		else {
 			Calibration_CameraInfoText_Buffer = "Camera Pos: " + pos.ToString("f3") + "\nCamera Rot: " + rot.ToString("f2");
 		}
+	}
+
+	public List<string> checkCalibrationCanvasButton() {
+		List<string> button_push_list = new List<string>();
+		if (Calibration_push_PoxXPlus) {
+			button_push_list.Add(Calibration_PosXPlusButton.name);
+		}
+		if (Calibration_push_PoxXMinus) {
+			button_push_list.Add(Calibration_PosXMinusButton.name);
+		}
+		if (Calibration_push_PoxYPlus) {
+			button_push_list.Add(Calibration_PosYPlusButton.name);
+		}
+		if (Calibration_push_PoxYMinus) {
+			button_push_list.Add(Calibration_PosYMinusButton.name);
+		}
+		if (Calibration_push_PoxZPlus) {
+			button_push_list.Add(Calibration_PosZPlusButton.name);
+		}
+		if (Calibration_push_PoxZMinus) {
+			button_push_list.Add(Calibration_PosZMinusButton.name);
+		}
+		if (Calibration_push_RotRight) {
+			button_push_list.Add(Calibration_RotRightButton.name);
+		}
+		if (Calibration_push_RotLeft) {
+			button_push_list.Add(Calibration_RotLeftButton.name);
+		}
+		return button_push_list;
 	}
 
 	/**************************************************
