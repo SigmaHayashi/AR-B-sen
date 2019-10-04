@@ -16,6 +16,8 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	private MainScript mainSystem;
 
 	private Vector3 not_offset_pos, not_offset_rot;
+	
+	public Vector3 offset_vicon_pos;
 
 	//AugmentedImageでつかうものたち
 	private List<AugmentedImage> m_AugmentedImages = new List<AugmentedImage>();
@@ -117,7 +119,8 @@ public class BsenCalibrationSystem : MonoBehaviour {
 						//位置を取得＆変換
 						Vector3 marker_position = new Vector3((float)responce.values.tmsdb[0].x, (float)responce.values.tmsdb[0].y, (float)responce.values.tmsdb[0].z);
 						marker_position = Ros2UnityPosition(marker_position);
-						marker_position.z += 0.25f;
+						//marker_position.z += 0.25f;
+						marker_position += offset_vicon_pos;
 						Debug.Log("Marker Pos: " + marker_position);
 						mainSystem.MyConsole_Add("Marker Pos: " + marker_position);
 
