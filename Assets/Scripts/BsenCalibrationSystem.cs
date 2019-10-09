@@ -95,11 +95,14 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		
 		//CameraとB-senのポジション表示
 		mainSystem.UpdateCalibrationInfoCamera(Camera.main.transform.position, Camera.main.transform.eulerAngles);
-		mainSystem.UpdateCalibrationInfoBsen(bsen_model.transform.position, bsen_model.transform.eulerAngles);
+		//mainSystem.UpdateCalibrationInfoBsen(bsen_model.transform.position, bsen_model.transform.eulerAngles);
+		mainSystem.UpdateCalibrationInfoDevice(arcore_device.transform.position, arcore_device.transform.eulerAngles);
 
 		//どれだけ手動キャリブしてるか表示
-		Vector3 offset_pos = bsen_model.transform.position - not_offset_pos;
-		Vector3 offset_rot = bsen_model.transform.eulerAngles - not_offset_rot;
+		//Vector3 offset_pos = bsen_model.transform.position - not_offset_pos;
+		//Vector3 offset_rot = bsen_model.transform.eulerAngles - not_offset_rot;
+		Vector3 offset_pos = arcore_device.transform.position - not_offset_pos;
+		Vector3 offset_rot = arcore_device.transform.eulerAngles - not_offset_rot;
 		mainSystem.UpdateCalibrationInfoOffset(offset_pos, offset_rot);
 
 		//自動キャリブ終了前
@@ -190,8 +193,10 @@ public class BsenCalibrationSystem : MonoBehaviour {
 					}
 
 					//自動キャリブ終了時の位置と回転を保存
-					not_offset_pos = bsen_model.transform.position;
-					not_offset_rot = bsen_model.transform.eulerAngles;
+					//not_offset_pos = bsen_model.transform.position;
+					//not_offset_rot = bsen_model.transform.eulerAngles;
+					not_offset_pos = arcore_device.transform.position;
+					not_offset_rot = arcore_device.transform.eulerAngles;
 					break;
 			}
 		}
@@ -234,81 +239,6 @@ public class BsenCalibrationSystem : MonoBehaviour {
 
 				//debug("Auto Positioning DONE");
 				mainSystem.UpdateMainCanvasInfoText("Auto Positioning DONE");
-				*/
-
-				/*
-				//画像の回転を取得し，手前をX軸，鉛直上方向をY軸にするように回転
-				Quaternion image_rot_new = marker_image.CenterPose.rotation;
-				image_rot_new *= Quaternion.Euler(0, 0, 90);
-				image_rot_new *= Quaternion.Euler(90, 0, 0);
-
-				//傾きをなくす
-				Vector3 image_euler_new = image_rot_new.eulerAngles;
-				image_euler_new.x = 0.0f;
-				image_euler_new.z = 0.0f;
-
-				//画像の位置と回転，カメラの位置と回転を取得
-				Vector3 image_pos = marker_image.CenterPose.position;
-				Vector3 image_euler = image_euler_new;
-				Vector3 cam_pos = Camera.main.transform.position;
-				Vector3 cam_euler = Camera.main.transform.eulerAngles;
-
-				mainSystem.MyConsole_Add("Image Pos: " + image_pos.ToString());
-				mainSystem.MyConsole_Add("Image Eul: " + image_euler.ToString());
-				mainSystem.MyConsole_Add("Camera Pos: " + cam_pos.ToString());
-				mainSystem.MyConsole_Add("Camera Eul: " + cam_euler.ToString());
-				
-				//そのときのカメラの位置・画像の位置に空オブジェクトを配置し，親子関係にする
-				GameObject image_object = Instantiate(new GameObject());
-				image_object.transform.position = image_pos;
-				image_object.transform.eulerAngles = image_euler;
-
-				GameObject camera_object = Instantiate(new GameObject());
-				camera_object.transform.position = cam_pos;
-				camera_object.transform.eulerAngles = cam_euler;
-
-				camera_object.transform.SetParent(image_object.transform, true);
-
-				//あるべき回転とのずれを計算し，回転する
-				//image_object.transform.eulerAngles = irvs_marker.transform.eulerAngles;
-
-				//あるべき位置とのずれを計算し，移動する
-				//image_object.transform.position = irvs_marker.transform.position;
-
-				//仮の画像オブジェクトをあるべき回転・位置に変更
-				image_object.transform.eulerAngles = irvs_marker.transform.eulerAngles;
-				image_object.transform.position = irvs_marker.transform.position;
-
-				mainSystem.MyConsole_Add("New Image Pos: " + image_object.transform.position.ToString());
-				mainSystem.MyConsole_Add("New Image Eul: " + image_object.transform.eulerAngles.ToString());
-
-				//仮のカメラオブジェクトの位置からローカル位置を引いた場所にデバイスを移動
-				//Vector3 arcore_device_euler = arcore_device_object.transform.eulerAngles;
-				//arcore_device_euler.x = 0.0f;
-				//arcore_device_euler.z = 0.0f;
-				arcore_device.transform.position = camera_object.transform.position - Camera.main.transform.localPosition;
-				//arcore_device.transform.eulerAngles = arcore_device_euler;
-
-				//仮のカメラオブジェクトとデバイスオブジェクトを作成して逆親子関係にする
-				GameObject arcore_device_object = Instantiate(new GameObject());
-				arcore_device_object.transform.position = arcore_device.transform.position;
-				arcore_device_object.transform.eulerAngles = arcore_device.transform.eulerAngles;
-
-				camera_object.transform.position = Camera.main.transform.position;
-				camera_object.transform.eulerAngles = Camera.main.transform.eulerAngles;
-
-				arcore_device_object.transform.SetParent(camera_object.transform, true);
-
-				//camera_object.transform.eulerAngles = image_euler - image_euler_new;
-				//camera_object.transform.eulerAngles = image_euler_new - image_euler;
-				camera_object.transform.eulerAngles = irvs_marker.transform.eulerAngles - image_euler;
-
-				arcore_device.transform.position = arcore_device_object.transform.position;
-				//arcore_device.transform.eulerAngles = arcore_device_object.transform.eulerAngles;
-				Vector3 arcore_device_euler = arcore_device_object.transform.eulerAngles;
-				arcore_device_euler.x = 0.0f;
-				arcore_device_euler.z = 0.0f;
-				arcore_device.transform.eulerAngles = arcore_device_euler;
 				*/
 
 				//画像の位置・回転を取得
@@ -511,18 +441,6 @@ public class BsenCalibrationSystem : MonoBehaviour {
 				tmp = new Vector3(0, 0, -0.1f * Time.deltaTime);
 				arcore_device.transform.position += tmp;
 				break;
-				/*
-				case "rot Right Button":
-				//arcore_device.transform.position += Camera.main.transform.position;
-				tmp = new Vector3(0, 5.0f * Time.deltaTime, 0);
-				arcore_device.transform.eulerAngles += tmp;
-				break;
-				case "rot Left Button":
-				//arcore_device.transform.position += Camera.main.transform.position;
-				tmp = new Vector3(0, -5.0f * Time.deltaTime, 0);
-				arcore_device.transform.eulerAngles += tmp;
-				break;
-				*/
 				case "rot Right Button": {
 					GameObject camera_object = new GameObject();
 					camera_object.transform.position = Camera.main.transform.position;

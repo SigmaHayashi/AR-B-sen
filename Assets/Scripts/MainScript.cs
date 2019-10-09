@@ -35,11 +35,13 @@ public class MainScript : MonoBehaviour {
 
 	//Calibration CanvasのUI
 	private Text Calibration_OffsetInfoText;
-	private Text Calibration_BsenInfoText;
+	//private Text Calibration_BsenInfoText;
 	private Text Calibration_CameraInfoText;
+	private Text Calibration_DeviceInfoText;
 	private string Calibration_OffsetInfoText_Buffer;
-	private string Calibration_BsenInfoText_Buffer;
+	//private string Calibration_BsenInfoText_Buffer;
 	private string Calibration_CameraInfoText_Buffer;
+	private string Calibration_DeviceInfoText_Buffer;
 	private Button Calibration_PosXPlusButton;
 	private Button Calibration_PosXMinusButton;
 	private Button Calibration_PosYPlusButton;
@@ -114,8 +116,9 @@ public class MainScript : MonoBehaviour {
 
 		//Calibration Canvasのオブジェクトを取得，ボタンにキャリブシステムの機能を持たせる
 		Calibration_OffsetInfoText = GameObject.Find("Main System/Calibration Canvas/Text Canvas/Offset Position Text").GetComponent<Text>();
-		Calibration_BsenInfoText = GameObject.Find("Main System/Calibration Canvas/Text Canvas/B-sen Position Text").GetComponent<Text>();
+		//Calibration_BsenInfoText = GameObject.Find("Main System/Calibration Canvas/Text Canvas/B-sen Position Text").GetComponent<Text>();
 		Calibration_CameraInfoText = GameObject.Find("Main System/Calibration Canvas/Text Canvas/Camera Position Text").GetComponent<Text>();
+		Calibration_DeviceInfoText = GameObject.Find("Main System/Calibration Canvas/Text Canvas/Device Position Text").GetComponent<Text>();
 
 		Calibration_PosXPlusButton = GameObject.Find("Main System/Calibration Canvas/Button Canvas/pos X+ Button").GetComponent<Button>();
 		Calibration_PosXMinusButton = GameObject.Find("Main System/Calibration Canvas/Button Canvas/pos X- Button").GetComponent<Button>();
@@ -255,7 +258,7 @@ public class MainScript : MonoBehaviour {
 	}
 
 	/**************************************************
-	 * 画面の切り替え
+	 * 画面の切り替え：Calibration Canvas
 	 **************************************************/
 	void ChangeToCalibration() {
 		CanvasDictionary[0].SetActive(false);
@@ -266,16 +269,25 @@ public class MainScript : MonoBehaviour {
 			Calibration_OffsetInfoText.text = Calibration_OffsetInfoText_Buffer;
 			Calibration_OffsetInfoText_Buffer = null;
 		}
+		/*
 		if(Calibration_BsenInfoText_Buffer != null){
 			Calibration_BsenInfoText.text = Calibration_BsenInfoText_Buffer;
 			Calibration_BsenInfoText_Buffer = null;
 		}
-		if(Calibration_CameraInfoText_Buffer != null) {
+		*/
+		if (Calibration_CameraInfoText_Buffer != null) {
 			Calibration_CameraInfoText.text = Calibration_CameraInfoText_Buffer;
 			Calibration_CameraInfoText_Buffer = null;
 		}
+		if (Calibration_DeviceInfoText_Buffer != null) {
+			Calibration_DeviceInfoText.text = Calibration_DeviceInfoText_Buffer;
+			Calibration_DeviceInfoText_Buffer = null;
+		}
 	}
 
+	/**************************************************
+	 * 画面の切り替え：MyConsole Canvas
+	 **************************************************/
 	void ChangeToMyConsole() {
 		CanvasDictionary[0].SetActive(false);
 		CanvasDictionary[2].SetActive(true);
@@ -291,6 +303,9 @@ public class MainScript : MonoBehaviour {
 		myconsole_Buffer = new List<object>();
 	}
 
+	/**************************************************
+	 * 画面の切り替え：Database Info Canvas
+	 **************************************************/
 	void ChangeToDatabase() {
 		CanvasDictionary[0].SetActive(false);
 		CanvasDictionary[3].SetActive(true);
@@ -375,6 +390,9 @@ public class MainScript : MonoBehaviour {
 		Database_WHS1WaveGraph_Buffer = null;
 	}
 
+	/**************************************************
+	 * 画面の切り替え：Main Canvas
+	 **************************************************/
 	void BackToMain() {
 		CanvasDictionary[1].SetActive(false);
 		CanvasDictionary[2].SetActive(false);
@@ -404,17 +422,20 @@ public class MainScript : MonoBehaviour {
 	 * Calibration CanvasのAPI
 	 **************************************************/
 	public void UpdateCalibrationInfoAll(Vector3 offset_pos, Vector3 offset_rot, 
-										Vector3 bsen_pos, Vector3 bsen_rot, 
-										Vector3 camera_pos, Vector3 camera_rot) {
+										//Vector3 bsen_pos, Vector3 bsen_rot, 
+										Vector3 camera_pos, Vector3 camera_rot,
+										Vector3 device_pos, Vector3 device_rot) {
 		if(CheckCanvasState() == CalibrationCanvas.name) {
 			Calibration_OffsetInfoText.text = "Offset Pos: " + offset_pos.ToString("f3") + "\nOffset Rot: " + offset_rot.ToString("f2");
-			Calibration_BsenInfoText.text = "B-sen Pos: " + bsen_pos.ToString("f3") + "\nB-sen Rot: " + bsen_rot.ToString("f2");
+			//Calibration_BsenInfoText.text = "B-sen Pos: " + bsen_pos.ToString("f3") + "\nB-sen Rot: " + bsen_rot.ToString("f2");
 			Calibration_CameraInfoText.text = "Camera Pos: " + camera_pos.ToString("f3") + "\nCamera Rot: " + camera_rot.ToString("f2");
+			Calibration_DeviceInfoText.text = "Device Pos: " + device_pos.ToString("f3") + "\nDevice Rot: " + device_rot.ToString("f2");
 		}
 		else {
 			Calibration_OffsetInfoText_Buffer = "Offset Pos: " + offset_pos.ToString("f3") + "\nOffset Rot: " + offset_rot.ToString("f2");
-			Calibration_BsenInfoText_Buffer = "B-sen Pos: " + bsen_pos.ToString("f3") + "\nB-sen Rot: " + bsen_rot.ToString("f2");
+			//Calibration_BsenInfoText_Buffer = "B-sen Pos: " + bsen_pos.ToString("f3") + "\nB-sen Rot: " + bsen_rot.ToString("f2");
 			Calibration_CameraInfoText_Buffer = "Camera Pos: " + camera_pos.ToString("f3") + "\nCamera Rot: " + camera_rot.ToString("f2");
+			Calibration_DeviceInfoText_Buffer = "Device Pos: " + device_pos.ToString("f3") + "\nDevice Rot: " + device_rot.ToString("f2");
 		}
 	}
 
@@ -427,6 +448,7 @@ public class MainScript : MonoBehaviour {
 		}
 	}
 
+	/*
 	public void UpdateCalibrationInfoBsen(Vector3 pos, Vector3 rot) {
 		if (CheckCanvasState() == "Calibration Canvas") {
 			Calibration_BsenInfoText.text = "B-sen Pos: " + pos.ToString("f3") + "\nB-sen Rot: " + rot.ToString("f2");
@@ -435,6 +457,7 @@ public class MainScript : MonoBehaviour {
 			Calibration_BsenInfoText_Buffer = "B-sen Pos: " + pos.ToString("f3") + "\nB-sen Rot: " + rot.ToString("f2");
 		}
 	}
+	*/
 
 	public void UpdateCalibrationInfoCamera(Vector3 pos, Vector3 rot) {
 		if (CheckCanvasState() == "Calibration Canvas") {
@@ -442,6 +465,15 @@ public class MainScript : MonoBehaviour {
 		}
 		else {
 			Calibration_CameraInfoText_Buffer = "Camera Pos: " + pos.ToString("f3") + "\nCamera Rot: " + rot.ToString("f2");
+		}
+	}
+
+	public void UpdateCalibrationInfoDevice(Vector3 pos, Vector3 rot) {
+		if (CheckCanvasState() == "Calibration Canvas") {
+			Calibration_DeviceInfoText.text = "Device Pos: " + pos.ToString("f3") + "\nDevice Rot: " + rot.ToString("f2");
+		}
+		else {
+			Calibration_DeviceInfoText_Buffer = "Device Pos: " + pos.ToString("f3") + "\nDevice Rot: " + rot.ToString("f2");
 		}
 	}
 
