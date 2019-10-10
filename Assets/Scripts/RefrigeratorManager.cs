@@ -101,10 +101,10 @@ public class RefrigeratorManager : MonoBehaviour {
 		}
 
 		//位置合わせするや～つを配置
-		GameObject prefab = (GameObject)Resources.Load("Coordinates Adapter");
-		coordinates_adapter = (GameObject)Instantiate(prefab, this.transform);
-		coordinates_adapter.transform.parent = refrigerator.transform;
-		
+		coordinates_adapter = Instantiate(new GameObject());
+		coordinates_adapter.name = "Coordinates Adapter";
+		coordinates_adapter.transform.SetParent(refrigerator.transform, false);
+
 		//データベースと通信するやつ
 		DBAdapter = GameObject.Find("Database Adapter").GetComponent<TMSDatabaseAdapter>();
 

@@ -62,14 +62,14 @@ public class WHS1Viewer : MonoBehaviour {
 	private void InitThisSystem() {
 		GameObject prefab = (GameObject)Resources.Load("TextMeshPro");
 		WHS1_3D_Text = Instantiate(prefab);
-		WHS1_3D_Text.transform.parent = GameObject.Find("rostms/world_link/bsen_room_link/bed_link").transform;
+		WHS1_3D_Text.transform.SetParent(GameObject.Find("rostms/world_link/bsen_room_link/bed_link").transform, false);
 		WHS1_3D_Text.transform.localPosition = new Vector3(0.0f, 0.7f, 0.0f);
 		
 		WHS1_3D_TextMeshPro = WHS1_3D_Text.GetComponent<TextMeshPro>();
 		WHS1_3D_TextMeshPro.text = "";
 
 		wave_graph = new GameObject("Wave Graph");
-		wave_graph.transform.parent = GameObject.Find("rostms/world_link/bsen_room_link/bed_link").transform;
+		wave_graph.transform.SetParent(GameObject.Find("rostms/world_link/bsen_room_link/bed_link").transform, false);
 		wave_graph.transform.localPosition = new Vector3(0.0f, 1.2f, 0.0f);
 		wave_graph.transform.localEulerAngles = new Vector3(0, 0, 0);
 		wave_graph.transform.localScale = new Vector3(-1, 1, 1);
@@ -158,7 +158,7 @@ public class WHS1Viewer : MonoBehaviour {
 			for (int n = 0; n < wave_list.Length - 1; n++) {
 				GameObject line = Instantiate(line_prefab);
 				line.name = "Line" + n.ToString();
-				line.transform.parent = wave_graph.transform;
+				line.transform.SetParent(wave_graph.transform, false);
 				line.transform.localPosition = new Vector3(0, 0, 0);
 				line.transform.localEulerAngles = new Vector3(0, 0, 0);
 				line.transform.localScale = new Vector3(1, 1, 1);

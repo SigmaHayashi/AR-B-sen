@@ -138,16 +138,6 @@ public class MainScript : MonoBehaviour {
 		else {
 			Calibration_BsenInfoText.gameObject.SetActive(false);
 		}
-		/*
-		Calibration_PosXPlusButton.onClick.AddListener(CalibSystem.onPosXplusClick);
-		Calibration_PosXMinusButton.onClick.AddListener(CalibSystem.onPosXminusClick);
-		Calibration_PosYPlusButton.onClick.AddListener(CalibSystem.onPosYplusClick);
-		Calibration_PosYMinusButton.onClick.AddListener(CalibSystem.onPosYminusClick);
-		Calibration_PosZPlusButton.onClick.AddListener(CalibSystem.onPosZplusClick);
-		Calibration_PosZMinusButton.onClick.AddListener(CalibSystem.onPosZminusClick);
-		Calibration_RotRightButton.onClick.AddListener(CalibSystem.onRotRightClick);
-		Calibration_RotLeftButton.onClick.AddListener(CalibSystem.onRotLeftClick);
-		*/
 		AddTrigger(Calibration_PosXPlusButton);
 		AddTrigger(Calibration_PosXMinusButton);
 		AddTrigger(Calibration_PosYPlusButton);
@@ -428,7 +418,6 @@ public class MainScript : MonoBehaviour {
 	 * Calibration CanvasのAPI
 	 **************************************************/
 	public void UpdateCalibrationInfoAll(Vector3 offset_pos, Vector3 offset_rot,
-										//Vector3 bsen_pos, Vector3 bsen_rot, 
 										Vector3 bsen_or_device_pos, Vector3 bsen_or_device_rot,
 										Vector3 camera_pos, Vector3 camera_rot) {
 		if(CheckCanvasState() == CalibrationCanvas.name) {

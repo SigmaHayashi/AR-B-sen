@@ -51,13 +51,9 @@ public class BsenCalibrationSystem : MonoBehaviour {
 
 		bsen_model = GameObject.Find("rostms");
 		rostms_shader = bsen_model.GetComponent<ShaderChange>();
-
-		//GameObject prefab = (GameObject)Resources.Load("Coordinates Adapter");
-
-		//coordinates_adapter = Instantiate(prefab);
+		
 		coordinates_adapter = Instantiate(new GameObject());
 		coordinates_adapter.name = "Coordinates Adapter";
-		//coordinates_adapter.transform.parent = bsen_model.transform;
 		coordinates_adapter.transform.SetParent(bsen_model.transform, false);
 
 		calibration_state = 1;
@@ -100,7 +96,6 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		
 		//CameraとB-senのポジション表示
 		mainSystem.UpdateCalibrationInfoCamera(Camera.main.transform.position, Camera.main.transform.eulerAngles);
-		//mainSystem.UpdateCalibrationInfoBsen(bsen_model.transform.position, bsen_model.transform.eulerAngles);
 		if (OldCalibrationStyle()) {
 			mainSystem.UpdateCalibrationInfoBsen(bsen_model.transform.position, bsen_model.transform.eulerAngles);
 		}
@@ -109,8 +104,6 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		}
 
 		//どれだけ手動キャリブしてるか表示
-		//Vector3 offset_pos = bsen_model.transform.position - not_offset_pos;
-		//Vector3 offset_rot = bsen_model.transform.eulerAngles - not_offset_rot;
 		if (OldCalibrationStyle()) {
 			Vector3 offset_pos = bsen_model.transform.position - not_offset_pos;
 			Vector3 offset_rot = bsen_model.transform.eulerAngles - not_offset_rot;
@@ -151,8 +144,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 						//回転を取得＆変換
 						Vector3 marker_euler = new Vector3(Rad2Euler((float)responce.values.tmsdb[0].rr), Rad2Euler((float)responce.values.tmsdb[0].rp), Rad2Euler((float)responce.values.tmsdb[0].ry));
 						marker_euler = Ros2UnityRotation(marker_euler);
-
-						//marker_euler *= -1.0f;
+						
 						if (OldCalibrationStyle()) {
 							marker_euler *= -1.0f;
 						}
@@ -165,24 +157,18 @@ public class BsenCalibrationSystem : MonoBehaviour {
 						mainSystem.UpdateDatabaseInfoViconIRVSMarker(marker_position, marker_euler);
 
 						//回転をモデルに適用
-						//bsen_model.transform.eulerAngles = marker_euler;
 						if (OldCalibrationStyle()) {
 							bsen_model.transform.eulerAngles = marker_euler;
 						}
 
 						//位置と回転をモデル上のマーカーに適用
-						//GameObject prefab = (GameObject)Resources.Load("Coordinates Adapter");
-						//irvs_marker = Instantiate(prefab);
 						irvs_marker = Instantiate(new GameObject());
 						irvs_marker.name = "IRVS Marker";
-						//irvs_marker.transform.parent = GameObject.Find("rostms/world_link").transform;
 						irvs_marker.transform.SetParent(GameObject.Find("rostms/world_link").transform, false);
 						irvs_marker.transform.localPosition = marker_position;
 						irvs_marker.transform.localEulerAngles = marker_euler;
 
 						//回転軸をマーカーの位置に合わせる
-						//GameObject world_link = GameObject.Find("rostms/world_link");
-						//world_link.transform.localPosition = marker_position * -1;
 						if (OldCalibrationStyle()) {
 							GameObject world_link = GameObject.Find("rostms/world_link");
 							world_link.transform.localPosition = marker_position * -1;
@@ -221,8 +207,6 @@ public class BsenCalibrationSystem : MonoBehaviour {
 					}
 
 					//自動キャリブ終了時の位置と回転を保存
-					//not_offset_pos = bsen_model.transform.position;
-					//not_offset_rot = bsen_model.transform.eulerAngles;
 					if (OldCalibrationStyle()) {
 						not_offset_pos = bsen_model.transform.position;
 						not_offset_rot = bsen_model.transform.eulerAngles;
@@ -246,34 +230,6 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		//画像認識ができたら
 		if (detected_marker) {
 			if (marker_image.TrackingState == TrackingState.Tracking) {
-				/*
-				//画像の回転を取得し，手前をX軸，鉛直方向をY軸にするように回転
-				Quaternion new_rot = new Quaternion();
-				new_rot = marker_image.CenterPose.rotation;
-				new_rot *= Quaternion.Euler(0, 0, 90);
-				new_rot *= Quaternion.Euler(90, 0, 0);
-
-				//傾きはないものとする
-				Vector3 new_euler = new_rot.eulerAngles;
-				new_euler.x = 0.0f;
-				new_euler.z = 0.0f;
-				
-				//モデルを画像の向きをもとに回転
-				bsen_model.transform.eulerAngles += new_euler;
-				
-				//Unity空間における画像の位置，VICONから得たマーカーの座標からどれだけずれてるか計算
-				Vector3 image_position = marker_image.CenterPose.position;
-				Vector3 real_position = irvs_marker.transform.position;
-				Vector3 offset_vector = image_position - real_position;
-
-				//どれだけずれてるかの値からモデルを移動
-				Vector3 temp_room_position = bsen_model.transform.position;
-				temp_room_position += offset_vector;
-				bsen_model.transform.position = temp_room_position;
-
-				//debug("Auto Positioning DONE");
-				mainSystem.UpdateMainCanvasInfoText("Auto Positioning DONE");
-				*/
 				if (OldCalibrationStyle()) {
 					//画像の回転を取得し，手前をX軸，鉛直方向をY軸にするように回転
 					Quaternion new_rot = new Quaternion();
