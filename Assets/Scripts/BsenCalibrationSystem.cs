@@ -31,7 +31,12 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	public bool CheckFinishCalibration() {
 		return finish_calibration;
 	}
-	
+
+	[SerializeField]
+	private bool old_calibration_style = false;
+	public bool OldCalibrationStyle() {
+		return old_calibration_style;
+	}
 
 	private TMSDatabaseAdapter DBAdapter;
 
@@ -96,14 +101,26 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		//CameraとB-senのポジション表示
 		mainSystem.UpdateCalibrationInfoCamera(Camera.main.transform.position, Camera.main.transform.eulerAngles);
 		//mainSystem.UpdateCalibrationInfoBsen(bsen_model.transform.position, bsen_model.transform.eulerAngles);
-		mainSystem.UpdateCalibrationInfoDevice(arcore_device.transform.position, arcore_device.transform.eulerAngles);
+		if (OldCalibrationStyle()) {
+			mainSystem.UpdateCalibrationInfoBsen(bsen_model.transform.position, bsen_model.transform.eulerAngles);
+		}
+		else {
+			mainSystem.UpdateCalibrationInfoDevice(arcore_device.transform.position, arcore_device.transform.eulerAngles);
+		}
 
 		//どれだけ手動キャリブしてるか表示
 		//Vector3 offset_pos = bsen_model.transform.position - not_offset_pos;
 		//Vector3 offset_rot = bsen_model.transform.eulerAngles - not_offset_rot;
-		Vector3 offset_pos = arcore_device.transform.position - not_offset_pos;
-		Vector3 offset_rot = arcore_device.transform.eulerAngles - not_offset_rot;
-		mainSystem.UpdateCalibrationInfoOffset(offset_pos, offset_rot);
+		if (OldCalibrationStyle()) {
+			Vector3 offset_pos = bsen_model.transform.position - not_offset_pos;
+			Vector3 offset_rot = bsen_model.transform.eulerAngles - not_offset_rot;
+			mainSystem.UpdateCalibrationInfoOffset(offset_pos, offset_rot);
+		}
+		else {
+			Vector3 offset_pos = arcore_device.transform.position - not_offset_pos;
+			Vector3 offset_rot = arcore_device.transform.eulerAngles - not_offset_rot;
+			mainSystem.UpdateCalibrationInfoOffset(offset_pos, offset_rot);
+		}
 
 		//自動キャリブ終了前
 		if (!CheckFinishCalibration()) {
@@ -136,6 +153,9 @@ public class BsenCalibrationSystem : MonoBehaviour {
 						marker_euler = Ros2UnityRotation(marker_euler);
 
 						//marker_euler *= -1.0f;
+						if (OldCalibrationStyle()) {
+							marker_euler *= -1.0f;
+						}
 						marker_euler.x = 0.0f;
 						marker_euler.z = 0.0f;
 						marker_euler.y += 0.0f; //回転微調整用
@@ -146,6 +166,9 @@ public class BsenCalibrationSystem : MonoBehaviour {
 
 						//回転をモデルに適用
 						//bsen_model.transform.eulerAngles = marker_euler;
+						if (OldCalibrationStyle()) {
+							bsen_model.transform.eulerAngles = marker_euler;
+						}
 
 						//位置と回転をモデル上のマーカーに適用
 						//GameObject prefab = (GameObject)Resources.Load("Coordinates Adapter");
@@ -156,10 +179,14 @@ public class BsenCalibrationSystem : MonoBehaviour {
 						irvs_marker.transform.SetParent(GameObject.Find("rostms/world_link").transform, false);
 						irvs_marker.transform.localPosition = marker_position;
 						irvs_marker.transform.localEulerAngles = marker_euler;
-						
+
 						//回転軸をマーカーの位置に合わせる
 						//GameObject world_link = GameObject.Find("rostms/world_link");
 						//world_link.transform.localPosition = marker_position * -1;
+						if (OldCalibrationStyle()) {
+							GameObject world_link = GameObject.Find("rostms/world_link");
+							world_link.transform.localPosition = marker_position * -1;
+						}
 
 						calibration_state = 3;
 					}
@@ -168,6 +195,14 @@ public class BsenCalibrationSystem : MonoBehaviour {
 				//画像認識したらキャリブレーションしてモデルを表示
 				//UnityEditor上ではここはスキップ
 				case 3:
+					if (Application.isEditor) {
+						rostms_shader.alpha = 0.6f;
+						rostms_shader.ChangeColors();
+
+						calibration_state = 4;
+						finish_calibration = true;
+						return;
+					}
 					if (!detected_marker) {
 						foreach (var image in m_AugmentedImages) {
 							if (image.TrackingState == TrackingState.Tracking) {
@@ -184,19 +219,18 @@ public class BsenCalibrationSystem : MonoBehaviour {
 							}
 						}
 					}
-					if (Application.isEditor) {
-						rostms_shader.alpha = 0.6f;
-						rostms_shader.ChangeColors();
-
-						calibration_state = 4;
-						finish_calibration = true;
-					}
 
 					//自動キャリブ終了時の位置と回転を保存
 					//not_offset_pos = bsen_model.transform.position;
 					//not_offset_rot = bsen_model.transform.eulerAngles;
-					not_offset_pos = arcore_device.transform.position;
-					not_offset_rot = arcore_device.transform.eulerAngles;
+					if (OldCalibrationStyle()) {
+						not_offset_pos = bsen_model.transform.position;
+						not_offset_rot = bsen_model.transform.eulerAngles;
+					}
+					else {
+						not_offset_pos = arcore_device.transform.position;
+						not_offset_rot = arcore_device.transform.eulerAngles;
+					}
 					break;
 			}
 		}
@@ -240,55 +274,81 @@ public class BsenCalibrationSystem : MonoBehaviour {
 				//debug("Auto Positioning DONE");
 				mainSystem.UpdateMainCanvasInfoText("Auto Positioning DONE");
 				*/
+				if (OldCalibrationStyle()) {
+					//画像の回転を取得し，手前をX軸，鉛直方向をY軸にするように回転
+					Quaternion new_rot = new Quaternion();
+					new_rot = marker_image.CenterPose.rotation;
+					new_rot *= Quaternion.Euler(0, 0, 90);
+					new_rot *= Quaternion.Euler(90, 0, 0);
 
-				//画像の位置・回転を取得
-				Vector3 image_pos = marker_image.CenterPose.position;
-				Quaternion image_rot = marker_image.CenterPose.rotation;
+					//傾きはないものとする
+					Vector3 new_euler = new_rot.eulerAngles;
+					new_euler.x = 0.0f;
+					new_euler.z = 0.0f;
 
-				//画像を回転して，手前をX軸，鉛直上向きをY軸にする
-				image_rot *= Quaternion.Euler(0, 0, 90);
-				image_rot *= Quaternion.Euler(90, 0, 0);
-				
-				//画像傾きをなくす（水平に配置されてると仮定）
-				Vector3 image_eul = image_rot.eulerAngles;
-				image_eul.x = 0.0f;
-				image_eul.z = 0.0f;
+					//モデルを画像の向きをもとに回転
+					bsen_model.transform.eulerAngles += new_euler;
 
-				//デバイスの位置・回転を取得
-				Vector3 device_pos = arcore_device.transform.position;
-				Vector3 device_eul = arcore_device.transform.eulerAngles;
+					//Unity空間における画像の位置，VICONから得たマーカーの座標からどれだけずれてるか計算
+					Vector3 image_position = marker_image.CenterPose.position;
+					Vector3 real_position = irvs_marker.transform.position;
+					Vector3 offset_vector = image_position - real_position;
 
-				//カメラの位置・回転を取得
-				Vector3 camera_pos = Camera.main.transform.position;
-				Vector3 camera_eul = Camera.main.transform.eulerAngles;
+					//どれだけずれてるかの値からモデルを移動
+					Vector3 temp_room_position = bsen_model.transform.position;
+					temp_room_position += offset_vector;
+					bsen_model.transform.position = temp_room_position;
 
-				//座標計算用の仮のオブジェクトをそれぞれ作成
-				//GameObject image_object = Instantiate(new GameObject());
-				GameObject image_object = new GameObject();
-				image_object.transform.position = image_pos;
-				image_object.transform.eulerAngles = image_eul;
+					//debug("Auto Positioning DONE");
+					mainSystem.UpdateMainCanvasInfoText("Auto Positioning DONE");
+				}
+				else {
+					//画像の位置・回転を取得
+					Vector3 image_pos = marker_image.CenterPose.position;
+					Quaternion image_rot = marker_image.CenterPose.rotation;
 
-				//GameObject device_object = Instantiate(new GameObject());
-				GameObject device_object = new GameObject();
-				device_object.transform.position = device_pos;
-				device_object.transform.eulerAngles = device_eul;
+					//画像を回転して，手前をX軸，鉛直上向きをY軸にする
+					image_rot *= Quaternion.Euler(0, 0, 90);
+					image_rot *= Quaternion.Euler(90, 0, 0);
 
-				//GameObject camera_object = Instantiate(new GameObject());
-				GameObject camera_object = new GameObject();
-				camera_object.transform.position = camera_pos;
-				camera_object.transform.eulerAngles = camera_eul;
+					//画像傾きをなくす（水平に配置されてると仮定）
+					Vector3 image_eul = image_rot.eulerAngles;
+					image_eul.x = 0.0f;
+					image_eul.z = 0.0f;
 
-				//親子関係を，画像＞デバイス＞カメラにする
-				camera_object.transform.SetParent(device_object.transform, true);
-				device_object.transform.SetParent(image_object.transform, true);
+					//デバイスの位置・回転を取得
+					Vector3 device_pos = arcore_device.transform.position;
+					Vector3 device_eul = arcore_device.transform.eulerAngles;
 
-				//仮の画像オブジェクトをあるべき位置・回転に変更
-				image_object.transform.position = irvs_marker.transform.position;
-				image_object.transform.eulerAngles = irvs_marker.transform.eulerAngles;
+					//カメラの位置・回転を取得
+					Vector3 camera_pos = Camera.main.transform.position;
+					Vector3 camera_eul = Camera.main.transform.eulerAngles;
 
-				//デバイスを仮のデバイスの位置・回転に変更
-				arcore_device.transform.position = device_object.transform.position;
-				arcore_device.transform.eulerAngles = device_object.transform.eulerAngles;
+					//座標計算用の仮のオブジェクトをそれぞれ作成
+					GameObject image_object = new GameObject();
+					image_object.transform.position = image_pos;
+					image_object.transform.eulerAngles = image_eul;
+					
+					GameObject device_object = new GameObject();
+					device_object.transform.position = device_pos;
+					device_object.transform.eulerAngles = device_eul;
+					
+					GameObject camera_object = new GameObject();
+					camera_object.transform.position = camera_pos;
+					camera_object.transform.eulerAngles = camera_eul;
+
+					//親子関係を，画像＞デバイス＞カメラにする
+					camera_object.transform.SetParent(device_object.transform, true);
+					device_object.transform.SetParent(image_object.transform, true);
+
+					//仮の画像オブジェクトをあるべき位置・回転に変更
+					image_object.transform.position = irvs_marker.transform.position;
+					image_object.transform.eulerAngles = irvs_marker.transform.eulerAngles;
+
+					//デバイスを仮のデバイスの位置・回転に変更
+					arcore_device.transform.position = device_object.transform.position;
+					arcore_device.transform.eulerAngles = device_object.transform.eulerAngles;
+				}
 			}
 		}
 	}
@@ -296,184 +356,125 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	/*****************************************************************
 	 * ボタン押したときの動作
 	 *****************************************************************/
-	/*
-	public void onPosXplusClick() {
-		Vector3 tmp = new Vector3(0.025f, 0.0f, 0.0f);
-		coordinates_adapter.transform.localPosition = tmp;
-
-		tmp = coordinates_adapter.transform.position;
-		bsen_model.transform.position = tmp;
-	}
-
-	public void onPosXminusClick() {
-		Vector3 tmp = new Vector3(-0.025f, 0.0f, 0.0f);
-		coordinates_adapter.transform.localPosition = tmp;
-
-		tmp = coordinates_adapter.transform.position;
-		bsen_model.transform.position = tmp;
-	}
-
-	public void onPosYplusClick() {
-		Vector3 tmp = new Vector3(0.0f, 0.025f, 0.0f);
-		coordinates_adapter.transform.localPosition = tmp;
-
-		tmp = coordinates_adapter.transform.position;
-		bsen_model.transform.position = tmp;
-	}
-
-	public void onPosYminusClick() {
-		Vector3 tmp = new Vector3(0.0f, -0.025f, 0.0f);
-		coordinates_adapter.transform.localPosition = tmp;
-
-		tmp = coordinates_adapter.transform.position;
-		bsen_model.transform.position = tmp;
-	}
-
-	public void onPosZplusClick() {
-		Vector3 tmp = new Vector3(0.0f, 0.0f, 0.025f);
-		coordinates_adapter.transform.localPosition = tmp;
-
-		tmp = coordinates_adapter.transform.position;
-		bsen_model.transform.position = tmp;
-	}
-
-	public void onPosZminusClick() {
-		Vector3 tmp = new Vector3(0.0f, 0.0f, -0.025f);
-		coordinates_adapter.transform.localPosition = tmp;
-
-		tmp = coordinates_adapter.transform.position;
-		bsen_model.transform.position = tmp;
-	}
-
-	public void onRotRightClick() {
-		Vector3 tmp = bsen_model.transform.eulerAngles;
-		tmp.y += 0.25f;
-		bsen_model.transform.eulerAngles = tmp;
-	}
-
-	public void onRotLeftClick() {
-		Vector3 tmp = bsen_model.transform.eulerAngles;
-		tmp.y -= 0.25f;
-		bsen_model.transform.eulerAngles = tmp;
-	}
-	*/
-
 	private void manualCalibration() {
 		foreach (string button_name in mainSystem.checkCalibrationCanvasButton()) {
 			Vector3 tmp = new Vector3();
-			switch (button_name) {
-				/*
-				case "pos X+ Button":
-					tmp = new Vector3(0.1f * Time.deltaTime, 0, 0);
-					coordinates_adapter.transform.localPosition = tmp;
+			if (OldCalibrationStyle()) {
+				switch (button_name) {
+					case "pos X+ Button":
+						tmp = new Vector3(0.1f * Time.deltaTime, 0, 0);
+						coordinates_adapter.transform.localPosition = tmp;
 
-					tmp = coordinates_adapter.transform.position;
-					bsen_model.transform.position = tmp;
-					break;
-				case "pos X- Button":
-					tmp = new Vector3(-0.1f * Time.deltaTime, 0, 0);
-					coordinates_adapter.transform.localPosition = tmp;
+						tmp = coordinates_adapter.transform.position;
+						bsen_model.transform.position = tmp;
+						break;
+					case "pos X- Button":
+						tmp = new Vector3(-0.1f * Time.deltaTime, 0, 0);
+						coordinates_adapter.transform.localPosition = tmp;
 
-					tmp = coordinates_adapter.transform.position;
-					bsen_model.transform.position = tmp;
-					break;
-				case "pos Y+ Button":
-					tmp = new Vector3(0, 0.1f * Time.deltaTime, 0);
-					coordinates_adapter.transform.localPosition = tmp;
+						tmp = coordinates_adapter.transform.position;
+						bsen_model.transform.position = tmp;
+						break;
+					case "pos Y+ Button":
+						tmp = new Vector3(0, 0.1f * Time.deltaTime, 0);
+						coordinates_adapter.transform.localPosition = tmp;
 
-					tmp = coordinates_adapter.transform.position;
-					bsen_model.transform.position = tmp;
-					break;
-				case "pos Y- Button":
-					tmp = new Vector3(0, -0.1f * Time.deltaTime, 0);
-					coordinates_adapter.transform.localPosition = tmp;
+						tmp = coordinates_adapter.transform.position;
+						bsen_model.transform.position = tmp;
+						break;
+					case "pos Y- Button":
+						tmp = new Vector3(0, -0.1f * Time.deltaTime, 0);
+						coordinates_adapter.transform.localPosition = tmp;
 
-					tmp = coordinates_adapter.transform.position;
-					bsen_model.transform.position = tmp;
-					break;
-				case "pos Z+ Button":
-					tmp = new Vector3(0, 0, 0.1f * Time.deltaTime);
-					coordinates_adapter.transform.localPosition = tmp;
+						tmp = coordinates_adapter.transform.position;
+						bsen_model.transform.position = tmp;
+						break;
+					case "pos Z+ Button":
+						tmp = new Vector3(0, 0, 0.1f * Time.deltaTime);
+						coordinates_adapter.transform.localPosition = tmp;
 
-					tmp = coordinates_adapter.transform.position;
-					bsen_model.transform.position = tmp;
-					break;
-				case "pos Z- Button":
-					tmp = new Vector3(0, 0, -0.1f * Time.deltaTime);
-					coordinates_adapter.transform.localPosition = tmp;
+						tmp = coordinates_adapter.transform.position;
+						bsen_model.transform.position = tmp;
+						break;
+					case "pos Z- Button":
+						tmp = new Vector3(0, 0, -0.1f * Time.deltaTime);
+						coordinates_adapter.transform.localPosition = tmp;
 
-					tmp = coordinates_adapter.transform.position;
-					bsen_model.transform.position = tmp;
-					break;
-				case "rot Right Button":
-					tmp = bsen_model.transform.eulerAngles;
-					tmp.y += 0.5f * Time.deltaTime;
-					bsen_model.transform.eulerAngles = tmp;
-					break;
-				case "rot Left Button":
-					tmp = bsen_model.transform.eulerAngles;
-					tmp.y -= 0.5f * Time.deltaTime;
-					bsen_model.transform.eulerAngles = tmp;
-					break;
-				*/
-				case "pos X+ Button":
-				tmp = new Vector3(0.1f * Time.deltaTime, 0, 0);
-				//tmp += arcore_device.transform.position;
-				arcore_device.transform.position += tmp;
-				break;
-				case "pos X- Button":
-				tmp = new Vector3(-0.1f * Time.deltaTime, 0, 0);
-				arcore_device.transform.position += tmp;
-				break;
-				case "pos Y+ Button":
-				tmp = new Vector3(0, 0.1f * Time.deltaTime, 0);
-				arcore_device.transform.position += tmp;
-				break;
-				case "pos Y- Button":
-				tmp = new Vector3(0, -0.1f * Time.deltaTime, 0);
-				arcore_device.transform.position += tmp;
-				break;
-				case "pos Z+ Button":
-				tmp = new Vector3(0, 0, 0.1f * Time.deltaTime);
-				arcore_device.transform.position += tmp;
-				break;
-				case "pos Z- Button":
-				tmp = new Vector3(0, 0, -0.1f * Time.deltaTime);
-				arcore_device.transform.position += tmp;
-				break;
-				case "rot Right Button": {
-					GameObject camera_object = new GameObject();
-					camera_object.transform.position = Camera.main.transform.position;
-					camera_object.transform.eulerAngles = Camera.main.transform.eulerAngles;
-
-					GameObject device_object = new GameObject();
-					device_object.transform.position = arcore_device.transform.position;
-					device_object.transform.eulerAngles = arcore_device.transform.eulerAngles;
-
-					device_object.transform.SetParent(camera_object.transform, true);
-
-					camera_object.transform.eulerAngles += new Vector3(0, 2.0f * Time.deltaTime, 0);
-
-					arcore_device.transform.position = device_object.transform.position;
-					arcore_device.transform.eulerAngles = device_object.transform.eulerAngles;
-					break;
+						tmp = coordinates_adapter.transform.position;
+						bsen_model.transform.position = tmp;
+						break;
+					case "rot Right Button":
+						tmp = bsen_model.transform.eulerAngles;
+						tmp.y += 0.5f * Time.deltaTime;
+						bsen_model.transform.eulerAngles = tmp;
+						break;
+					case "rot Left Button":
+						tmp = bsen_model.transform.eulerAngles;
+						tmp.y -= 0.5f * Time.deltaTime;
+						bsen_model.transform.eulerAngles = tmp;
+						break;
 				}
-				case "rot Left Button": {
-					GameObject camera_object = new GameObject();
-					camera_object.transform.position = Camera.main.transform.position;
-					camera_object.transform.eulerAngles = Camera.main.transform.eulerAngles;
+			}
+			else {
+				switch (button_name) {
+					case "pos X+ Button":
+						tmp = new Vector3(0.1f * Time.deltaTime, 0, 0);
+						arcore_device.transform.position += tmp;
+						break;
+					case "pos X- Button":
+						tmp = new Vector3(-0.1f * Time.deltaTime, 0, 0);
+						arcore_device.transform.position += tmp;
+						break;
+					case "pos Y+ Button":
+						tmp = new Vector3(0, 0.1f * Time.deltaTime, 0);
+						arcore_device.transform.position += tmp;
+						break;
+					case "pos Y- Button":
+						tmp = new Vector3(0, -0.1f * Time.deltaTime, 0);
+						arcore_device.transform.position += tmp;
+						break;
+					case "pos Z+ Button":
+						tmp = new Vector3(0, 0, 0.1f * Time.deltaTime);
+						arcore_device.transform.position += tmp;
+						break;
+					case "pos Z- Button":
+						tmp = new Vector3(0, 0, -0.1f * Time.deltaTime);
+						arcore_device.transform.position += tmp;
+						break;
+					case "rot Right Button": {
+						GameObject camera_object = new GameObject();
+						camera_object.transform.position = Camera.main.transform.position;
+						camera_object.transform.eulerAngles = Camera.main.transform.eulerAngles;
 
-					GameObject device_object = new GameObject();
-					device_object.transform.position = arcore_device.transform.position;
-					device_object.transform.eulerAngles = arcore_device.transform.eulerAngles;
+						GameObject device_object = new GameObject();
+						device_object.transform.position = arcore_device.transform.position;
+						device_object.transform.eulerAngles = arcore_device.transform.eulerAngles;
 
-					device_object.transform.SetParent(camera_object.transform, true);
+						device_object.transform.SetParent(camera_object.transform, true);
 
-					camera_object.transform.eulerAngles += new Vector3(0, -2.0f * Time.deltaTime, 0);
+						camera_object.transform.eulerAngles += new Vector3(0, 2.0f * Time.deltaTime, 0);
 
-					arcore_device.transform.position = device_object.transform.position;
-					arcore_device.transform.eulerAngles = device_object.transform.eulerAngles;
-					break;
+						arcore_device.transform.position = device_object.transform.position;
+						arcore_device.transform.eulerAngles = device_object.transform.eulerAngles;
+						break;
+					}
+					case "rot Left Button": {
+						GameObject camera_object = new GameObject();
+						camera_object.transform.position = Camera.main.transform.position;
+						camera_object.transform.eulerAngles = Camera.main.transform.eulerAngles;
+
+						GameObject device_object = new GameObject();
+						device_object.transform.position = arcore_device.transform.position;
+						device_object.transform.eulerAngles = arcore_device.transform.eulerAngles;
+
+						device_object.transform.SetParent(camera_object.transform, true);
+
+						camera_object.transform.eulerAngles += new Vector3(0, -2.0f * Time.deltaTime, 0);
+
+						arcore_device.transform.position = device_object.transform.position;
+						arcore_device.transform.eulerAngles = device_object.transform.eulerAngles;
+						break;
+					}
 				}
 			}
 		}
