@@ -760,7 +760,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37f99612bdb95ca41a607338729a9b93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  offset_vicon_pos: {x: -2.95, y: 0, z: 5.52}
+  offset_vicon_pos: {x: 0, y: 0, z: 0}
   old_calibration_style: 0
 --- !u!4 &94305706
 Transform:
