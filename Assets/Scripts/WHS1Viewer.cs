@@ -32,7 +32,7 @@ public class WHS1Viewer : MonoBehaviour {
 
 	private bool init_this_system = false;
 
-	[SerializeField]
+	//[SerializeField]
 	private float distance_to_display = 1.5f;
 
 	// Start is called before the first frame update

@@ -18,7 +18,10 @@ public class BsenCalibrationSystem : MonoBehaviour {
 
 	private Vector3 not_offset_pos, not_offset_rot;
 	
-	public Vector3 offset_vicon_pos;
+	[HideInInspector] public Vector3 offset_vicon_pos;
+	
+	private Vector3 offset_calibration_pos;
+	private float offset_calibration_yaw;
 
 	//AugmentedImageでつかうものたち
 	private List<AugmentedImage> m_AugmentedImages = new List<AugmentedImage>();
@@ -32,8 +35,9 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		return finish_calibration;
 	}
 
-	[SerializeField]
+	//[SerializeField]
 	private bool old_calibration_style = false;
+
 	public bool OldCalibrationStyle() {
 		return old_calibration_style;
 	}

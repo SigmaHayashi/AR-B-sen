@@ -8,10 +8,23 @@ using UnityEngine.EventSystems;
 public class MainScript : MonoBehaviour {
 
 	//スクリーンが消えないようにする
-	public bool ScreenNOTSleep = true;
-	
+	//public bool ScreenNOTSleep = true;
+	[SerializeField] private bool ScreenNOTSleep = true;
+
 	//キャプチャモードかどうか
 	private bool capture_mode = false;
+
+	//設定ファイルから得る変数
+	[HideInInspector] public bool finish_read_config = false;
+	[HideInInspector] public string config_ros_ip;
+	[HideInInspector] public bool config_old_calibration;
+	[HideInInspector] public Vector3 config_vicon_offset_pos;
+	[HideInInspector] public Vector3 config_calibration_offset_pos;
+	[HideInInspector] public float config_calibration_offset_yaw;
+	[HideInInspector] public Vector3 config_robot_offset_pos;
+	[HideInInspector] public float config_robot_offset_yaw;
+	[HideInInspector] public float config_refrigerator_distance;
+	[HideInInspector] public float config_whs1_distance;
 
 	//Canvasたち
 	public GameObject MainCanvas;
@@ -152,12 +165,12 @@ public class MainScript : MonoBehaviour {
 		myconsole = GameObject.Find("Main System/MyConsole Canvas/Console Panel").GetComponent<MyConsole>();
 
 		//Database Info Canvasのオブジェクトを取得
-		Database_RefrigeratorGoodsTextSample = GameObject.Find("Main System/Database Info Canvas/Refrigerator Goods Info/Sample Text");
-		Database_SmartPalBatteryText = GameObject.Find("Main System/Database Info Canvas/SmartPal Battery Text").GetComponent<Text>();
-		Database_WHS1InfoText = GameObject.Find("Main System/Database Info Canvas/WHS1 Info/Temp and Rate Text").GetComponent<Text>();
-		Database_WHS1WaveGraph = GameObject.Find("Main System/Database Info Canvas/WHS1 Info/Wave Graph");
-		Database_ViconIRVSMarkerText = GameObject.Find("Main System/Database Info Canvas/VICON Info/IRVS Marker Text").GetComponent<Text>();
-		Database_ViconSmartPalText = GameObject.Find("Main System/Database Info Canvas/VICON Info/SmartPal Text").GetComponent<Text>();
+		Database_RefrigeratorGoodsTextSample = GameObject.Find("Main System/Database Info Canvas/Info Area/Scroll View/Scroll Contents/Refrigerator Goods Info/Sample Text");
+		Database_SmartPalBatteryText = GameObject.Find("Main System/Database Info Canvas/Info Area/Scroll View/Scroll Contents/SmartPal Battery Text").GetComponent<Text>();
+		Database_WHS1InfoText = GameObject.Find("Main System/Database Info Canvas/Info Area/Scroll View/Scroll Contents/WHS1 Info/Temp and Rate Text").GetComponent<Text>();
+		Database_WHS1WaveGraph = GameObject.Find("Main System/Database Info Canvas/Info Area/Scroll View/Scroll Contents/WHS1 Info/Wave Graph");
+		Database_ViconIRVSMarkerText = GameObject.Find("Main System/Database Info Canvas/Info Area/Scroll View/Scroll Contents/VICON Info/IRVS Marker Text").GetComponent<Text>();
+		Database_ViconSmartPalText = GameObject.Find("Main System/Database Info Canvas/Info Area/Scroll View/Scroll Contents/VICON Info/SmartPal Text").GetComponent<Text>();
 
 		//Main Canvasのみ表示
 		foreach (KeyValuePair<int, GameObject> Canvas in CanvasDictionary) {
@@ -316,7 +329,7 @@ public class MainScript : MonoBehaviour {
 					GameObject new_text = Instantiate(Database_RefrigeratorGoodsTextSample);
 
 					new_text.name = "Info of " + goods_info.Key.ToString();
-					new_text.transform.SetParent(GameObject.Find("Main System/Database Info Canvas/Refrigerator Goods Info").transform, false);
+					new_text.transform.SetParent(GameObject.Find("Main System/Database Info Canvas/Info Area/Scroll View/Scroll Contents/Refrigerator Goods Info").transform, false);
 
 					RectTransform sample_rect = Database_RefrigeratorGoodsTextSample.GetComponent<RectTransform>();
 					float new_posY = sample_rect.anchoredPosition.y;
@@ -546,7 +559,7 @@ public class MainScript : MonoBehaviour {
 					GameObject new_text = Instantiate(Database_RefrigeratorGoodsTextSample);
 
 					new_text.name = "Info of " + goods_info.Key.ToString();
-					new_text.transform.SetParent(GameObject.Find("Main System/Database Info Canvas/Refrigerator Goods Info").transform, false);
+					new_text.transform.SetParent(GameObject.Find("Main System/Database Info Canvas/Info Area/Scroll View/Scroll Contents/Refrigerator Goods Info").transform, false);
 
 					RectTransform sample_rect = Database_RefrigeratorGoodsTextSample.GetComponent<RectTransform>();
 					float new_posY = sample_rect.anchoredPosition.y;

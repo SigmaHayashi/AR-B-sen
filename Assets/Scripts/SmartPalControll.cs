@@ -25,6 +25,9 @@ public class SmartPalControll : MonoBehaviour {
 	//キャリブシステム
 	private BsenCalibrationSystem calib_system;
 
+	private Vector3 offset_sp5_pos;
+	private float offset_sp5_yaw;
+
 	// Start is called before the first frame update
 	void Start() {
 		//各種オブジェクトを取得

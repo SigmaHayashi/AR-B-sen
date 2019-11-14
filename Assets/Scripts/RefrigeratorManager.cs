@@ -53,7 +53,7 @@ public class RefrigeratorManager : MonoBehaviour {
 	private float distance;
 	private float distance_old;
 
-	[SerializeField]
+	//[SerializeField]
 	private float distance_to_display = 1.5f;
 
 	//ShaderChange
