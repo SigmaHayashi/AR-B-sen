@@ -4,6 +4,19 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
+using System.IO;
+
+public class ARBsenConfig {
+	public string ros_ip = "ws://192.168.4.170:9090";
+	public bool old_calibration = false;
+	public Vector3 vicon_offset_pos = new Vector3();
+	public Vector3 calibration_offset_pos = new Vector3();
+	public float calibration_offset_yaw = 0.0f;
+	public Vector3 robot_offset_pos = new Vector3();
+	public float robot_offset_yaw = 0.0f;
+	public float refrigerator_distance = 2.0f;
+	public float whs1_distance = 2.0f;
+}
 
 public class MainScript : MonoBehaviour {
 
@@ -16,6 +29,7 @@ public class MainScript : MonoBehaviour {
 
 	//設定ファイルから得る変数
 	[HideInInspector] public bool finish_read_config = false;
+	/*
 	[HideInInspector] public string config_ros_ip;
 	[HideInInspector] public bool config_old_calibration;
 	[HideInInspector] public Vector3 config_vicon_offset_pos;
@@ -25,18 +39,32 @@ public class MainScript : MonoBehaviour {
 	[HideInInspector] public float config_robot_offset_yaw;
 	[HideInInspector] public float config_refrigerator_distance;
 	[HideInInspector] public float config_whs1_distance;
+	*/
+	//[HideInInspector] public ARBsenConfig config_data = new ARBsenConfig();
+	private ARBsenConfig config_data = new ARBsenConfig();
+
+	public ARBsenConfig GetConfig() {
+		return config_data;
+	}
 
 	//Canvasたち
-	public GameObject MainCanvas;
-	public GameObject CalibrationCanvas;
-	public GameObject MyConsoleCanvas;
-	public GameObject DatabaseInfoCanvas;
+	//public GameObject MainCanvas;
+	//public GameObject CalibrationCanvas;
+	//public GameObject MyConsoleCanvas;
+	//public GameObject DatabaseInfoCanvas;
+	private GameObject MainCanvas;
+	private GameObject CalibrationCanvas;
+	private GameObject MyConsoleCanvas;
+	private GameObject DatabaseInfoCanvas;
+	private GameObject SettingsCanvas;
 
 	//Canvasを遷移させるボタンたち
 	private Button ChangeToCalibrationButton;
 	private Button ChangeToMyConsoleButton;
 	private Button ChangeToDatabaseButton;
+	private Button ChangeToSettingsButton;
 	private List<Button> BackToMainButton = new List<Button>();
+	private Button RestartAppButton;
 
 	//いまどのCanvasを使用中か示す変数，それに対応する辞書
 	private int CanvasState = 0;
@@ -64,7 +92,7 @@ public class MainScript : MonoBehaviour {
 	private Button Calibration_RotRightButton;
 	private Button Calibration_RotLeftButton;
 	//private BsenCalibrationSystem CalibSystem;
-	private bool old_calibration_style = false;
+	//private bool old_calibration_style = false;
 	private bool Calibration_push_PoxXPlus = false;
 	private bool Calibration_push_PoxXMinus = false;
 	private bool Calibration_push_PoxYPlus = false;
@@ -94,6 +122,17 @@ public class MainScript : MonoBehaviour {
 	private string Database_ViconIRVSMarkerText_Buffer;
 	private string Database_ViconSmartPalText_Buffer;
 
+	//Setting CanvasのUI
+	private InputField Config_input_ros_ip;
+	private Toggle Config_toggle_old_calibration;
+	private InputField[] Config_input_vicon_offset = new InputField[3];
+	private InputField[] Config_input_calibration_offset = new InputField[4];
+	private InputField[] Config_input_robot_offset = new InputField[4];
+	private InputField Config_input_refrigerator_distance;
+	private InputField Config_input_whs1_distance;
+	//private bool config_changed = false;
+	private string config_filepath;
+
 	// Use this for initialization
 	void Start () {
 		// 画面が消えないようにする
@@ -104,26 +143,39 @@ public class MainScript : MonoBehaviour {
 			Screen.sleepTimeout = SleepTimeout.SystemSetting;
 		}
 
+		//Canvasを取得
+		MainCanvas = GameObject.Find("Main System/Main Canvas");
+		CalibrationCanvas = GameObject.Find("Main System/Calibration Canvas");
+		MyConsoleCanvas = GameObject.Find("Main System/MyConsole Canvas");
+		DatabaseInfoCanvas = GameObject.Find("Main System/Database Info Canvas");
+		SettingsCanvas = GameObject.Find("Main System/Settings Canvas");
+
 		//CanvasをDictionaryに追加
 		CanvasDictionary.Add(0, MainCanvas);
 		CanvasDictionary.Add(1, CalibrationCanvas);
 		CanvasDictionary.Add(2, MyConsoleCanvas);
 		CanvasDictionary.Add(3, DatabaseInfoCanvas);
+		CanvasDictionary.Add(4, SettingsCanvas);
 
 		//Canvas移動用ボタンを取得・設定
 		ChangeToCalibrationButton = GameObject.Find("Main System/Main Canvas/Change to Calibration Button").GetComponent<Button>();
 		ChangeToMyConsoleButton = GameObject.Find("Main System/Main Canvas/Change to MyConsole Button").GetComponent<Button>();
 		ChangeToDatabaseButton = GameObject.Find("Main System/Main Canvas/Change to Database Button").GetComponent<Button>();
+		ChangeToSettingsButton = GameObject.Find("Main System/Main Canvas/Change to Settings Button").GetComponent<Button>();
 		BackToMainButton.Add(GameObject.Find("Main System/Calibration Canvas/Button Canvas/Back to Main Button").GetComponent<Button>());
 		BackToMainButton.Add(GameObject.Find("Main System/MyConsole Canvas/Back to Main Button").GetComponent<Button>());
 		BackToMainButton.Add(GameObject.Find("Main System/Database Info Canvas/Back to Main Button").GetComponent<Button>());
+		BackToMainButton.Add(GameObject.Find("Main System/Settings Canvas/Back to Main Button").GetComponent<Button>());
+		RestartAppButton = GameObject.Find("Main System/Settings Canvas/Restart App Button").GetComponent<Button>();
 
 		ChangeToCalibrationButton.onClick.AddListener(ChangeToCalibration);
 		ChangeToMyConsoleButton.onClick.AddListener(ChangeToMyConsole);
 		ChangeToDatabaseButton.onClick.AddListener(ChangeToDatabase);
+		ChangeToSettingsButton.onClick.AddListener(ChangeToSettings);
 		foreach(Button button in BackToMainButton) {
 			button.onClick.AddListener(BackToMain);
 		}
+		RestartAppButton.onClick.AddListener(RestartApp);
 
 		//Main Canvasのオブジェクトを取得
 		Main_InfoText = GameObject.Find("Main System/Main Canvas/Info Text").GetComponent<Text>();
@@ -144,13 +196,17 @@ public class MainScript : MonoBehaviour {
 		Calibration_RotLeftButton = GameObject.Find("Main System/Calibration Canvas/Button Canvas/rot Left Button").GetComponent<Button>();
 
 		//CalibSystem = GameObject.Find("B-sen Calibration System").GetComponent<BsenCalibrationSystem>();
-		old_calibration_style = GameObject.Find("B-sen Calibration System").GetComponent<BsenCalibrationSystem>().OldCalibrationStyle();
-		if (old_calibration_style) {
+
+		//old_calibration_style = GameObject.Find("B-sen Calibration System").GetComponent<BsenCalibrationSystem>().OldCalibrationStyle();
+		//if (old_calibration_style) {
+		/*
+		if (config_data.old_calibration) {
 			Calibration_DeviceInfoText.gameObject.SetActive(false);
 		}
 		else {
 			Calibration_BsenInfoText.gameObject.SetActive(false);
 		}
+		*/
 		AddTrigger(Calibration_PosXPlusButton);
 		AddTrigger(Calibration_PosXMinusButton);
 		AddTrigger(Calibration_PosYPlusButton);
@@ -171,6 +227,68 @@ public class MainScript : MonoBehaviour {
 		Database_WHS1WaveGraph = GameObject.Find("Main System/Database Info Canvas/Info Area/Scroll View/Scroll Contents/WHS1 Info/Wave Graph");
 		Database_ViconIRVSMarkerText = GameObject.Find("Main System/Database Info Canvas/Info Area/Scroll View/Scroll Contents/VICON Info/IRVS Marker Text").GetComponent<Text>();
 		Database_ViconSmartPalText = GameObject.Find("Main System/Database Info Canvas/Info Area/Scroll View/Scroll Contents/VICON Info/SmartPal Text").GetComponent<Text>();
+
+		//Settings Canvasのオブジェクトを取得・設定
+		Config_input_ros_ip = GameObject.Find("Main System/Settings Canvas/Info Area/Scroll View/Scroll Contents/ROS IP/Input_0").GetComponent<InputField>();
+		Config_toggle_old_calibration = GameObject.Find("Main System/Settings Canvas/Info Area/Scroll View/Scroll Contents/Old Calibration/Toggle").GetComponent<Toggle>();
+		for(int i = 0; i < 3; i++) {
+			Config_input_vicon_offset[i] = GameObject.Find(string.Format("Main System/Settings Canvas/Info Area/Scroll View/Scroll Contents/VICON Offset/Input_{0}", i)).GetComponent<InputField>();
+		}
+		for(int i = 0; i < 4; i++) {
+			Config_input_calibration_offset[i] = GameObject.Find(string.Format("Main System/Settings Canvas/Info Area/Scroll View/Scroll Contents/Calibration Offset/Input_{0}", i)).GetComponent<InputField>();
+			Config_input_robot_offset[i] = GameObject.Find(string.Format("Main System/Settings Canvas/Info Area/Scroll View/Scroll Contents/Robot Offset/Input_{0}", i)).GetComponent<InputField>();
+		}
+		Config_input_refrigerator_distance = GameObject.Find("Main System/Settings Canvas/Info Area/Scroll View/Scroll Contents/Refrigerator Distance/Input_0").GetComponent<InputField>();
+		Config_input_whs1_distance = GameObject.Find("Main System/Settings Canvas/Info Area/Scroll View/Scroll Contents/WHS1 Distance/Input_0").GetComponent<InputField>();
+		
+		Config_input_ros_ip.onValueChanged.AddListener(Config_Changed);
+		Config_toggle_old_calibration.onValueChanged.AddListener(Config_Changed);
+		for(int i = 0; i < 3; i++) {
+			Config_input_vicon_offset[i].onValueChanged.AddListener(Config_Changed);
+		}
+		for(int i = 0; i < 4; i++) {
+			Config_input_calibration_offset[i].onValueChanged.AddListener(Config_Changed);
+			Config_input_robot_offset[i].onValueChanged.AddListener(Config_Changed);
+		}
+		Config_input_refrigerator_distance.onValueChanged.AddListener(Config_Changed);
+		Config_input_whs1_distance.onValueChanged.AddListener(Config_Changed);
+
+		//コンフィグファイルを読み込み
+		config_filepath = Application.persistentDataPath + "/AR B-sen Config.JSON";
+		if (!File.Exists(config_filepath)) {
+			using (File.Create(config_filepath)) { }
+			string config_json = JsonUtility.ToJson(config_data);
+			using (FileStream file = new FileStream(config_filepath, FileMode.Create, FileAccess.Write)) {
+				using (StreamWriter writer = new StreamWriter(file)) {
+					writer.Write(config_json);
+				}
+			}
+		}
+		using (FileStream file = new FileStream(config_filepath, FileMode.Open, FileAccess.Read)) {
+			using (StreamReader reader = new StreamReader(file)) {
+				string config_read = reader.ReadToEnd();
+				Debug.Log(config_read);
+
+				config_data = JsonUtility.FromJson<ARBsenConfig>(config_read);
+
+				Config_input_ros_ip.text = config_data.ros_ip;
+				Config_toggle_old_calibration.isOn = config_data.old_calibration;
+				for (int i = 0; i < 3; i++) {
+					Config_input_vicon_offset[i].text = config_data.vicon_offset_pos[i].ToString("f2");
+					Config_input_calibration_offset[i].text = config_data.calibration_offset_pos[i].ToString("f2");
+					Config_input_robot_offset[i].text = config_data.robot_offset_pos[i].ToString("f2");
+				}
+				Config_input_calibration_offset[3].text = config_data.calibration_offset_yaw.ToString("f2");
+				Config_input_robot_offset[3].text = config_data.robot_offset_yaw.ToString("f2");
+				Config_input_refrigerator_distance.text = config_data.refrigerator_distance.ToString("f2");
+				Config_input_whs1_distance.text = config_data.whs1_distance.ToString("f2");
+
+				finish_read_config = true;
+			}
+		}
+
+		RestartAppButton.gameObject.SetActive(false);
+		BackToMainButton[3].gameObject.SetActive(true);
 
 		//Main Canvasのみ表示
 		foreach (KeyValuePair<int, GameObject> Canvas in CanvasDictionary) {
@@ -276,15 +394,26 @@ public class MainScript : MonoBehaviour {
 		CanvasDictionary[1].SetActive(true);
 		CanvasState = 1;
 
-		if(Calibration_OffsetInfoText_Buffer != null) {
+		if (config_data.old_calibration) {
+			Calibration_DeviceInfoText.gameObject.SetActive(false);
+			Calibration_BsenInfoText.gameObject.SetActive(true);
+		}
+		else {
+			Calibration_BsenInfoText.gameObject.SetActive(false);
+			Calibration_DeviceInfoText.gameObject.SetActive(true);
+		}
+
+		if (Calibration_OffsetInfoText_Buffer != null) {
 			Calibration_OffsetInfoText.text = Calibration_OffsetInfoText_Buffer;
 			Calibration_OffsetInfoText_Buffer = null;
 		}
-		if(Calibration_BsenInfoText_Buffer != null && old_calibration_style) {
+		//if(Calibration_BsenInfoText_Buffer != null && old_calibration_style) {
+		if (Calibration_BsenInfoText_Buffer != null && config_data.old_calibration) {
 			Calibration_BsenInfoText.text = Calibration_BsenInfoText_Buffer;
 			Calibration_BsenInfoText_Buffer = null;
 		}
-		if (Calibration_DeviceInfoText_Buffer != null && !old_calibration_style) {
+		//if (Calibration_DeviceInfoText_Buffer != null && !old_calibration_style) {
+		if (Calibration_DeviceInfoText_Buffer != null && !config_data.old_calibration) {
 			Calibration_DeviceInfoText.text = Calibration_DeviceInfoText_Buffer;
 			Calibration_DeviceInfoText_Buffer = null;
 		}
@@ -400,12 +529,22 @@ public class MainScript : MonoBehaviour {
 	}
 
 	/**************************************************
+	 * 画面の切り替え：Settings Canvas
+	 **************************************************/
+	void ChangeToSettings() {
+		CanvasDictionary[0].SetActive(false);
+		CanvasDictionary[4].SetActive(true);
+		CanvasState = 4;
+	}
+
+	/**************************************************
 	 * 画面の切り替え：Main Canvas
 	 **************************************************/
 	void BackToMain() {
 		CanvasDictionary[1].SetActive(false);
 		CanvasDictionary[2].SetActive(false);
 		CanvasDictionary[3].SetActive(false);
+		CanvasDictionary[4].SetActive(false);
 		CanvasDictionary[0].SetActive(true);
 		CanvasState = 0;
 
@@ -435,7 +574,8 @@ public class MainScript : MonoBehaviour {
 										Vector3 camera_pos, Vector3 camera_rot) {
 		if(CheckCanvasState() == CalibrationCanvas.name) {
 			Calibration_OffsetInfoText.text = "Offset Pos: " + offset_pos.ToString("f3") + "\nOffset Rot: " + offset_rot.ToString("f2");
-			if (old_calibration_style) {
+			//if (old_calibration_style) {
+			if (config_data.old_calibration) {
 				Calibration_BsenInfoText.text = "B-sen Pos: " + bsen_or_device_pos.ToString("f3") + "\nB-sen Rot: " + bsen_or_device_rot.ToString("f2");
 			}
 			else {
@@ -445,7 +585,8 @@ public class MainScript : MonoBehaviour {
 		}
 		else {
 			Calibration_OffsetInfoText_Buffer = "Offset Pos: " + offset_pos.ToString("f3") + "\nOffset Rot: " + offset_rot.ToString("f2");
-			if (old_calibration_style) {
+			//if (old_calibration_style) {
+			if (config_data.old_calibration) {
 				Calibration_BsenInfoText_Buffer = "B-sen Pos: " + bsen_or_device_pos.ToString("f3") + "\nB-sen Rot: " + bsen_or_device_rot.ToString("f2");
 			}
 			else {
@@ -465,7 +606,8 @@ public class MainScript : MonoBehaviour {
 	}
 	
 	public void UpdateCalibrationInfoBsen(Vector3 pos, Vector3 rot) {
-		if (old_calibration_style) {
+		//if (old_calibration_style) {
+		if (config_data.old_calibration) {
 			if (CheckCanvasState() == "Calibration Canvas") {
 				Calibration_BsenInfoText.text = "B-sen Pos: " + pos.ToString("f3") + "\nB-sen Rot: " + rot.ToString("f2");
 			}
@@ -476,7 +618,8 @@ public class MainScript : MonoBehaviour {
 	}
 
 	public void UpdateCalibrationInfoDevice(Vector3 pos, Vector3 rot) {
-		if (!old_calibration_style) {
+		//if (!old_calibration_style) {
+		if (!config_data.old_calibration) {
 			if (CheckCanvasState() == "Calibration Canvas") {
 				Calibration_DeviceInfoText.text = "Device Pos: " + pos.ToString("f3") + "\nDevice Rot: " + rot.ToString("f2");
 			}
@@ -649,6 +792,53 @@ public class MainScript : MonoBehaviour {
 		else {
 			Database_WHS1WaveGraph_Buffer = wave_list;
 		}
+	}
+
+	/**************************************************
+	 * Settings CanvasのAPI
+	 **************************************************/
+	void RestartApp() {
+		config_data.ros_ip = Config_input_ros_ip.text;
+		config_data.old_calibration = Config_toggle_old_calibration.isOn;
+		config_data.vicon_offset_pos = new Vector3(
+			float.Parse(Config_input_vicon_offset[0].text),
+			float.Parse(Config_input_vicon_offset[1].text),
+			float.Parse(Config_input_vicon_offset[2].text));
+		config_data.calibration_offset_pos = new Vector3(
+			float.Parse(Config_input_calibration_offset[0].text),
+			float.Parse(Config_input_calibration_offset[1].text),
+			float.Parse(Config_input_calibration_offset[2].text));
+		config_data.calibration_offset_yaw = float.Parse(Config_input_calibration_offset[3].text);
+		config_data.robot_offset_pos = new Vector3(
+			float.Parse(Config_input_robot_offset[0].text),
+			float.Parse(Config_input_robot_offset[1].text),
+			float.Parse(Config_input_robot_offset[2].text));
+		config_data.robot_offset_yaw = float.Parse(Config_input_robot_offset[3].text);
+		config_data.refrigerator_distance = float.Parse(Config_input_refrigerator_distance.text);
+		config_data.whs1_distance = float.Parse(Config_input_whs1_distance.text);
+
+		string config_json = JsonUtility.ToJson(config_data);
+
+		using (FileStream file = new FileStream(config_filepath, FileMode.Create, FileAccess.Write)) {
+			using (StreamWriter writer = new StreamWriter(file)) {
+				writer.Write(config_json);
+			}
+		}
+
+		SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+	}
+
+	void Config_Changed(string s) {
+		Config_ActivateRestartButton();
+	}
+
+	void Config_Changed(bool b) {
+		Config_ActivateRestartButton();
+	}
+
+	void Config_ActivateRestartButton() {
+		BackToMainButton[3].gameObject.SetActive(false);
+		RestartAppButton.gameObject.SetActive(true);
 	}
 
 	/*****************************************************************

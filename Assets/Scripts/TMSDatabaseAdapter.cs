@@ -190,6 +190,13 @@ public class TMSDatabaseAdapter : MonoBehaviour {
 		return responce;
 	}
 
+	public bool IsConnected() {
+		if(wsc.conneciton_state == wscCONST.STATE_CONNECTED) {
+			return true;
+		}
+		return false;
+	}
+
 	/**************************************************
 	 * キャリブレーション用マーカーのVICONデータ
 	 **************************************************/

@@ -205,7 +205,7 @@ public class AndroidRosSocketClient : MonoBehaviour {
 	private WebSocket ws;
 	
 	//public string address = "ws://192.168.4.170:9090";
-	private string address = "ws://192.168.4.170:9090";
+	//private string address = "ws://192.168.4.170:9090";
 
 	[HideInInspector]
 	public int conneciton_state = wscCONST.STATE_DISCONNECTED;
@@ -214,6 +214,9 @@ public class AndroidRosSocketClient : MonoBehaviour {
 	private List<string[]> namesService, namesPubTopic, namesSubTopic;
 
 	//private Console console;
+
+	private MainScript mainSystem;
+	private bool finish_set_address;
 
 	//*****************************************
 	// function to be run first
@@ -225,17 +228,51 @@ public class AndroidRosSocketClient : MonoBehaviour {
 		namesSubTopic = new List<string[]>();
 
 		// connect another PC via websocket
-		Connect();
+		//Connect();
 	}
 
 	private void Start() {
 		//console = GameObject.Find("Console Panel").GetComponent<Console>();
+		mainSystem = GameObject.Find("Main System").GetComponent<MainScript>();
+	}
+
+	private void Update() {
+		if (!mainSystem.finish_read_config) {
+			return;
+		}
+		else {
+			if (!finish_set_address) {
+				ws = new WebSocket(mainSystem.GetConfig().ros_ip);
+				//open message
+				ws.OnOpen += (sender, e) => {
+					Debug.Log("*********** Websocket connected ***********");
+					conneciton_state = wscCONST.STATE_CONNECTED;
+				};
+				//close message
+				ws.OnClose += (sender, e) => {
+					Debug.Log("*********** Websocket disconnected ***********");
+					conneciton_state = wscCONST.STATE_DISCONNECTED;
+				};
+				//error message
+				ws.OnError += (sender, e) => {
+					Debug.Log("Error : " + e.Message);
+					conneciton_state = wscCONST.STATE_ERROR;
+				};
+				OnMessage();
+
+				finish_set_address = true;
+				Debug.Log("OK ROS_IP");
+
+				Connect();
+			}
+		}
 	}
 
 	//*****************************************
 	// function to connect another PC(ROS)
 	// can connect Unity and UWP environment
 
+	/*
 	public AndroidRosSocketClient() {
 		ws = new WebSocket(address);
 		//open message
@@ -255,6 +292,7 @@ public class AndroidRosSocketClient : MonoBehaviour {
 		};
 		OnMessage();
 	}
+	*/
 
 	public void Connect() {
 		if(conneciton_state != wscCONST.STATE_CONNECTED) {

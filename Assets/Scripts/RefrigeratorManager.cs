@@ -54,7 +54,7 @@ public class RefrigeratorManager : MonoBehaviour {
 	private float distance_old;
 
 	//[SerializeField]
-	private float distance_to_display = 1.5f;
+	//private float distance_to_display = 1.5f;
 
 	//ShaderChange
 	private ShaderChange refrigerator_shaderchange;
@@ -122,6 +122,10 @@ public class RefrigeratorManager : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update() {
+		if (!mainSystem.finish_read_config) {
+			return;
+		}
+
 		//CoordinatesAdapterの位置を調整してカメラとの距離を計算
 		coordinates_adapter.transform.localPosition = new Vector3(-0.23f, 0.0f, -0.3f);
 		distance_old = distance;
@@ -139,7 +143,8 @@ public class RefrigeratorManager : MonoBehaviour {
 		//距離が閾値以下でデータベースのstateが1だったら表示，違ったら非表示
 		if (calib_system.CheckFinishCalibration() && finish_coroutine) {
 			//近づいたとき
-			if (distance < distance_to_display && distance_old >= distance_to_display) {
+			//if (distance < distance_to_display && distance_old >= distance_to_display) {
+			if (distance < mainSystem.GetConfig().refrigerator_distance && distance_old >= mainSystem.GetConfig().refrigerator_distance) {
 				refrigerator_shaderchange.ChangeShader(Shader.Find("Custom/Transparent"));
 				refrigerator_shaderchange.alpha = 0.4f;
 				refrigerator_shaderchange.ChangeColors();
@@ -148,8 +153,9 @@ public class RefrigeratorManager : MonoBehaviour {
 				StartCoroutine(coroutine);
 			}
 			//遠くにいるとき
-			else if(distance >= distance_to_display) {
-				foreach(GoodsData goods in goods_data_dictionary.Values) {
+			//else if(distance >= distance_to_display) {
+			else if (distance >= mainSystem.GetConfig().refrigerator_distance) {
+				foreach (GoodsData goods in goods_data_dictionary.Values) {
 					ShaderChange goods_shaderchange = goods.obj.GetComponent<ShaderChange>();
 					goods_shaderchange.alpha = 0.0f;
 					goods_shaderchange.ChangeColors();
@@ -162,7 +168,8 @@ public class RefrigeratorManager : MonoBehaviour {
 				}
 			}
 			//ずっと近くにいるとき
-			else if (distance < distance_to_display && distance_old < distance_to_display){
+			//else if (distance < distance_to_display && distance_old < distance_to_display){
+			else if (distance < mainSystem.GetConfig().refrigerator_distance && distance_old < mainSystem.GetConfig().refrigerator_distance) {
 				foreach (GoodsData goods in goods_data_dictionary.Values) {
 					ShaderChange goods_shaderchange = goods.obj.GetComponent<ShaderChange>();
 					if (goods.state_bool) {
