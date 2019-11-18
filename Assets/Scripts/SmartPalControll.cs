@@ -74,10 +74,8 @@ public class SmartPalControll : MonoBehaviour {
 				Vector3 sp5_pos = new Vector3((float)responce.values.tmsdb[0].x, (float)responce.values.tmsdb[0].y, (float)responce.values.tmsdb[0].z);
 				sp5_pos = Ros2UnityPosition(sp5_pos);
 				sp5_pos.y = 0.0f;
-				//sp5_pos.z += -0.15f;
-				sp5_pos += mainSystem.GetConfig().robot_offset_pos;
-				//sp5_pos += calib_system.offset_vicon_pos;
 				sp5_pos += mainSystem.GetConfig().vicon_offset_pos;
+				sp5_pos += mainSystem.GetConfig().robot_offset_pos;
 
 				Vector3 sp5_euler = new Vector3(Rad2Euler((float)responce.values.tmsdb[0].rr), Rad2Euler((float)responce.values.tmsdb[0].rp), Rad2Euler((float)responce.values.tmsdb[0].ry));
 				sp5_euler = Ros2UnityRotation(sp5_euler);

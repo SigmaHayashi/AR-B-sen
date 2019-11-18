@@ -18,8 +18,6 @@ public class BsenCalibrationSystem : MonoBehaviour {
 
 	private Vector3 not_offset_pos, not_offset_rot;
 	
-	//[HideInInspector] public Vector3 offset_vicon_pos;
-	
 	private Vector3 offset_calibration_pos;
 	private float offset_calibration_yaw;
 
@@ -34,15 +32,6 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	public bool CheckFinishCalibration() {
 		return finish_calibration;
 	}
-
-	//[SerializeField]
-	/*
-	private bool old_calibration_style = false;
-
-	public bool OldCalibrationStyle() {
-		return old_calibration_style;
-	}
-	*/
 
 	private TMSDatabaseAdapter DBAdapter;
 
@@ -73,9 +62,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		if (!mainSystem.finish_read_config) {
 			return;
 		}
-
-		//debug("state: " + calibration_state.ToString());
-		//mainSystem.UpdateMainCanvasInfoText("state : " + calibration_state.ToString());
+		
 		switch (calibration_state) {
 			case 0:
 				mainSystem.UpdateMainCanvasInfoText("Fail to Start");
@@ -106,7 +93,6 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		
 		//CameraとB-senのポジション表示
 		mainSystem.UpdateCalibrationInfoCamera(Camera.main.transform.position, Camera.main.transform.eulerAngles);
-		//if (OldCalibrationStyle()) {
 		if (mainSystem.GetConfig().old_calibration) {
 			mainSystem.UpdateCalibrationInfoBsen(bsen_model.transform.position, bsen_model.transform.eulerAngles);
 		}
@@ -115,7 +101,6 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		}
 
 		//どれだけ手動キャリブしてるか表示
-		//if (OldCalibrationStyle()) {
 		if (mainSystem.GetConfig().old_calibration) {
 			Vector3 offset_pos = bsen_model.transform.position - not_offset_pos;
 			Vector3 offset_rot = bsen_model.transform.eulerAngles - not_offset_rot;
@@ -148,30 +133,27 @@ public class BsenCalibrationSystem : MonoBehaviour {
 						//位置を取得＆変換
 						Vector3 marker_position = new Vector3((float)responce.values.tmsdb[0].x, (float)responce.values.tmsdb[0].y, (float)responce.values.tmsdb[0].z);
 						marker_position = Ros2UnityPosition(marker_position);
-						//marker_position.z += 0.25f;
-						//marker_position += offset_vicon_pos;
 						marker_position += mainSystem.GetConfig().vicon_offset_pos;
+						marker_position += mainSystem.GetConfig().calibration_offset_pos;
 						Debug.Log("Marker Pos: " + marker_position);
 						mainSystem.MyConsole_Add("Marker Pos: " + marker_position);
 
 						//回転を取得＆変換
 						Vector3 marker_euler = new Vector3(Rad2Euler((float)responce.values.tmsdb[0].rr), Rad2Euler((float)responce.values.tmsdb[0].rp), Rad2Euler((float)responce.values.tmsdb[0].ry));
 						marker_euler = Ros2UnityRotation(marker_euler);
-
-						//if (OldCalibrationStyle()) {
+						
 						if (mainSystem.GetConfig().old_calibration) {
 							marker_euler *= -1.0f;
 						}
 						marker_euler.x = 0.0f;
 						marker_euler.z = 0.0f;
-						marker_euler.y += 0.0f; //回転微調整用
+						marker_euler.y += mainSystem.GetConfig().calibration_offset_yaw;
 						Debug.Log("Marker Rot: " + marker_euler);
 						mainSystem.MyConsole_Add("Marker Rot: " + marker_euler);
 
 						mainSystem.UpdateDatabaseInfoViconIRVSMarker(marker_position, marker_euler);
 
 						//回転をモデルに適用
-						//if (OldCalibrationStyle()) {
 						if (mainSystem.GetConfig().old_calibration) {
 							bsen_model.transform.eulerAngles = marker_euler;
 						}
@@ -184,7 +166,6 @@ public class BsenCalibrationSystem : MonoBehaviour {
 						irvs_marker.transform.localEulerAngles = marker_euler;
 
 						//回転軸をマーカーの位置に合わせる
-						//if (OldCalibrationStyle()) {
 						if (mainSystem.GetConfig().old_calibration) {
 							GameObject world_link = GameObject.Find("rostms/world_link");
 							world_link.transform.localPosition = marker_position * -1;
@@ -223,7 +204,6 @@ public class BsenCalibrationSystem : MonoBehaviour {
 					}
 
 					//自動キャリブ終了時の位置と回転を保存
-					//if (OldCalibrationStyle()) {
 					if (mainSystem.GetConfig().old_calibration) {
 						not_offset_pos = bsen_model.transform.position;
 						not_offset_rot = bsen_model.transform.eulerAngles;
@@ -247,7 +227,6 @@ public class BsenCalibrationSystem : MonoBehaviour {
 		//画像認識ができたら
 		if (detected_marker) {
 			if (marker_image.TrackingState == TrackingState.Tracking) {
-				//if (OldCalibrationStyle()) {
 				if (mainSystem.GetConfig().old_calibration) {
 					//画像の回転を取得し，手前をX軸，鉛直方向をY軸にするように回転
 					Quaternion new_rot = new Quaternion();
@@ -272,8 +251,7 @@ public class BsenCalibrationSystem : MonoBehaviour {
 					Vector3 temp_room_position = bsen_model.transform.position;
 					temp_room_position += offset_vector;
 					bsen_model.transform.position = temp_room_position;
-
-					//debug("Auto Positioning DONE");
+					
 					mainSystem.UpdateMainCanvasInfoText("Auto Positioning DONE");
 				}
 				else {
@@ -333,7 +311,6 @@ public class BsenCalibrationSystem : MonoBehaviour {
 	private void manualCalibration() {
 		foreach (string button_name in mainSystem.checkCalibrationCanvasButton()) {
 			Vector3 tmp = new Vector3();
-			//if (OldCalibrationStyle()) {
 			if (mainSystem.GetConfig().old_calibration) {
 				switch (button_name) {
 					case "pos X+ Button":

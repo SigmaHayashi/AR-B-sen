@@ -21,7 +21,6 @@ public class ARBsenConfig {
 public class MainScript : MonoBehaviour {
 
 	//スクリーンが消えないようにする
-	//public bool ScreenNOTSleep = true;
 	[SerializeField] private bool ScreenNOTSleep = true;
 
 	//キャプチャモードかどうか
@@ -29,18 +28,6 @@ public class MainScript : MonoBehaviour {
 
 	//設定ファイルから得る変数
 	[HideInInspector] public bool finish_read_config = false;
-	/*
-	[HideInInspector] public string config_ros_ip;
-	[HideInInspector] public bool config_old_calibration;
-	[HideInInspector] public Vector3 config_vicon_offset_pos;
-	[HideInInspector] public Vector3 config_calibration_offset_pos;
-	[HideInInspector] public float config_calibration_offset_yaw;
-	[HideInInspector] public Vector3 config_robot_offset_pos;
-	[HideInInspector] public float config_robot_offset_yaw;
-	[HideInInspector] public float config_refrigerator_distance;
-	[HideInInspector] public float config_whs1_distance;
-	*/
-	//[HideInInspector] public ARBsenConfig config_data = new ARBsenConfig();
 	private ARBsenConfig config_data = new ARBsenConfig();
 
 	public ARBsenConfig GetConfig() {
@@ -48,10 +35,6 @@ public class MainScript : MonoBehaviour {
 	}
 
 	//Canvasたち
-	//public GameObject MainCanvas;
-	//public GameObject CalibrationCanvas;
-	//public GameObject MyConsoleCanvas;
-	//public GameObject DatabaseInfoCanvas;
 	private GameObject MainCanvas;
 	private GameObject CalibrationCanvas;
 	private GameObject MyConsoleCanvas;
@@ -91,8 +74,6 @@ public class MainScript : MonoBehaviour {
 	private Button Calibration_PosZMinusButton;
 	private Button Calibration_RotRightButton;
 	private Button Calibration_RotLeftButton;
-	//private BsenCalibrationSystem CalibSystem;
-	//private bool old_calibration_style = false;
 	private bool Calibration_push_PoxXPlus = false;
 	private bool Calibration_push_PoxXMinus = false;
 	private bool Calibration_push_PoxYPlus = false;
@@ -130,7 +111,6 @@ public class MainScript : MonoBehaviour {
 	private InputField[] Config_input_robot_offset = new InputField[4];
 	private InputField Config_input_refrigerator_distance;
 	private InputField Config_input_whs1_distance;
-	//private bool config_changed = false;
 	private string config_filepath;
 
 	// Use this for initialization
@@ -195,18 +175,6 @@ public class MainScript : MonoBehaviour {
 		Calibration_RotRightButton = GameObject.Find("Main System/Calibration Canvas/Button Canvas/rot Right Button").GetComponent<Button>();
 		Calibration_RotLeftButton = GameObject.Find("Main System/Calibration Canvas/Button Canvas/rot Left Button").GetComponent<Button>();
 
-		//CalibSystem = GameObject.Find("B-sen Calibration System").GetComponent<BsenCalibrationSystem>();
-
-		//old_calibration_style = GameObject.Find("B-sen Calibration System").GetComponent<BsenCalibrationSystem>().OldCalibrationStyle();
-		//if (old_calibration_style) {
-		/*
-		if (config_data.old_calibration) {
-			Calibration_DeviceInfoText.gameObject.SetActive(false);
-		}
-		else {
-			Calibration_BsenInfoText.gameObject.SetActive(false);
-		}
-		*/
 		AddTrigger(Calibration_PosXPlusButton);
 		AddTrigger(Calibration_PosXMinusButton);
 		AddTrigger(Calibration_PosYPlusButton);
@@ -407,12 +375,10 @@ public class MainScript : MonoBehaviour {
 			Calibration_OffsetInfoText.text = Calibration_OffsetInfoText_Buffer;
 			Calibration_OffsetInfoText_Buffer = null;
 		}
-		//if(Calibration_BsenInfoText_Buffer != null && old_calibration_style) {
 		if (Calibration_BsenInfoText_Buffer != null && config_data.old_calibration) {
 			Calibration_BsenInfoText.text = Calibration_BsenInfoText_Buffer;
 			Calibration_BsenInfoText_Buffer = null;
 		}
-		//if (Calibration_DeviceInfoText_Buffer != null && !old_calibration_style) {
 		if (Calibration_DeviceInfoText_Buffer != null && !config_data.old_calibration) {
 			Calibration_DeviceInfoText.text = Calibration_DeviceInfoText_Buffer;
 			Calibration_DeviceInfoText_Buffer = null;
@@ -816,6 +782,14 @@ public class MainScript : MonoBehaviour {
 		config_data.robot_offset_yaw = float.Parse(Config_input_robot_offset[3].text);
 		config_data.refrigerator_distance = float.Parse(Config_input_refrigerator_distance.text);
 		config_data.whs1_distance = float.Parse(Config_input_whs1_distance.text);
+
+		if(config_data.refrigerator_distance < 0.0f) {
+			config_data.refrigerator_distance = 0.0f;
+		}
+
+		if(config_data.whs1_distance < 0.0f) {
+			config_data.refrigerator_distance = 0.0f;
+		}
 
 		string config_json = JsonUtility.ToJson(config_data);
 
