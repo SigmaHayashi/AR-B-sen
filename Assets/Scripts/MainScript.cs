@@ -16,6 +16,7 @@ public class ARBsenConfig {
 	public float robot_offset_yaw = 0.0f;
 	public float refrigerator_distance = 2.0f;
 	public float whs1_distance = 2.0f;
+	public float robot_battery_distance = 2.0f;
 }
 
 public class MainScript : MonoBehaviour {
@@ -111,6 +112,7 @@ public class MainScript : MonoBehaviour {
 	private InputField[] Config_input_robot_offset = new InputField[4];
 	private InputField Config_input_refrigerator_distance;
 	private InputField Config_input_whs1_distance;
+	private InputField Config_input_robot_battery_distance;
 	private string config_filepath;
 
 	// Use this for initialization
@@ -208,7 +210,8 @@ public class MainScript : MonoBehaviour {
 		}
 		Config_input_refrigerator_distance = GameObject.Find("Main System/Settings Canvas/Info Area/Scroll View/Scroll Contents/Refrigerator Distance/Input_0").GetComponent<InputField>();
 		Config_input_whs1_distance = GameObject.Find("Main System/Settings Canvas/Info Area/Scroll View/Scroll Contents/WHS1 Distance/Input_0").GetComponent<InputField>();
-		
+		Config_input_robot_battery_distance = GameObject.Find("Main System/Settings Canvas/Info Area/Scroll View/Scroll Contents/Robot Battery Distance/Input_0").GetComponent<InputField>();
+
 		Config_input_ros_ip.onValueChanged.AddListener(Config_Changed);
 		Config_toggle_old_calibration.onValueChanged.AddListener(Config_Changed);
 		for(int i = 0; i < 3; i++) {
@@ -220,6 +223,7 @@ public class MainScript : MonoBehaviour {
 		}
 		Config_input_refrigerator_distance.onValueChanged.AddListener(Config_Changed);
 		Config_input_whs1_distance.onValueChanged.AddListener(Config_Changed);
+		Config_input_robot_battery_distance.onValueChanged.AddListener(Config_Changed);
 
 		//コンフィグファイルを読み込み
 		config_filepath = Application.persistentDataPath + "/AR B-sen Config.JSON";
@@ -250,6 +254,7 @@ public class MainScript : MonoBehaviour {
 				Config_input_robot_offset[3].text = config_data.robot_offset_yaw.ToString("f2");
 				Config_input_refrigerator_distance.text = config_data.refrigerator_distance.ToString("f2");
 				Config_input_whs1_distance.text = config_data.whs1_distance.ToString("f2");
+				Config_input_robot_battery_distance.text = config_data.robot_battery_distance.ToString("f2");
 
 				finish_read_config = true;
 			}
@@ -782,13 +787,18 @@ public class MainScript : MonoBehaviour {
 		config_data.robot_offset_yaw = float.Parse(Config_input_robot_offset[3].text);
 		config_data.refrigerator_distance = float.Parse(Config_input_refrigerator_distance.text);
 		config_data.whs1_distance = float.Parse(Config_input_whs1_distance.text);
+		config_data.robot_battery_distance = float.Parse(Config_input_robot_battery_distance.text);
 
-		if(config_data.refrigerator_distance < 0.0f) {
+		if (config_data.refrigerator_distance < 0.0f) {
 			config_data.refrigerator_distance = 0.0f;
 		}
 
 		if(config_data.whs1_distance < 0.0f) {
 			config_data.refrigerator_distance = 0.0f;
+		}
+
+		if (config_data.robot_battery_distance < 0.0f) {
+			config_data.robot_battery_distance = 0.0f;
 		}
 
 		string config_json = JsonUtility.ToJson(config_data);

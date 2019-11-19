@@ -140,7 +140,8 @@ public class SmartPalControll : MonoBehaviour {
 
 		//カメラとSmartPalの距離が近づいたら表示
 		if(Battery_3DText != null) {
-			if(CalcDistance(Camera.main.gameObject, transform.gameObject) < 2.0f) {
+			//if(CalcDistance(Camera.main.gameObject, transform.gameObject) < 2.0f) {
+			if (CalcDistance(Camera.main.gameObject, transform.gameObject) < mainSystem.GetConfig().robot_battery_distance) {
 				Battery_3DText.SetActive(true);
 			}
 			else {
