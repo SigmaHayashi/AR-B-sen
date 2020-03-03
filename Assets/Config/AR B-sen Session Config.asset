@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: AR B-sen Session Config
   m_EditorClassIdentifier: 
   MatchCameraFramerate: 1
-  PlaneFindingMode: 1
-  EnableLightEstimation: 1
+  PlaneFindingMode: 0
+  LightEstimationMode: 0
   EnableCloudAnchor: 0
-  AugmentedImageDatabase: {fileID: 11400000, guid: 37a0546c24d284743add866326fb005e,
+  AugmentedImageDatabase: {fileID: 11400000, guid: 54088e32e35bd6649bae41d5b9d29fc7,
     type: 2}
   CameraFocusMode: 1
   AugmentedFaceMode: 0
